@@ -71,3 +71,19 @@ export const uploadWinnerProof = (data) => API.post('/winners/proof', data, {
 export const updateWinnerStatus = (id, data) => API.patch(`/winners/${id}/status`, data);
 
 export default API;
+
+const API_BASE_URL = import.meta.env.VITE_API_URL ||
+  (import.meta.env.PROD
+    ? 'https://golf-charity-backend.vercel.app'
+    : 'http://localhost:5000');
+
+export const apiCall = async (endpoint, options = {}) => {
+  const response = await fetch(`${API_BASE_URL}/api${endpoint}`, {
+    ...options,
+    headers: {
+      'Content-Type': 'application/json',
+      ...options.headers,
+    },
+  });
+  return response.json();
+};
