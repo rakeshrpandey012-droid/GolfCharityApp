@@ -1,0 +1,13 @@
+{
+  "version": 2,
+  "projects": [
+    {
+      "name": "golf-charity-frontend",
+      "rootDirectory": "frontend"
+    },
+    {
+      "name": "golf-charity-backend",
+      "rootDirectory": "backend"
+    }
+  ]
+}

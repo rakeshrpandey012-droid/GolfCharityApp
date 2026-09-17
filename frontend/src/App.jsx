@@ -3,8 +3,11 @@ import { Toaster } from 'react-hot-toast';
 import { AuthProvider } from './context/AuthContext';
 import { ThemeProvider } from './context/ThemeContext';
 
+// CSS - ADD THIS AT THE TOP
+import './styles/lightTheme.css'
+
 // Pages
-import Landing from './pages/Landing';
+import GolfWinLightThemeUI from './pages/GolfWinLightThemeUI'
 import Login from './pages/Login';
 import Register from './pages/Register';
 import CheckoutSimulation from './pages/CheckoutSimulation';
@@ -51,7 +54,7 @@ export default function App() {
 
           <Routes>
             {/* Public */}
-            <Route path="/" element={<Landing />} />
+            <Route path="/" element={<GolfWinLightThemeUI />} />  {/* ← UPDATED */}
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
             <Route path="/checkout-simulation" element={<CheckoutSimulation />} />
