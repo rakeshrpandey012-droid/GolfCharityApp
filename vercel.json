@@ -1,13 +1,27 @@
 {
-  "version": 2,
-  "projects": [
-    {
-      "name": "golf-charity-frontend",
-      "rootDirectory": "frontend"
+    "services": {
+        "frontend": {
+            "root": "frontend",
+            "framework": "vite"
+        },
+        "backend": {
+            "root": "backend"
+        }
     },
-    {
-      "name": "golf-charity-backend",
-      "rootDirectory": "backend"
-    }
-  ]
+    "rewrites": [
+        {
+            "source": "/api(/.*)?",
+            "destination": {
+                "type": "service",
+                "service": "backend"
+            }
+        },
+        {
+            "source": "/(.*)",
+            "destination": {
+                "type": "service",
+                "service": "frontend"
+            }
+        }
+    ]
 }
