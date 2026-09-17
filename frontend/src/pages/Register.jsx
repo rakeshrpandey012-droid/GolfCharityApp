@@ -1,170 +1,188 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { motion } from 'framer-motion';
-import { Eye, EyeOff, Mail, Lock, User } from 'lucide-react';
+import { User, Mail, Lock, Phone, Calendar, ChevronRight, ArrowLeft } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 import toast from 'react-hot-toast';
 import { register } from '../api/api';
 import { useAuth } from '../context/AuthContext';
-import GlowButton from '../components/GlowButton';
+import { useTheme } from '../context/ThemeContext';
+
+function ThemeTogglePill() {
+  const { theme, toggleTheme } = useTheme();
+  return (
+    <button onClick={toggleTheme} className="theme-toggle" aria-label="Toggle theme" style={{ position: 'absolute', top: 20, right: 20, zIndex: 10 }}>
+      <div className="theme-toggle-knob">{theme === 'dark' ? '🌙' : '☀️'}</div>
+    </button>
+  );
+}
+
+const STEPS = ['Account', 'Details', 'Confirm'];
 
 export default function Register() {
-  const [form, setForm] = useState({ name: '', email: '', password: '' });
-  const [showPass, setShowPass] = useState(false);
+  const [step, setStep] = useState(0);
   const [loading, setLoading] = useState(false);
   const { loginUser } = useAuth();
   const navigate = useNavigate();
 
-  const handleChange = (e) => setForm({ ...form, [e.target.name]: e.target.value });
+  const [form, setForm] = useState({
+    name: '', email: '', password: '', confirmPassword: '',
+    dob: '', phone: '', agreeTerms: false,
+  });
+  const [errors, setErrors] = useState({});
+
+  const handleChange = (e) => {
+    const val = e.target.type === 'checkbox' ? e.target.checked : e.target.value;
+    setForm(f => ({ ...f, [e.target.name]: val }));
+    setErrors(err => ({ ...err, [e.target.name]: undefined }));
+  };
+
+  const validateStep = () => {
+    const errs = {};
+    if (step === 0) {
+      if (!form.name.trim())  errs.name  = 'Name is required.';
+      if (!form.email.trim()) errs.email = 'Email is required.';
+      if (!/\S+@\S+\.\S+/.test(form.email)) errs.email = 'Enter a valid email.';
+    }
+    if (step === 1) {
+      if (form.password.length < 8)               errs.password = 'Min 8 characters.';
+      if (form.password !== form.confirmPassword)  errs.confirmPassword = 'Passwords do not match.';
+    }
+    if (step === 2) {
+      if (!form.agreeTerms) errs.agreeTerms = 'You must agree to the terms.';
+    }
+    setErrors(errs);
+    return Object.keys(errs).length === 0;
+  };
+
+  const handleNext = (e) => {
+    e.preventDefault();
+    if (validateStep()) setStep(s => s + 1);
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (form.password.length < 6) {
-      toast.error('Password must be at least 6 characters');
-      return;
-    }
+    if (!validateStep()) return;
     setLoading(true);
     try {
-      const res = await register(form);
+      const res = await register({ name: form.name, email: form.email, password: form.password, dob: form.dob, phone: form.phone });
       const { token, user } = res.data;
       loginUser(token, user);
-      toast.success(`Welcome to GolfWin, ${user.name}! 🎉`);
+      toast.success('Account created! Welcome to GolfWin 🎉');
       navigate('/dashboard');
     } catch (err) {
-      toast.error(err.response?.data?.message || 'Registration failed. Try again.');
+      toast.error(err.response?.data?.message || 'Registration failed. Please try again.');
     } finally {
       setLoading(false);
     }
   };
 
-  return (
-    <div className="page-bg auth-page-wrapper" style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 24 }}>
-      <div className="orb orb-green" style={{ width: 500, height: 500, top: -200, right: -200 }} />
-      <div className="orb orb-purple" style={{ width: 400, height: 400, bottom: -150, left: -150 }} />
+  const Field = ({ label, name, type = 'text', placeholder, icon: Icon, ...rest }) => (
+    <div className="form-group">
+      <label className="form-label">{label}</label>
+      <div className="form-input-wrap">
+        {Icon && <span className="input-icon input-icon-l"><Icon size={18} /></span>}
+        <input
+          type={type} name={name} placeholder={placeholder}
+          value={form[name]} onChange={handleChange}
+          className={`form-input${Icon ? ' has-icon-l' : ''}${errors[name] ? ' error' : ''}`}
+          {...rest}
+        />
+      </div>
+      {errors[name] && <span className="form-error">{errors[name]}</span>}
+    </div>
+  );
 
-      <motion.div
-        initial={{ opacity: 0, y: 30, scale: 0.97 }}
-        animate={{ opacity: 1, y: 0, scale: 1 }}
-        transition={{ duration: 0.6, type: 'spring', stiffness: 200 }}
-        className="glass-strong auth-card"
-        style={{ width: '100%', maxWidth: 440, padding: '48px 40px', position: 'relative', zIndex: 1 }}
-      >
-        <div style={{ textAlign: 'center', marginBottom: 36 }}>
-          <div style={{
-            width: 52, height: 52, borderRadius: 14,
-            background: 'linear-gradient(135deg, #10b981, #3b82f6)',
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-            fontSize: '1.6rem', margin: '0 auto 16px',
-            boxShadow: '0 0 30px rgba(16,185,129,0.4)',
-          }}>
-            ⛳
-          </div>
-          <h1 style={{ fontFamily: "'Space Grotesk',sans-serif", fontSize: '1.7rem', fontWeight: 700, marginBottom: 8 }}>
-            Create Account
-          </h1>
-          <p style={{ color: 'var(--text-secondary)', fontSize: '0.9rem' }}>Join thousands of golfers making an impact</p>
+  return (
+    <div className="page-bg" style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 24 }}>
+      <ThemeTogglePill />
+
+      <motion.div initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} style={{ width: '100%', maxWidth: 480 }}>
+        {/* Header */}
+        <div style={{ textAlign: 'center', marginBottom: 32 }}>
+          <div className="sidebar-logo-icon" style={{ margin: '0 auto 16px' }}>⛳</div>
+          <h2 style={{ marginBottom: 8 }}>Create Your Account</h2>
+          <p>Join GolfWin and start making an impact today</p>
         </div>
 
-        <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
-          {/* Name */}
-          <div>
-            <label style={{ display: 'block', fontSize: '0.82rem', fontWeight: 600, color: 'var(--text-secondary)', marginBottom: 8, textTransform: 'uppercase', letterSpacing: '0.06em' }}>
-              Full Name
-            </label>
-            <div style={{ position: 'relative' }}>
-              <User size={16} style={{ position: 'absolute', left: 14, top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
-              <input
-                type="text"
-                name="name"
-                value={form.name}
-                onChange={handleChange}
-                placeholder="Your full name"
-                required
-                className="glass-input"
-                style={{ paddingLeft: 40 }}
-              />
-            </div>
-          </div>
-
-          {/* Email */}
-          <div>
-            <label style={{ display: 'block', fontSize: '0.82rem', fontWeight: 600, color: 'var(--text-secondary)', marginBottom: 8, textTransform: 'uppercase', letterSpacing: '0.06em' }}>
-              Email Address
-            </label>
-            <div style={{ position: 'relative' }}>
-              <Mail size={16} style={{ position: 'absolute', left: 14, top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
-              <input
-                type="email"
-                name="email"
-                value={form.email}
-                onChange={handleChange}
-                placeholder="you@example.com"
-                required
-                className="glass-input"
-                style={{ paddingLeft: 40 }}
-              />
-            </div>
-          </div>
-
-          {/* Password */}
-          <div>
-            <label style={{ display: 'block', fontSize: '0.82rem', fontWeight: 600, color: 'var(--text-secondary)', marginBottom: 8, textTransform: 'uppercase', letterSpacing: '0.06em' }}>
-              Password
-            </label>
-            <div style={{ position: 'relative' }}>
-              <Lock size={16} style={{ position: 'absolute', left: 14, top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
-              <input
-                type={showPass ? 'text' : 'password'}
-                name="password"
-                value={form.password}
-                onChange={handleChange}
-                placeholder="Min. 6 characters"
-                required
-                className="glass-input"
-                style={{ paddingLeft: 40, paddingRight: 44 }}
-              />
-              <button
-                type="button"
-                onClick={() => setShowPass(!showPass)}
-                style={{ position: 'absolute', right: 14, top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer' }}
-              >
-                {showPass ? <EyeOff size={16} /> : <Eye size={16} />}
-              </button>
-            </div>
-          </div>
-
-          {/* Password strength */}
-          {form.password && (
-            <div>
-              <div style={{ height: 4, background: 'rgba(255,255,255,0.06)', borderRadius: 2, overflow: 'hidden' }}>
+        {/* Step progress */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 32 }}>
+          {STEPS.map((s, i) => (
+            <div key={s} style={{ display: 'flex', alignItems: 'center', flex: i < STEPS.length - 1 ? 1 : 'none', gap: 8 }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
                 <div style={{
-                  height: '100%', borderRadius: 2, transition: 'width 0.3s',
-                  width: form.password.length < 6 ? '30%' : form.password.length < 10 ? '60%' : '100%',
-                  background: form.password.length < 6 ? '#ef4444' : form.password.length < 10 ? '#f59e0b' : '#10b981',
-                }} />
+                  width: 28, height: 28, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  fontSize: '0.75rem', fontWeight: 700,
+                  background: i <= step ? 'var(--grad-brand)' : 'var(--bg-overlay)',
+                  color: i <= step ? '#fff' : 'var(--text-muted)',
+                  transition: 'all 0.3s',
+                }}>
+                  {i < step ? '✓' : i + 1}
+                </div>
+                <span style={{ fontSize: '0.78rem', fontWeight: i === step ? 700 : 400, color: i === step ? 'var(--text-primary)' : 'var(--text-muted)', whiteSpace: 'nowrap' }}>{s}</span>
               </div>
-              <p style={{ fontSize: '0.72rem', color: 'var(--text-muted)', marginTop: 4 }}>
-                {form.password.length < 6 ? 'Weak' : form.password.length < 10 ? 'Fair' : 'Strong'} password
-              </p>
+              {i < STEPS.length - 1 && (
+                <div style={{ flex: 1, height: 2, borderRadius: 2, background: i < step ? 'var(--brand)' : 'var(--border)', transition: 'background 0.3s' }} />
+              )}
             </div>
-          )}
+          ))}
+        </div>
 
-          <GlowButton variant="green" type="submit" loading={loading} style={{ width: '100%', padding: '14px', marginTop: 4 }}>
-            Create My Account →
-          </GlowButton>
+        <div className="glass-card" style={{ padding: '32px 28px' }}>
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={step}
+              initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }}
+              transition={{ duration: 0.25 }}
+            >
+              <form onSubmit={step < 2 ? handleNext : handleSubmit}>
+                {step === 0 && (
+                  <>
+                    <Field label="Full Name"      name="name"  icon={User} placeholder="John Doe" required />
+                    <Field label="Email Address"  name="email" type="email" icon={Mail} placeholder="you@example.com" required />
+                  </>
+                )}
+                {step === 1 && (
+                  <>
+                    <Field label="Password"         name="password"        type="password" icon={Lock} placeholder="Min 8 characters" required />
+                    <Field label="Confirm Password" name="confirmPassword" type="password" icon={Lock} placeholder="Repeat your password" required />
+                  </>
+                )}
+                {step === 2 && (
+                  <>
+                    <Field label="Date of Birth" name="dob"   type="date" icon={Calendar} required />
+                    <Field label="Phone Number"  name="phone" type="tel"  icon={Phone}    placeholder="+44 7700 900000" />
+                    <div className="form-group" style={{ marginTop: 8 }}>
+                      <label style={{ display: 'flex', gap: 10, alignItems: 'flex-start', cursor: 'pointer', fontSize: '0.875rem', color: 'var(--text-secondary)' }}>
+                        <input
+                          type="checkbox" name="agreeTerms" checked={form.agreeTerms} onChange={handleChange}
+                          style={{ marginTop: 3, accentColor: 'var(--brand)', flexShrink: 0 }}
+                        />
+                        I agree to GolfWin's <a href="#" style={{ fontWeight: 600, marginLeft: 4 }}>Terms of Service</a> &amp; <a href="#" style={{ fontWeight: 600 }}>Privacy Policy</a>. I confirm I am 18+.
+                      </label>
+                      {errors.agreeTerms && <span className="form-error">{errors.agreeTerms}</span>}
+                    </div>
+                  </>
+                )}
 
-          <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)', textAlign: 'center' }}>
-            By signing up you agree to our Terms of Service & Privacy Policy
+                <div style={{ display: 'flex', gap: 12, marginTop: 24 }}>
+                  {step > 0 && (
+                    <button type="button" onClick={() => setStep(s => s - 1)} className="btn btn-secondary" style={{ minWidth: 44 }}>
+                      <ArrowLeft size={18} />
+                    </button>
+                  )}
+                  <button type="submit" disabled={loading} className="btn btn-primary" style={{ flex: 1 }}>
+                    {loading ? <span className="spinner" /> : step < 2 ? <>Next <ChevronRight size={18} /></> : 'Create Account 🎉'}
+                  </button>
+                </div>
+              </form>
+            </motion.div>
+          </AnimatePresence>
+
+          <div className="divider" style={{ margin: '24px 0' }} />
+          <p style={{ textAlign: 'center', fontSize: '0.875rem', color: 'var(--text-secondary)' }}>
+            Already have an account? <Link to="/login" style={{ fontWeight: 700, color: 'var(--brand)' }}>Log in</Link>
           </p>
-        </form>
-
-        <div className="divider" />
-
-        <p style={{ textAlign: 'center', color: 'var(--text-secondary)', fontSize: '0.88rem' }}>
-          Already have an account?{' '}
-          <Link to="/login" style={{ color: '#60a5fa', textDecoration: 'none', fontWeight: 600 }}>
-            Sign in
-          </Link>
-        </p>
+        </div>
       </motion.div>
     </div>
   );

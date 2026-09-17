@@ -1,454 +1,280 @@
-import React, { useState } from 'react';
-import '../styles/lightTheme.css';
+import { useState, useEffect } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import { motion, AnimatePresence } from 'framer-motion';
+import { Trophy, Heart, ShieldCheck, Target, Check, ChevronRight, Menu, X } from 'lucide-react';
+import { useTheme } from '../context/ThemeContext';
 
-const GolfWinLightThemeUI = () => {
-  const [_activeNav] = useState('home');
-  const [selectedPlan, setSelectedPlan] = useState('yearly');
+void motion;
+void AnimatePresence;
+
+function ThemeTogglePill() {
+  const { theme, toggleTheme } = useTheme();
+  return (
+    <button onClick={toggleTheme} className="theme-toggle" aria-label="Toggle theme">
+      <div className="theme-toggle-knob">{theme === 'dark' ? '🌙' : '☀️'}</div>
+    </button>
+  );
+}
+
+const NAV_LINKS = [
+  { label: 'How It Works', href: '#how-it-works' },
+  { label: 'Prizes',       href: '#prizes' },
+  { label: 'Charities',    href: '#charities' },
+  { label: 'Pricing',      href: '/pricing' },
+];
+
+export default function Landing() {
+  const navigate = useNavigate();
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
+
+  useEffect(() => {
+    const handler = () => setScrolled(window.scrollY > 20);
+    window.addEventListener('scroll', handler);
+    return () => window.removeEventListener('scroll', handler);
+  }, []);
 
   return (
-    <div data-theme="light" className="min-h-screen bg-white">
-      {/* ============ NAVIGATION ============ */}
-      <nav className="fixed top-0 w-full bg-white border-b border-gray-200 shadow-sm z-50">
-        <div className="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
-          {/* Logo */}
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-linear-to-br from-blue-500 to-purple-600 rounded-lg flex items-center justify-center">
-              <span className="text-white font-bold text-lg">⛳</span>
-            </div>
-            <span className="font-bold text-xl text-gray-900">GolfWin</span>
+    <div className="page-bg" style={{ minHeight: '100vh' }}>
+
+      {/* ── NAVBAR ─────────────────────────────────────────── */}
+      <nav className="navbar" style={{ boxShadow: scrolled ? 'var(--shadow-md)' : 'none' }}>
+        <div className="navbar-inner">
+          <Link to="/" style={{ display: 'flex', alignItems: 'center', gap: 10, textDecoration: 'none' }}>
+            <div className="sidebar-logo-icon" style={{ width: 36, height: 36, fontSize: '1.1rem', borderRadius: 9 }}>⛳</div>
+            <span style={{ fontWeight: 800, fontSize: '1.1rem', color: 'var(--text-primary)' }}>
+              Golf<span className="gradient-text">Win</span>
+            </span>
+          </Link>
+
+          <div className="navbar-links" style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+            {NAV_LINKS.map(({ label, href }) =>
+              href.startsWith('/') ? (
+                <Link key={label} to={href} style={{ padding: '6px 14px', borderRadius: 8, color: 'var(--text-secondary)', fontWeight: 500, fontSize: '0.875rem', transition: 'color 0.2s' }}>
+                  {label}
+                </Link>
+              ) : (
+                <a key={label} href={href} style={{ padding: '6px 14px', borderRadius: 8, color: 'var(--text-secondary)', fontWeight: 500, fontSize: '0.875rem', transition: 'color 0.2s' }}>
+                  {label}
+                </a>
+              )
+            )}
           </div>
 
-          {/* Nav Links */}
-          <div className="hidden md:flex gap-8">
-            {['How It Works', 'Prizes', 'Charities', 'Pricing'].map((item) => (
-              <a
-                key={item}
-                href="#"
-                className="text-gray-700 font-medium hover:text-blue-600 transition-colors"
-              >
-                {item}
-              </a>
-            ))}
-          </div>
-
-          {/* Right Actions */}
-          <div className="flex gap-4 items-center">
-            <button className="text-gray-700 hover:text-gray-900">🌙</button>
-            <button className="px-6 py-2 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700 transition-colors">
-              Logout
+          <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+            <ThemeTogglePill />
+            <Link to="/login"
+              style={{ padding: '8px 16px', borderRadius: 8, border: '1px solid var(--border)', color: 'var(--text-primary)', fontWeight: 600, fontSize: '0.875rem', transition: 'all 0.2s' }}
+              className="navbar-auth-btns"
+            >
+              Log In
+            </Link>
+            <button
+              onClick={() => navigate('/register')}
+              className="btn btn-primary navbar-auth-btns"
+              style={{ padding: '8px 20px', minHeight: 'unset', fontSize: '0.875rem' }}
+            >
+              Get Started
+            </button>
+            <button
+              onClick={() => setMobileMenuOpen(v => !v)}
+              style={{ display: 'none', background: 'var(--bg-subtle)', border: '1px solid var(--border)', borderRadius: 8, padding: 8, cursor: 'pointer', color: 'var(--text-primary)' }}
+              className="mobile-hamburger"
+              aria-label="Menu"
+            >
+              {mobileMenuOpen ? <X size={20} /> : <Menu size={20} />}
             </button>
           </div>
         </div>
       </nav>
 
-      {/* ============ HERO SECTION ============ */}
-      <section className="pt-32 pb-20 px-4 bg-linear-to-br from-blue-50 via-white to-purple-50">
-        <div className="max-w-4xl mx-auto text-center">
-          <span className="inline-block px-4 py-2 bg-blue-100 text-blue-700 rounded-full text-sm font-semibold mb-6">
-            🎉 Platform is Live
-          </span>
-          
-            <h1 className="text-5xl md:text-6xl font-bold text-gray-900 mb-6 leading-tight">
-            Turn Your Golf Scores Into Returns & <span className="bg-linear-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">Real Impact</span>
-          </h1>
-          
-          <p className="text-xl text-gray-700 mb-8 max-w-2xl mx-auto">
-            GolfWin is a subscription platform that lets golfers log Stableford scores to enter monthly jackpot draws, while directly funding vital charities.
-          </p>
-          
-          <button className="px-8 py-4 bg-linear-to-r from-blue-600 to-purple-600 text-white text-lg font-bold rounded-xl hover:shadow-2xl transition-all transform hover:scale-105">
-            Get Started →
-          </button>
+      {/* ── HERO ───────────────────────────────────────────── */}
+      <section style={{ paddingTop: '140px', paddingBottom: '100px', textAlign: 'center', position: 'relative', zIndex: 1 }}>
+        <div className="container">
+          <motion.div initial={{ opacity: 0, y: 40 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7 }}>
+            <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, background: 'var(--brand-dim)', border: '1px solid var(--border-brand)', borderRadius: 'var(--r-full)', padding: '6px 16px', marginBottom: 32, fontSize: '0.8rem', fontWeight: 700, color: 'var(--brand-vivid)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+              🏆 Monthly Jackpot Draws · Charity-First Platform
+            </div>
+            <h1 style={{ marginBottom: 24, maxWidth: 700, margin: '0 auto 24px' }}>
+              Golf, Win Big,<br />
+              <span className="gradient-text">Fund Good Causes</span>
+            </h1>
+            <p style={{ fontSize: '1.15rem', maxWidth: 560, margin: '0 auto 48px', lineHeight: 1.7 }}>
+              Log your Stableford scores to enter monthly prize draws. A guaranteed 10% of every subscription goes straight to the charity you choose.
+            </p>
+            <div style={{ display: 'flex', gap: 16, justifyContent: 'center', flexWrap: 'wrap' }}>
+              <button onClick={() => navigate('/register')} className="btn btn-primary" style={{ fontSize: '1rem', padding: '14px 32px', minHeight: 'unset' }}>
+                Start Playing Free <ChevronRight size={18} />
+              </button>
+              <a href="#how-it-works" className="btn btn-secondary" style={{ fontSize: '1rem', padding: '14px 32px', minHeight: 'unset' }}>
+                How It Works
+              </a>
+            </div>
+          </motion.div>
+
+          {/* Hero stats strip */}
+          <motion.div
+            initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7, delay: 0.3 }}
+            style={{ display: 'flex', gap: 40, justifyContent: 'center', flexWrap: 'wrap', marginTop: 80, paddingTop: 40, borderTop: '1px solid var(--border)' }}
+          >
+            {[
+              { label: 'Active Golfers', value: '2,400+' },
+              { label: 'Monthly Prize Pool', value: '£14,480' },
+              { label: 'Donated to Charity', value: '£84,200+' },
+              { label: 'Verified Charities', value: '12' },
+            ].map(({ label, value }) => (
+              <div key={label} style={{ textAlign: 'center' }}>
+                <div style={{ fontSize: '1.8rem', fontWeight: 800, background: 'var(--grad-brand)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>{value}</div>
+                <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginTop: 4 }}>{label}</div>
+              </div>
+            ))}
+          </motion.div>
         </div>
       </section>
 
-      {/* ============ SUBSCRIPTION PRICING ============ */}
-      <section className="py-20 px-4 bg-white">
-        <div className="max-w-6xl mx-auto">
-          <h2 className="text-4xl font-bold text-gray-900 text-center mb-4">
-            Choose the subscription tier that best fits your game.
-          </h2>
-          
-          <div className="flex justify-center gap-4 mb-12">
-            <button
-              onClick={() => setSelectedPlan('monthly')}
-              className={`px-8 py-3 rounded-full font-semibold transition-all ${
-                selectedPlan === 'monthly'
-                  ? 'bg-blue-600 text-white'
-                  : 'bg-gray-100 text-gray-900 hover:bg-gray-200'
-              }`}
-            >
-              Monthly
-            </button>
-            <button
-              onClick={() => setSelectedPlan('yearly')}
-              className={`px-8 py-3 rounded-full font-semibold transition-all ${
-                selectedPlan === 'yearly'
-                  ? 'bg-blue-600 text-white'
-                  : 'bg-gray-100 text-gray-900 hover:bg-gray-200'
-              }`}
-            >
-              Yearly (Save 20%)
-            </button>
+      {/* ── HOW IT WORKS ──────────────────────────────────── */}
+      <section id="how-it-works" style={{ padding: '80px 0', position: 'relative', zIndex: 1 }}>
+        <div className="container">
+          <div style={{ textAlign: 'center', marginBottom: 56 }}>
+            <h2>Three Steps to Win</h2>
+            <p style={{ marginTop: 12, maxWidth: 480, margin: '12px auto 0' }}>Simple as your golf game — just better rewards.</p>
           </div>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: 24 }}>
+            {[
+              { icon: '🎯', step: '01', title: 'Join & Pick a Cause', desc: 'Register, subscribe, and select the charity your 10% contribution will support each month.' },
+              { icon: '⛳', step: '02', title: 'Log Your Scores', desc: 'Enter your five latest Stableford scores (1–45) through your dashboard. Your most recent five are always used.' },
+              { icon: '🏆', step: '03', title: 'Match & Collect', desc: 'If your scores match the monthly drawn numbers, you win your share of the prize pool. 3, 4, or 5 matches pay out.' },
+            ].map(({ icon, step, title, desc }) => (
+              <motion.div
+                key={step}
+                className="glass-card"
+                style={{ padding: 32, position: 'relative', overflow: 'hidden' }}
+                initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}
+              >
+                <div style={{ fontSize: '0.65rem', fontWeight: 800, letterSpacing: '0.15em', color: 'var(--brand-vivid)', marginBottom: 16, textTransform: 'uppercase' }}>Step {step}</div>
+                <div style={{ fontSize: '2.5rem', marginBottom: 16 }}>{icon}</div>
+                <h3 style={{ marginBottom: 12 }}>{title}</h3>
+                <p style={{ fontSize: '0.9rem', lineHeight: 1.7 }}>{desc}</p>
+                <div style={{ position: 'absolute', top: -20, right: -20, fontSize: '5rem', opacity: 0.04, fontWeight: 900 }}>{step}</div>
+              </motion.div>
+            ))}
+          </div>
+        </div>
+      </section>
 
-          {/* Pricing Cards */}
-          <div className="grid md:grid-cols-3 gap-8 mb-20">
-            {/* Monthly Plan */}
-            <div className="bg-white border-2 border-gray-200 rounded-2xl p-8 hover:shadow-lg transition-all">
-              <h3 className="text-2xl font-bold text-gray-900 mb-2">Monthly Plan</h3>
-              <p className="text-gray-600 mb-6">Perfect for getting started and entering the monthly draws.</p>
-              
-              <div className="mb-8">
-                <span className="text-5xl font-bold text-gray-900">$</span>
-                <span className="text-2xl text-gray-600 font-semibold">/mo</span>
+      {/* ── PRIZE TIERS ────────────────────────────────────── */}
+      <section id="prizes" style={{ padding: '80px 0', position: 'relative', zIndex: 1, background: 'var(--bg-subtle)' }}>
+        <div className="container">
+          <div style={{ textAlign: 'center', marginBottom: 56 }}>
+            <h2>Prize Pool Tiers</h2>
+            <p style={{ marginTop: 12 }}>Match more numbers, win a bigger share of the monthly pool.</p>
+          </div>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: 24, maxWidth: 900, margin: '0 auto' }}>
+            {[
+              { pct: '40%', match: '5-Number Match', desc: 'Jackpot — rolls over if no winner', color: 'var(--warning)', glow: 'rgba(245,158,11,0.3)', border: 'rgba(245,158,11,0.3)' },
+              { pct: '35%', match: '4-Number Match', desc: 'Second Tier Prize', color: 'var(--brand-vivid)', glow: 'rgba(99,102,241,0.3)', border: 'rgba(99,102,241,0.3)' },
+              { pct: '25%', match: '3-Number Match', desc: 'Third Tier Prize', color: 'var(--accent)', glow: 'rgba(6,182,212,0.3)', border: 'rgba(6,182,212,0.3)' },
+            ].map(({ pct, match, desc, color, glow, border }) => (
+              <motion.div
+                key={pct}
+                className="glass-card hoverable"
+                style={{ padding: 36, textAlign: 'center', border: `1px solid ${border}`, boxShadow: `0 8px 32px ${glow}` }}
+                initial={{ opacity: 0, scale: 0.9 }} whileInView={{ opacity: 1, scale: 1 }} viewport={{ once: true }}
+              >
+                <div style={{ fontSize: '3rem', fontWeight: 900, color, marginBottom: 12, lineHeight: 1 }}>{pct}</div>
+                <div style={{ fontSize: '1rem', fontWeight: 700, marginBottom: 8, color: 'var(--text-primary)' }}>{match}</div>
+                <div style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>{desc}</div>
+              </motion.div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ── CHARITIES ─────────────────────────────────────── */}
+      <section id="charities" style={{ padding: '80px 0', position: 'relative', zIndex: 1 }}>
+        <div className="container">
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: 56, alignItems: 'center' }}>
+            <div>
+              <div style={{ display: 'inline-flex', alignItems: 'center', gap: 6, background: 'var(--success-dim)', border: '1px solid rgba(16,185,129,0.3)', borderRadius: 'var(--r-full)', padding: '4px 12px', marginBottom: 20, fontSize: '0.75rem', fontWeight: 700, color: 'var(--success)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
+                ♻️ Transparent Impact
               </div>
-
-              <ul className="space-y-4 mb-8">
-                <li className="flex items-center gap-3">
-                  <span className="text-teal-500 text-lg">✓</span>
-                  <span className="text-gray-700">Enter 1 draw per month</span>
-                </li>
-                <li className="flex items-center gap-3">
-                  <span className="text-teal-500 text-lg">✓</span>
-                  <span className="text-gray-700">10% Charity Donation</span>
-                </li>
-                <li className="flex items-center gap-3">
-                  <span className="text-teal-500 text-lg">✓</span>
-                  <span className="text-gray-700">Score Tracking Dashboard</span>
-                </li>
-              </ul>
-
-              <button className="w-full px-6 py-3 border-2 border-gray-300 text-gray-900 font-bold rounded-xl hover:bg-gray-50 transition-colors">
-                Subscribe Monthly
+              <h2 style={{ marginBottom: 20 }}>Your Game Funds Real Change</h2>
+              <p style={{ lineHeight: 1.8, marginBottom: 32 }}>
+                Every subscription automatically donates a minimum 10% to your chosen verified charity. Watch community impact grow in real time on your dashboard.
+              </p>
+              <button onClick={() => navigate('/register')} className="btn btn-primary">
+                Join the Mission <ChevronRight size={18} />
               </button>
             </div>
-
-            {/* Yearly Plan - Featured */}
-            <div className="bg-linear-to-br from-blue-50 to-purple-50 border-2 border-blue-500 rounded-2xl p-8 relative transform hover:shadow-2xl transition-all md:scale-105">
-              <span className="absolute top-4 right-4 bg-blue-600 text-white px-4 py-1 rounded-full text-sm font-bold">
-                MOST POPULAR
-              </span>
-              
-              <h3 className="text-2xl font-bold text-blue-600 mb-2">Yearly Plan</h3>
-              <p className="text-gray-700 mb-6">Save 20% by committing to a year of golf and giving.</p>
-              
-              <div className="mb-8">
-                <span className="text-5xl font-bold text-gray-900">£99.99</span>
-                <span className="text-2xl text-gray-600 font-semibold">/yr</span>
-              </div>
-
-              <ul className="space-y-4 mb-8">
-                <li className="flex items-center gap-3">
-                  <span className="text-blue-600 text-lg">✓</span>
-                  <span className="text-gray-700 font-semibold">Enter all 12 monthly draws</span>
-                </li>
-                <li className="flex items-center gap-3">
-                  <span className="text-blue-600 text-lg">✓</span>
-                  <span className="text-gray-700 font-semibold">Guaranteed 10% Charity Share</span>
-                </li>
-                <li className="flex items-center gap-3">
-                  <span className="text-blue-600 text-lg">✓</span>
-                  <span className="text-gray-700 font-semibold">Priority Support Access</span>
-                </li>
-              </ul>
-
-              <button className="w-full px-6 py-3 bg-linear-to-r from-blue-600 to-purple-600 text-white font-bold rounded-xl hover:shadow-lg transition-all">
-                Subscribe Yearly
-              </button>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+              {[
+                { name: 'Cancer Research UK', amount: '£34,200', pct: 72 },
+                { name: 'Mental Health Support',    amount: '£28,500', pct: 60 },
+                { name: 'Child Welfare Fund',  amount: '£21,800', pct: 46 },
+              ].map(({ name, amount, pct }) => (
+                <div key={name} className="glass-card" style={{ padding: '16px 20px' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 10 }}>
+                    <span style={{ fontWeight: 600, fontSize: '0.9rem' }}>{name}</span>
+                    <span style={{ fontWeight: 700, color: 'var(--success)' }}>{amount}</span>
+                  </div>
+                  <div className="progress-track">
+                    <motion.div
+                      className="progress-fill green"
+                      initial={{ width: 0 }} whileInView={{ width: `${pct}%` }}
+                      viewport={{ once: true }} transition={{ duration: 1, ease: 'easeOut' }}
+                    />
+                  </div>
+                </div>
+              ))}
             </div>
+          </div>
+        </div>
+      </section>
 
-            {/* Pro Plus Plan */}
-            <div className="bg-white border-2 border-gray-200 rounded-2xl p-8 hover:shadow-lg transition-all">
-              <h3 className="text-2xl font-bold text-gray-900 mb-2">Pro Plus</h3>
-              <p className="text-gray-600 mb-6">For dedicated golfers wanting maximum impact.</p>
-              
-              <div className="mb-8">
-                <span className="text-2xl text-gray-600 font-semibold">/mo</span>
-              </div>
-
-              <ul className="space-y-4 mb-8">
-                <li className="flex items-center gap-3">
-                  <span className="text-purple-500 text-lg">✓</span>
-                  <span className="text-gray-700">Everything in Standard</span>
-                </li>
-                <li className="flex items-center gap-3">
-                  <span className="text-purple-500 text-lg">✓</span>
-                  <span className="text-gray-700">20% Charity Donation</span>
-                </li>
-                <li className="flex items-center gap-3">
-                  <span className="text-purple-500 text-lg">✓</span>
-                  <span className="text-gray-700">Exclusive Founder Badge</span>
-                </li>
-              </ul>
-
-              <button className="w-full px-6 py-3 border-2 border-gray-300 text-gray-900 font-bold rounded-xl hover:bg-gray-50 transition-colors">
-                Get Pro Plus
+      {/* ── CTA ────────────────────────────────────────────── */}
+      <section style={{ padding: '80px 0', position: 'relative', zIndex: 1 }}>
+        <div className="container">
+          <div style={{ background: 'var(--grad-brand)', borderRadius: 'var(--r-xl)', padding: '64px 40px', textAlign: 'center', position: 'relative', overflow: 'hidden' }}>
+            <div style={{ position: 'absolute', top: -60, right: -60, width: 240, height: 240, borderRadius: '50%', background: 'rgba(255,255,255,0.07)' }} />
+            <div style={{ position: 'absolute', bottom: -80, left: -40, width: 300, height: 300, borderRadius: '50%', background: 'rgba(255,255,255,0.05)' }} />
+            <div style={{ position: 'relative', zIndex: 1 }}>
+              <h2 style={{ color: '#fff', marginBottom: 16 }}>Ready to Tee Off?</h2>
+              <p style={{ color: 'rgba(255,255,255,0.85)', marginBottom: 36, maxWidth: 480, margin: '0 auto 36px', fontSize: '1.05rem' }}>
+                Join thousands of golfers making a real-world impact while competing for life-changing prizes.
+              </p>
+              <button onClick={() => navigate('/register')} className="btn" style={{ background: '#fff', color: 'var(--brand)', fontWeight: 700, padding: '14px 36px', fontSize: '1rem', minHeight: 'unset' }}>
+                Create Free Account →
               </button>
             </div>
           </div>
         </div>
       </section>
 
-      {/* ============ CHARITABLE IMPACT ============ */}
-      <section className="py-20 px-4 bg-linear-to-br from-gray-50 to-gray-100">
-        <div className="max-w-6xl mx-auto">
-          <div className="grid md:grid-cols-2 gap-12 items-center">
-            <div>
-              <h2 className="text-4xl font-bold text-gray-900 mb-6">
-                Transparent <span className="text-teal-600">Charitable Impact</span>
-              </h2>
-              
-              <p className="text-lg text-gray-700 mb-6">
-                When you subscribe, you aren't just playing for yourself. You select exactly which verified charity receives your dedicated contribution.
-              </p>
-              
-              <p className="text-lg text-gray-700 mb-8">
-                Watch the global impact meters fill up in real time as our community drives thousands of pounds directly to front-line causes.
-              </p>
-              
-              <button className="px-8 py-3 bg-teal-600 text-white font-bold rounded-xl hover:bg-teal-700 transition-colors">
-                Join the Mission
-              </button>
+      {/* ── FOOTER ─────────────────────────────────────────── */}
+      <footer style={{ borderTop: '1px solid var(--border)', padding: '40px 0', position: 'relative', zIndex: 1 }}>
+        <div className="container">
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 24 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+              <div className="sidebar-logo-icon" style={{ width: 32, height: 32, fontSize: '1rem', borderRadius: 8 }}>⛳</div>
+              <span style={{ fontWeight: 800, color: 'var(--text-primary)' }}>Golf<span className="gradient-text">Win</span></span>
             </div>
-
-            {/* Impact Progress Bars */}
-            <div className="space-y-6">
-              <div>
-                <div className="flex justify-between items-center mb-2">
-                  <h4 className="font-semibold text-gray-900">Cancer Research</h4>
-                  <span className="text-2xl font-bold text-blue-600">£34,200</span>
-                </div>
-                <div className="w-full h-4 bg-gray-300 rounded-full overflow-hidden">
-                  <div className="h-full bg-blue-500" style={{ width: '72%' }}></div>
-                </div>
-              </div>
-
-              <div>
-                <div className="flex justify-between items-center mb-2">
-                  <h4 className="font-semibold text-gray-900">Mental Health Support</h4>
-                  <span className="text-2xl font-bold text-purple-600">£28,500</span>
-                </div>
-                <div className="w-full h-4 bg-gray-300 rounded-full overflow-hidden">
-                  <div className="h-full bg-purple-500" style={{ width: '60%' }}></div>
-                </div>
-              </div>
-
-              <div>
-                <div className="flex justify-between items-center mb-2">
-                  <h4 className="font-semibold text-gray-900">Child Welfare</h4>
-                  <span className="text-2xl font-bold text-teal-600">£21,800</span>
-                </div>
-                <div className="w-full h-4 bg-gray-300 rounded-full overflow-hidden">
-                  <div className="h-full bg-teal-500" style={{ width: '46%' }}></div>
-                </div>
-              </div>
+            <div style={{ display: 'flex', gap: 24, fontSize: '0.85rem' }}>
+              <a href="#" style={{ color: 'var(--text-muted)' }}>Privacy</a>
+              <a href="#" style={{ color: 'var(--text-muted)' }}>Terms</a>
+              <a href="#" style={{ color: 'var(--text-muted)' }}>Contact</a>
+              <Link to="/pricing" style={{ color: 'var(--text-muted)' }}>Pricing</Link>
             </div>
-          </div>
-        </div>
-      </section>
-
-      {/* ============ PRIZE POOL BREAKDOWN ============ */}
-      <section className="py-20 px-4 bg-white">
-        <div className="max-w-6xl mx-auto">
-          <h2 className="text-4xl font-bold text-gray-900 text-center mb-4">
-            Prize Pool Tiers
-          </h2>
-          <p className="text-xl text-gray-700 text-center mb-12">
-            The total prize pool is divided fairly based on how many numbers you match.
-          </p>
-
-          <div className="grid md:grid-cols-3 gap-8">
-            {/* 40% - Jackpot */}
-            <div className="bg-linear-to-br from-yellow-50 to-orange-50 border-2 border-yellow-200 rounded-2xl p-8 text-center">
-              <div className="text-6xl font-bold text-yellow-500 mb-4">40%</div>
-              <h3 className="text-2xl font-bold text-gray-900 mb-2">5-Number Match</h3>
-              <p className="text-gray-700 font-semibold">
-                Jackpot (Rollover if no winner)
-              </p>
-            </div>
-
-            {/* 35% - Second Tier */}
-            <div className="bg-linear-to-br from-blue-50 to-indigo-50 border-2 border-blue-200 rounded-2xl p-8 text-center">
-              <div className="text-6xl font-bold text-blue-500 mb-4">35%</div>
-              <h3 className="text-2xl font-bold text-gray-900 mb-2">4-Number Match</h3>
-              <p className="text-gray-700 font-semibold">
-                Second Tier Prize
-              </p>
-            </div>
-
-            {/* 25% - Third Tier */}
-            <div className="bg-linear-to-br from-purple-50 to-pink-50 border-2 border-purple-200 rounded-2xl p-8 text-center">
-              <div className="text-6xl font-bold text-purple-500 mb-4">25%</div>
-              <h3 className="text-2xl font-bold text-gray-900 mb-2">3-Number Match</h3>
-              <p className="text-gray-700 font-semibold">
-                Third Tier Prize
-              </p>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* ============ HOW IT WORKS ============ */}
-      <section className="py-20 px-4 bg-linear-to-br from-gray-50 to-gray-100">
-        <div className="max-w-6xl mx-auto">
-          <h2 className="text-4xl font-bold text-gray-900 text-center mb-4">
-            How It Works
-          </h2>
-          <p className="text-xl text-gray-700 text-center mb-12">
-            Three simple steps to enter the draws and start making a real impact.
-          </p>
-
-          <div className="grid md:grid-cols-3 gap-8">
-            {/* Step 1 */}
-            <div className="bg-white border-2 border-gray-200 rounded-2xl p-8 hover:shadow-lg transition-all">
-              <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mb-6">
-                <span className="text-3xl">🛡️</span>
-              </div>
-              <h3 className="text-2xl font-bold text-gray-900 mb-4">Join & Select Charity</h3>
-              <p className="text-gray-700">
-                Join the platform and select your preferred charity. A minimum 10% of your subscription goes directly to them.
-              </p>
-            </div>
-
-            {/* Step 2 */}
-            <div className="bg-white border-2 border-gray-200 rounded-2xl p-8 hover:shadow-lg transition-all">
-              <div className="w-16 h-16 bg-purple-100 rounded-full flex items-center justify-center mb-6">
-                <span className="text-3xl">🎯</span>
-              </div>
-              <h3 className="text-2xl font-bold text-gray-900 mb-4">Log Your Scores</h3>
-              <p className="text-gray-700">
-                Enter 5 Stableford scores (1-45) via the dashboard. We automatically use your most recent 5 scores for every draw.
-              </p>
-            </div>
-
-            {/* Step 3 */}
-            <div className="bg-white border-2 border-gray-200 rounded-2xl p-8 hover:shadow-lg transition-all">
-              <div className="w-16 h-16 bg-teal-100 rounded-full flex items-center justify-center mb-6">
-                <span className="text-3xl">🏆</span>
-              </div>
-              <h3 className="text-2xl font-bold text-gray-900 mb-4">Match & Win</h3>
-              <p className="text-gray-700">
-                Match your scores against our provably fair monthly draw. Match 3, 4, or 5 numbers to claim your share of the pool.
-              </p>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* ============ FEATURES ============ */}
-      <section className="py-20 px-4 bg-white">
-        <div className="max-w-6xl mx-auto">
-          <h2 className="text-4xl font-bold text-gray-900 text-center mb-12">
-            Platform Features
-          </h2>
-
-          <div className="grid md:grid-cols-3 gap-8">
-            {/* Feature 1 */}
-            <div className="bg-white border-2 border-gray-200 rounded-2xl p-8">
-              <div className="text-5xl mb-4">❤️</div>
-              <h3 className="text-xl font-bold text-gray-900 mb-3">Verified Charities</h3>
-              <p className="text-gray-700 mb-4">
-                A minimum 10% of every subscription automatically funds verified charitable causes.
-              </p>
-              <div className="flex gap-2">
-                <span className="px-3 py-1 bg-teal-100 text-teal-700 rounded-full text-sm font-semibold">Cancer Research</span>
-                <span className="px-3 py-1 bg-teal-100 text-teal-700 rounded-full text-sm font-semibold">Help for Heroes</span>
-              </div>
-              <button className="text-teal-600 font-semibold mt-4 hover:text-teal-700">
-                +10 More →
-              </button>
-            </div>
-
-            {/* Feature 2 */}
-            <div className="bg-white border-2 border-gray-200 rounded-2xl p-8">
-              <div className="text-5xl mb-4">🛡️</div>
-              <h3 className="text-xl font-bold text-gray-900 mb-3">Fair & Transparent</h3>
-              <p className="text-gray-700">
-                All prize distributions are verified by admin review before payouts process.
-              </p>
-            </div>
-
-            {/* Feature 3 */}
-            <div className="bg-white border-2 border-gray-200 rounded-2xl p-8">
-              <div className="text-5xl mb-4">📊</div>
-              <h3 className="text-xl font-bold text-gray-900 mb-3">Real-time Analytics</h3>
-              <p className="text-gray-700">
-                Real-time analytics on prize pools, subscriber counts, and charitable donations.
-              </p>
-              <div className="mt-6 bg-gray-100 rounded-lg p-4">
-                <p className="text-gray-600 text-sm font-semibold">Current Pool</p>
-                <p className="text-3xl font-bold text-orange-500">$14,480.00</p>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* ============ CTA SECTION ============ */}
-      <section className="py-20 px-4 bg-linear-to-r from-blue-600 to-purple-600">
-        <div className="max-w-4xl mx-auto text-center">
-          <h2 className="text-4xl font-bold text-white mb-6">
-            Ready to Hit the Green?
-          </h2>
-          <p className="text-xl text-blue-100 mb-8">
-            Join thousands of golfers making a real impact on causes they care about.
-          </p>
-          <button className="px-8 py-4 bg-white text-blue-600 text-lg font-bold rounded-xl hover:shadow-2xl transition-all transform hover:scale-105">
-            Get Started Today →
-          </button>
-        </div>
-      </section>
-
-      {/* ============ FOOTER ============ */}
-      <footer className="bg-gray-900 text-gray-400 py-12 px-4">
-        <div className="max-w-6xl mx-auto">
-          <div className="grid md:grid-cols-4 gap-8 mb-8">
-            <div>
-              <h4 className="text-white font-bold mb-4">Product</h4>
-              <ul className="space-y-2">
-                <li><a href="#" className="hover:text-white transition-colors">Features</a></li>
-                <li><a href="#" className="hover:text-white transition-colors">Pricing</a></li>
-                <li><a href="#" className="hover:text-white transition-colors">Charities</a></li>
-              </ul>
-            </div>
-            <div>
-              <h4 className="text-white font-bold mb-4">Company</h4>
-              <ul className="space-y-2">
-                <li><a href="#" className="hover:text-white transition-colors">About</a></li>
-                <li><a href="#" className="hover:text-white transition-colors">Blog</a></li>
-                <li><a href="#" className="hover:text-white transition-colors">Careers</a></li>
-              </ul>
-            </div>
-            <div>
-              <h4 className="text-white font-bold mb-4">Legal</h4>
-              <ul className="space-y-2">
-                <li><a href="#" className="hover:text-white transition-colors">Privacy</a></li>
-                <li><a href="#" className="hover:text-white transition-colors">Terms</a></li>
-                <li><a href="#" className="hover:text-white transition-colors">Contact</a></li>
-              </ul>
-            </div>
-            <div>
-              <h4 className="text-white font-bold mb-4">Follow</h4>
-              <ul className="space-y-2">
-                <li><a href="#" className="hover:text-white transition-colors">Twitter</a></li>
-                <li><a href="#" className="hover:text-white transition-colors">LinkedIn</a></li>
-                <li><a href="#" className="hover:text-white transition-colors">Instagram</a></li>
-              </ul>
-            </div>
-          </div>
-          
-          <div className="border-t border-gray-800 pt-8 flex justify-between items-center">
-            <p>&copy; 2026 GolfWin. All rights reserved.</p>
-            <div className="flex gap-4">
-              <a href="#" className="hover:text-white transition-colors">Privacy Policy</a>
-              <a href="#" className="hover:text-white transition-colors">Terms of Service</a>
-            </div>
+            <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', margin: 0 }}>© 2026 GolfWin. All rights reserved.</p>
           </div>
         </div>
       </footer>
+
+      <style>{`
+        @media (max-width: 768px) {
+          .mobile-hamburger { display: flex !important; }
+          .navbar-auth-btns { display: none !important; }
+        }
+      `}</style>
     </div>
   );
-};
-
-export default GolfWinLightThemeUI;
+}

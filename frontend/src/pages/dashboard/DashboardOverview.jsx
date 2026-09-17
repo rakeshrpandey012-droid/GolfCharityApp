@@ -1,243 +1,157 @@
 import { useEffect, useState } from 'react';
-import { motion } from 'framer-motion';
-import { Trophy, Target, Heart, CreditCard, Clock, ChevronRight } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { motion } from 'framer-motion';
+import { Target, Trophy, Heart, Gift, ChevronRight, TrendingUp, Clock } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
-import { getScores, getLatestDraw, getMySubscription, getWinners } from '../../api/api';
-import GlowButton from '../../components/GlowButton';
-import { StatCardSkeleton } from '../../components/Skeletons';
-
-function CountdownTimer({ targetDate }) {
-  const [time, setTime] = useState({ d: 0, h: 0, m: 0, s: 0 });
-
-  useEffect(() => {
-    const tick = () => {
-      const now = new Date();
-      const end = targetDate ? new Date(targetDate) : new Date(now.getFullYear(), now.getMonth() + 1, 1);
-      const diff = Math.max(0, end - now);
-      setTime({
-        d: Math.floor(diff / 86400000),
-        h: Math.floor((diff % 86400000) / 3600000),
-        m: Math.floor((diff % 3600000) / 60000),
-        s: Math.floor((diff % 60000) / 1000),
-      });
-    };
-    tick();
-    const id = setInterval(tick, 1000);
-    return () => clearInterval(id);
-  }, [targetDate]);
-
-  return (
-    <div style={{ display: 'flex', gap: 16, marginTop: 16 }}>
-      {Object.entries(time).map(([unit, val]) => (
-        <div key={unit} style={{ textAlign: 'center' }}>
-          <div style={{
-            background: 'rgba(59,130,246,0.1)', border: '1px solid rgba(59,130,246,0.2)',
-            borderRadius: 12, padding: '12px 16px',
-            fontFamily: "'Inter', sans-serif", fontSize: '1.5rem', fontWeight: 600,
-            color: '#60a5fa', minWidth: 60, textAlign: 'center', boxShadow: '0 4px 12px rgba(0,0,0,0.2)'
-          }}>
-            {String(val).padStart(2, '0')}
-          </div>
-          <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)', marginTop: 8, textTransform: 'uppercase', letterSpacing: '0.1em', fontWeight: 600 }}>
-            {unit === 'd' ? 'Days' : unit === 'h' ? 'Hrs' : unit === 'm' ? 'Min' : 'Sec'}
-          </div>
-        </div>
-      ))}
-    </div>
-  );
-}
-
-const stagger = { animate: { transition: { staggerChildren: 0.1 } } };
-const fadeUp = { initial: { opacity: 0, y: 20 }, animate: { opacity: 1, y: 0 } };
+import { getAnalytics, getLatestDraw } from '../../api/api';
 
 export default function DashboardOverview() {
   const { user } = useAuth();
   const navigate = useNavigate();
-  const [scores, setScores] = useState([]);
-  const [draw, setDraw] = useState(null);
-  const [winners, setWinners] = useState([]);
-  const [subscription, setSubscription] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const [analytics, setAnalytics] = useState(null);
+  const [draw, setDraw]           = useState(null);
+  const [loadingA, setLoadingA]   = useState(true);
+  const [loadingD, setLoadingD]   = useState(true);
 
   useEffect(() => {
-    Promise.allSettled([
-      getScores().then(r => setScores(r.data.scores || r.data || [])),
-      getLatestDraw().then(r => setDraw(r.data.draw || r.data)),
-      getWinners().then(r => setWinners(r.data.winners || r.data || [])),
-      getMySubscription().then(r => setSubscription(r.data.subscription || r.data)),
-    ]).finally(() => setLoading(false));
+    getAnalytics()
+      .then(r => setAnalytics(r.data))
+      .catch(() => {})
+      .finally(() => setLoadingA(false));
+    getLatestDraw()
+      .then(r => setDraw(r.data))
+      .catch(() => {})
+      .finally(() => setLoadingD(false));
   }, []);
 
-  const myWinnings = winners.filter(w => w.user?._id === user?._id || w.user === user?._id);
-  const totalWon = myWinnings.reduce((s, w) => s + (w.prizeAmount || 0), 0);
-  const isActive = user?.subscriptionStatus === 'active';
-
   const stats = [
-    {
-      icon: CreditCard, label: 'Subscription', color: '#3b82f6', glow: 'rgba(59,130,246,0.15)',
-      value: isActive ? 'Active' : 'Inactive',
-      sub: subscription?.plan ? `${subscription.plan} plan` : 'No active plan',
-      badgeColor: isActive ? '#10b981' : '#f43f5e',
-    },
-    {
-      icon: Target, label: 'Scores Entered', color: '#8b5cf6', glow: 'rgba(139,92,246,0.15)',
-      value: scores.length,
-      sub: `${Math.max(0, 5 - scores.length)} more needed for draw`,
-    },
-    {
-      icon: Trophy, label: 'Total Winnings', color: '#f59e0b', glow: 'rgba(245,158,11,0.15)',
-      value: `£${totalWon.toFixed(2)}`,
-      sub: `${myWinnings.length} prize(s) won`,
-    },
-    {
-      icon: Heart, label: 'Charity Impact', color: '#10b981', glow: 'rgba(16,185,129,0.15)',
-      value: `${user?.charityPercentage || 10}%`,
-      sub: 'of subscription donated',
-    },
+    { label: 'Scores Logged',    value: analytics?.scoreCount     ?? '—', icon: Target,  color: 'var(--brand)',   bg: 'var(--brand-dim)'   },
+    { label: 'Draws Entered',    value: analytics?.drawsEntered   ?? '—', icon: Trophy,  color: 'var(--warning)', bg: 'var(--warning-dim)' },
+    { label: 'Charity Impact',   value: analytics?.charityTotal ? `£${analytics.charityTotal.toFixed(2)}` : '—', icon: Heart,   color: 'var(--success)', bg: 'var(--success-dim)' },
+    { label: 'Total Winnings',   value: analytics?.totalWinnings ? `£${analytics.totalWinnings.toFixed(2)}` : '—', icon: Gift,    color: 'var(--accent)',  bg: 'var(--accent-dim)'  },
   ];
 
   return (
-    <div style={{ paddingBottom: 60 }}>
-      {/* Header */}
-      <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} style={{ marginBottom: 32 }}>
-        <h1 style={{ fontFamily: "'Inter', sans-serif", fontSize: '2rem', fontWeight: 500, marginBottom: 8, color: 'white' }}>
-          Good to see you, {user?.name?.split(' ')[0]} 👋
-        </h1>
-        <p style={{ color: 'var(--text-secondary)' }}>Welcome back to your personalized command center.</p>
-      </motion.div>
-
-      {/* Subscribe CTA if not subscribed */}
-      {!isActive && (
-        <motion.div
-           initial={{ opacity: 0, y: 20 }}
-           animate={{ opacity: 1, y: 0 }}
-           className="bento-card"
-           style={{
-             padding: '28px 32px', marginBottom: 24,
-             background: 'linear-gradient(135deg, rgba(59,130,246,0.1), rgba(139,92,246,0.05))',
-             borderColor: 'rgba(59,130,246,0.3)',
-             display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 16,
-           }}
-        >
-          <div>
-             <h3 style={{ fontFamily: "'Inter', sans-serif", fontWeight: 600, marginBottom: 6, fontSize: '1.1rem', color: 'white' }}>
-               🚀 Activate Your Subscription
-             </h3>
-             <p style={{ color: 'var(--text-secondary)', fontSize: '0.9rem' }}>
-               You are missing out on the monthly draws. Subscribe to enter your scores and support your charity.
-             </p>
-          </div>
-          <GlowButton onClick={() => navigate('/dashboard/scores')}>Subscribe Now</GlowButton>
-        </motion.div>
-      )}
-
-      {/* Stats row */}
-      <motion.div variants={stagger} initial="initial" animate="animate" className="bento-grid" style={{ marginBottom: 24 }}>
-        {loading
-          ? Array.from({ length: 4 }).map((_, i) => <StatCardSkeleton key={i} />)
-          : stats.map(({ icon: Icon, label, color, value, sub, glow, badgeColor }) => (
-            <motion.div key={label} variants={fadeUp} className="bento-card bento-col-3" style={{ padding: 24, position: 'relative', overflow: 'hidden' }}>
-              <div style={{ position: 'absolute', top: -20, right: -20, width: 100, height: 100, background: glow, filter: 'blur(30px)', borderRadius: '50%' }} />
-              
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 16, position: 'relative', zIndex: 10 }}>
-                <div style={{
-                  width: 44, height: 44, borderRadius: 12,
-                  background: `linear-gradient(145deg, ${color}22, transparent)`, border: `1px solid ${color}44`,
-                  display: 'flex', alignItems: 'center', justifyContent: 'center', color,
-                  boxShadow: `0 4px 12px ${color}22`
-                }}>
-                  <Icon size={20} />
-                </div>
-                {badgeColor && (
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 6, background: 'rgba(0,0,0,0.3)', padding: '4px 10px', borderRadius: 99, border: '1px solid rgba(255,255,255,0.05)' }}>
-                     <div style={{ width: 6, height: 6, borderRadius: '50%', background: badgeColor, boxShadow: `0 0 8px ${badgeColor}` }} />
-                     <span style={{ fontSize: '0.7rem', fontWeight: 600, color: 'white', textTransform: 'uppercase' }}>{value}</span>
-                  </div>
-                )}
-              </div>
-              <div style={{ position: 'relative', zIndex: 10 }}>
-                 {!badgeColor && <div style={{ fontSize: '1.75rem', fontWeight: 600, fontFamily: "'Inter', sans-serif", color: 'white', lineHeight: 1.2, marginBottom: 4 }}>{value}</div>}
-                 <div style={{ color: 'var(--text-secondary)', fontSize: '0.85rem', fontWeight: 500 }}>{label}</div>
-                 <div style={{ color: 'var(--text-muted)', fontSize: '0.75rem', marginTop: 8 }}>{sub}</div>
-              </div>
-            </motion.div>
-          ))
-        }
-      </motion.div>
-
-      {/* Huge Bento Grid (Draw & Scores) */}
-      <div className="bento-grid">
-         {/* Draw Countdown Widget */}
-         <motion.div variants={fadeUp} initial="initial" animate="animate" className="bento-card bento-col-7" style={{ padding: 32, display: 'flex', flexDirection: 'column' }}>
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 24 }}>
-               <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-                  <div style={{ width: 36, height: 36, background: 'rgba(59,130,246,0.1)', color: '#60a5fa', borderRadius: 10, display: 'flex', alignItems: 'center', justifyContent: 'center' }}><Clock size={16} /></div>
-                  <h3 style={{ fontFamily: "'Inter', sans-serif", fontWeight: 500, fontSize: '1.2rem', color: 'white' }}>Next Monthly Draw</h3>
-               </div>
-               
-               {isActive ? (
-                 scores.length >= 5 ? (
-                   <div style={{ display: 'flex', alignItems: 'center', gap: 6, color: '#10b981', background: 'rgba(16,185,129,0.1)', padding: '4px 12px', borderRadius: 99, border: '1px solid rgba(16,185,129,0.2)', fontSize: '0.75rem', fontWeight: 600 }}>✓ Eligible</div>
-                 ) : (
-                   <div style={{ display: 'flex', alignItems: 'center', gap: 6, color: '#f59e0b', background: 'rgba(245,158,11,0.1)', padding: '4px 12px', borderRadius: 99, border: '1px solid rgba(245,158,11,0.2)', fontSize: '0.75rem', fontWeight: 600 }}>⚠ Requires {5 - scores.length} more scores</div>
-                 )
-               ) : null}
-            </div>
-
-            <p style={{ color: 'var(--text-secondary)', fontSize: '0.9rem', marginBottom: 16 }}>
-               {draw?.status === 'published'
-                 ? `The previous draw (${draw.month}) concluded securely. Preparing countdown for the next event.`
-                 : 'Gathering scores. The provably fair engine will execute the jackpot sequence when the countdown ends.'}
-            </p>
-
-            <div style={{ marginTop: 'auto', background: 'rgba(0,0,0,0.2)', borderRadius: 16, padding: 24, border: '1px solid rgba(255,255,255,0.03)' }}>
-               <CountdownTimer />
-            </div>
-         </motion.div>
-
-         {/* Recent Scores Widget */}
-         <motion.div variants={fadeUp} initial="initial" animate="animate" className="bento-card bento-col-5" style={{ padding: 32, display: 'flex', flexDirection: 'column' }}>
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 24 }}>
-               <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-                  <div style={{ width: 36, height: 36, background: 'rgba(139,92,246,0.1)', color: '#a78bfa', borderRadius: 10, display: 'flex', alignItems: 'center', justifyContent: 'center' }}><Target size={16} /></div>
-                  <h3 style={{ fontFamily: "'Inter', sans-serif", fontWeight: 500, fontSize: '1.2rem', color: 'white' }}>Recent Scores</h3>
-               </div>
-               <button onClick={() => navigate('/dashboard/scores')} style={{ background: 'none', border: 'none', color: '#a78bfa', fontSize: '0.8rem', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 4, fontWeight: 500 }}>
-                 View all <ChevronRight size={14} />
-               </button>
-            </div>
-
-            {loading ? (
-              Array.from({ length: 4 }).map((_, i) => <div key={i} style={{ height: 48, background: 'rgba(255,255,255,0.02)', marginBottom: 8, borderRadius: 8, animation: 'pulse 2s infinite' }} />)
-            ) : scores.length === 0 ? (
-              <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', textAlign: 'center', background: 'rgba(0,0,0,0.2)', borderRadius: 16, border: '1px dashed rgba(255,255,255,0.1)' }}>
-                 <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem', marginBottom: 16 }}>You haven't logged any scores yet.</p>
-                 <GlowButton size="sm" variant="ghost" onClick={() => navigate('/dashboard/scores')}>Add First Score</GlowButton>
-              </div>
-            ) : (
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-                 {scores.slice(0, 5).map((s, i) => (
-                    <div key={s._id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'rgba(0,0,0,0.2)', padding: '12px 16px', borderRadius: 12, border: '1px solid rgba(255,255,255,0.03)' }}>
-                       <div>
-                          <div style={{ color: 'white', fontWeight: 600, fontSize: '0.95rem' }}>{s.score} <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', fontWeight: 400 }}>pts</span></div>
-                          <div style={{ color: 'var(--text-muted)', fontSize: '0.75rem', marginTop: 2 }}>{new Date(s.date).toLocaleDateString()}</div>
-                       </div>
-                       <div style={{ height: 6, width: 100, background: 'rgba(255,255,255,0.06)', borderRadius: 3, overflow: 'hidden' }}>
-                          <motion.div 
-                             initial={{ width: 0 }}
-                             animate={{ width: `${(s.score / 45) * 100}%` }}
-                             transition={{ duration: 1, ease: 'easeOut' }}
-                             style={{ height: '100%', background: 'linear-gradient(90deg, #8b5cf6, #c084fc)' }} 
-                          />
-                       </div>
-                    </div>
-                 ))}
-              </div>
-            )}
-         </motion.div>
+    <div>
+      {/* Greeting */}
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 16, marginBottom: 32 }}>
+        <div>
+          <h2 style={{ marginBottom: 4 }}>Welcome back, {user?.name?.split(' ')[0] || 'Golfer'}! ⛳</h2>
+          <p>Here's your performance and impact at a glance.</p>
+        </div>
+        <button onClick={() => navigate('/dashboard/scores')} className="btn btn-primary" style={{ fontSize: '0.9rem' }}>
+          Log Score <ChevronRight size={16} />
+        </button>
       </div>
 
+      {/* Stats Grid */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: 20, marginBottom: 32 }}>
+        {stats.map((s, i) => (
+          <motion.div
+            key={s.label}
+            className="stat-card"
+            initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.08 }}
+          >
+            <div className="stat-icon" style={{ background: s.bg }}>
+              <s.icon size={22} color={s.color} />
+            </div>
+            <div>
+              {loadingA ? (
+                <div className="skeleton" style={{ width: 64, height: 24, marginBottom: 6 }} />
+              ) : (
+                <div className="stat-value">{s.value}</div>
+              )}
+              <div className="stat-label">{s.label}</div>
+            </div>
+          </motion.div>
+        ))}
+      </div>
+
+      {/* Bottom Row */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: 24 }}>
+
+        {/* Next Draw Card */}
+        <motion.div
+          className="glass-card"
+          style={{ padding: 28, overflow: 'hidden', position: 'relative' }}
+          initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.35 }}
+        >
+          {/* Background glow */}
+          <div style={{ position: 'absolute', top: -40, right: -40, width: 180, height: 180, background: 'var(--grad-brand)', borderRadius: '50%', opacity: 0.06, filter: 'blur(30px)' }} />
+
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 20, position: 'relative', zIndex: 1 }}>
+            <h3 style={{ fontSize: '1rem' }}>🏆 Upcoming Draw</h3>
+            <span className="badge badge-pending" style={{ display: 'flex', gap: 5, alignItems: 'center' }}>
+              <Clock size={10} /> {loadingD ? '...' : draw?.month || 'Monthly'}
+            </span>
+          </div>
+
+          <div style={{ background: 'var(--grad-brand)', borderRadius: 'var(--r-lg)', padding: '24px 20px', marginBottom: 20, position: 'relative', zIndex: 1 }}>
+            <p style={{ color: 'rgba(255,255,255,0.8)', fontSize: '0.8rem', marginBottom: 6 }}>Current Prize Pool</p>
+            {loadingD ? (
+              <div className="skeleton" style={{ width: 160, height: 36 }} />
+            ) : (
+              <div style={{ fontSize: '2.2rem', fontWeight: 900, color: '#fff', lineHeight: 1 }}>
+                £{(draw?.totalPool || 0).toFixed(2)}
+              </div>
+            )}
+          </div>
+
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', position: 'relative', zIndex: 1 }}>
+            <div>
+              <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginBottom: 4 }}>Scores Needed</div>
+              <div style={{ fontWeight: 700, color: analytics?.scoreCount >= 5 ? 'var(--success)' : 'var(--warning)' }}>
+                {analytics?.scoreCount >= 5 ? '✓ Fully entered' : `${5 - (analytics?.scoreCount || 0)} more score(s)`}
+              </div>
+            </div>
+            <button onClick={() => navigate('/dashboard/scores')} className="btn btn-secondary" style={{ fontSize: '0.8rem', padding: '0 14px', minHeight: 36 }}>
+              Log Scores
+            </button>
+          </div>
+        </motion.div>
+
+        {/* Charity Progress */}
+        <motion.div
+          className="glass-card"
+          style={{ padding: 28 }}
+          initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.45 }}
+        >
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
+            <h3 style={{ fontSize: '1rem' }}>♻️ Charity Impact</h3>
+            <button onClick={() => navigate('/dashboard/charity')} className="btn btn-ghost" style={{ fontSize: '0.8rem', padding: '4px 10px', minHeight: 'unset' }}>
+              Change →
+            </button>
+          </div>
+
+          <div style={{ display: 'flex', alignItems: 'center', gap: 14, marginBottom: 20 }}>
+            <div style={{ width: 48, height: 48, borderRadius: 12, background: 'var(--success-dim)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <Heart size={22} color="var(--success)" />
+            </div>
+            <div>
+              <div style={{ fontWeight: 700, fontSize: '0.95rem' }}>{analytics?.charity?.name || 'No charity selected'}</div>
+              <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>{analytics?.charity?.category || 'Select a cause'}</div>
+            </div>
+          </div>
+
+          <div style={{ marginBottom: 8 }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.8rem', marginBottom: 8 }}>
+              <span style={{ color: 'var(--text-muted)' }}>Lifetime contributed</span>
+              <span style={{ fontWeight: 700, color: 'var(--success)' }}>
+                £{analytics?.charityTotal?.toFixed(2) || '0.00'}
+              </span>
+            </div>
+            <div className="progress-track">
+              <motion.div
+                className="progress-fill green"
+                initial={{ width: 0 }}
+                animate={{ width: `${Math.min(100, ((analytics?.charityTotal || 0) / 500) * 100)}%` }}
+                transition={{ duration: 1.2, ease: 'easeOut' }}
+              />
+            </div>
+          </div>
+        </motion.div>
+
+      </div>
     </div>
   );
 }

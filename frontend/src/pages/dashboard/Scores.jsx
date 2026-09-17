@@ -1,248 +1,192 @@
-import { useEffect, useState } from 'react';
-import { motion } from 'framer-motion';
-import { Target, Plus, Calendar, Trash2, AlertCircle } from 'lucide-react';
-import { getScores, addScore, createSubscription, getMySubscription } from '../../api/api';
-import { useAuth } from '../../context/AuthContext';
-import GlassCard from '../../components/GlassCard';
-import GlowButton from '../../components/GlowButton';
+import React, { useState } from 'react';
+import { Target, Calendar, Trash2, Edit2, TrendingUp } from 'lucide-react';
+import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
 import toast from 'react-hot-toast';
+import { motion, AnimatePresence } from 'framer-motion';
+
+import Card from '../../components/ui/Card';
+import Input from '../../components/ui/Input';
+import Button from '../../components/ui/Button';
 
 export default function Scores() {
-  const { user } = useAuth();
-  const [scores, setScores] = useState([]);
-  const [form, setForm] = useState({ score: '', date: new Date().toISOString().split('T')[0] });
-  const [loading, setLoading] = useState(true);
-  const [adding, setAdding] = useState(false);
-  const [subscribing, setSubscribing] = useState(false);
-  const [subscription, setSubscription] = useState(null);
+  const [scores, setScores] = useState([
+    { id: 1, date: '2026-09-10', score: 32 },
+    { id: 2, date: '2026-09-12', score: 36 },
+    { id: 3, date: '2026-09-14', score: 28 },
+    { id: 4, date: '2026-09-16', score: 40 },
+  ]);
 
-  const fetchScores = () =>
-    getScores()
-      .then(r => setScores(r.data.scores || r.data || []))
-      .catch(() => {});
+  const [form, setForm] = useState({ date: new Date().toISOString().split('T')[0], score: '' });
 
-  useEffect(() => {
-    Promise.allSettled([
-      fetchScores(),
-      getMySubscription().then(r => setSubscription(r.data.subscription || r.data)),
-    ]).finally(() => setLoading(false));
-  }, []);
-
-  const handleAdd = async (e) => {
+  const handleAddScore = (e) => {
     e.preventDefault();
-    const s = parseInt(form.score);
-    if (isNaN(s) || s < 1 || s > 45) {
-      toast.error('Score must be between 1 and 45');
-      return;
+    const val = parseInt(form.score, 10);
+    if (isNaN(val) || val < 1 || val > 45) {
+      return toast.error("Score must be between 1 and 45.");
     }
-    setAdding(true);
-    try {
-      await addScore({ score: s, date: form.date });
-      toast.success('Score added ✓');
-      setForm({ score: '', date: new Date().toISOString().split('T')[0] });
-      await fetchScores();
-    } catch (err) {
-      toast.error(err.response?.data?.message || 'Failed to add score');
-    } finally {
-      setAdding(false);
+    
+    // Check if score exists for that date
+    if (scores.some(s => s.date === form.date)) {
+      return toast.error("A score for this date already exists.");
     }
+
+    const newScore = { id: Date.now(), date: form.date, score: val };
+    
+    // Maintain only the latest 5 scores (simulate PRD logic)
+    const updated = [newScore, ...scores].sort((a, b) => new Date(b.date) - new Date(a.date)).slice(0, 5);
+    
+    setScores(updated);
+    setForm({ ...form, score: '' });
+    toast.success("Score added successfully!");
   };
 
-  const handleSubscribe = async (plan) => {
-    setSubscribing(true);
-    try {
-      const res = await createSubscription({ plan });
-      if (res.data.checkoutUrl) {
-        window.location.href = res.data.checkoutUrl;
-      } else {
-        toast.success('Subscription activated!');
-        await getMySubscription().then(r => setSubscription(r.data.subscription || r.data));
-      }
-    } catch (err) {
-      toast.error(err.response?.data?.message || 'Subscription failed');
-    } finally {
-      setSubscribing(false);
-    }
+  const handleDelete = (id) => {
+    setScores(scores.filter(s => s.id !== id));
+    toast.success("Score deleted.");
   };
 
-  const isActive = user?.subscriptionStatus === 'active';
+  // Chart data reversed for chronological left-to-right display
+  const chartData = [...scores].sort((a, b) => new Date(a.date) - new Date(b.date));
 
   return (
-    <div>
-      <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} style={{ marginBottom: 32 }}>
-        <h1 style={{ fontFamily: "'Space Grotesk',sans-serif", fontSize: '1.8rem', fontWeight: 700, marginBottom: 6 }}>
-          My Scores
-        </h1>
-        <p style={{ color: 'var(--text-secondary)' }}>Track your Stableford scores — latest 5 retained for monthly draws</p>
-      </motion.div>
-
-      {/* Subscription required */}
-      {!isActive && (
-        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="glass" style={{
-          padding: '28px 32px', marginBottom: 28,
-          background: 'linear-gradient(135deg, rgba(239,68,68,0.08), rgba(245,158,11,0.05))',
-          borderColor: 'rgba(239,68,68,0.25)',
-        }}>
-          <div style={{ display: 'flex', gap: 16, alignItems: 'flex-start' }}>
-            <AlertCircle size={24} style={{ color: '#f87171', flexShrink: 0, marginTop: 2 }} />
-            <div style={{ flex: 1 }}>
-              <h3 style={{ fontFamily: "'Space Grotesk',sans-serif", fontWeight: 700, color: '#f87171', marginBottom: 8 }}>
-                Active Subscription Required
-              </h3>
-              <p style={{ color: 'var(--text-secondary)', fontSize: '0.9rem', marginBottom: 20, lineHeight: 1.6 }}>
-                You need an active subscription to log scores and participate in draws.
-                Choose a plan below to get started.
-              </p>
-              <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
-                {['monthly', 'yearly'].map(plan => (
-                  <GlowButton
-                    key={plan}
-                    variant={plan === 'yearly' ? 'green' : 'primary'}
-                    onClick={() => handleSubscribe(plan)}
-                    loading={subscribing}
-                  >
-                    {plan === 'monthly' ? '£9.99 / Month' : '£89.99 / Year (Save 25%)'}
-                  </GlowButton>
-                ))}
-              </div>
-            </div>
-          </div>
-        </motion.div>
-      )}
-
-      <div className="scores-grid">
-        {/* Add Score Form */}
-        <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} className="glass" style={{ padding: 28 }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 24 }}>
-            <div style={{ width: 38, height: 38, borderRadius: 10, background: 'rgba(139,92,246,0.2)', border: '1px solid rgba(139,92,246,0.3)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#a78bfa' }}>
-              <Plus size={18} />
-            </div>
-            <h3 style={{ fontFamily: "'Space Grotesk',sans-serif", fontWeight: 700 }}>Add Score</h3>
-          </div>
-
-          <form onSubmit={handleAdd} style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
-            <div>
-              <label style={{ display: 'block', fontSize: '0.82rem', fontWeight: 600, color: 'var(--text-secondary)', marginBottom: 8, textTransform: 'uppercase', letterSpacing: '0.06em' }}>
-                Stableford Score (1–45)
-              </label>
-              <input
-                type="number"
-                min={1} max={45}
-                value={form.score}
-                onChange={e => setForm({ ...form, score: e.target.value })}
-                placeholder="e.g. 35"
-                required
-                disabled={!isActive}
-                className="glass-input"
-              />
-              {form.score && (
-                <div style={{ marginTop: 10 }}>
-                  <div style={{ height: 6, background: 'rgba(255,255,255,0.06)', borderRadius: 3, overflow: 'hidden' }}>
-                    <div className="score-bar" style={{ width: `${(Math.min(Math.max(parseInt(form.score) || 0, 0), 45) / 45) * 100}%`, height: '100%', transition: 'width 0.3s' }} />
-                  </div>
-                  <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)', marginTop: 6 }}>
-                    {Math.round((Math.min(Math.max(parseInt(form.score) || 0, 0), 45) / 45) * 100)}% of max
-                  </div>
-                </div>
-              )}
-            </div>
-
-            <div>
-              <label style={{ display: 'block', fontSize: '0.82rem', fontWeight: 600, color: 'var(--text-secondary)', marginBottom: 8, textTransform: 'uppercase', letterSpacing: '0.06em' }}>
-                Date Played
-              </label>
-              <div style={{ position: 'relative' }}>
-                <Calendar size={16} style={{ position: 'absolute', left: 14, top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
-                <input
-                  type="date"
-                  value={form.date}
-                  onChange={e => setForm({ ...form, date: e.target.value })}
-                  required
-                  disabled={!isActive}
-                  className="glass-input"
-                  style={{ paddingLeft: 40, colorScheme: 'dark' }}
-                />
-              </div>
-            </div>
-
-            <GlowButton type="submit" loading={adding} disabled={!isActive}>
-              Add Score
-            </GlowButton>
-
-            {isActive && (
-              <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)', textAlign: 'center' }}>
-                Only the latest 5 scores are kept. Oldest auto-removed.
-              </p>
-            )}
-          </form>
-        </motion.div>
-
-        {/* Score List */}
-        <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} className="glass" style={{ padding: 28 }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-              <Target size={18} style={{ color: '#a78bfa' }} />
-              <h3 style={{ fontFamily: "'Space Grotesk',sans-serif", fontWeight: 700 }}>Score History</h3>
-            </div>
-            <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
-              <span className={`badge ${scores.length >= 5 ? 'badge-active' : 'badge-pending'}`} style={{ fontSize: '0.72rem' }}>
-                {scores.length}/5 scores
-              </span>
-              {scores.length >= 5 && <span className="badge badge-active" style={{ fontSize: '0.72rem' }}>Draw eligible ✓</span>}
-            </div>
-          </div>
-
-          {loading ? (
-            Array.from({ length: 5 }).map((_, i) => <div key={i} className="skeleton" style={{ height: 64, marginBottom: 12, borderRadius: 10 }} />)
-          ) : scores.length === 0 ? (
-            <div style={{ textAlign: 'center', padding: '48px 0', color: 'var(--text-muted)' }}>
-              <Target size={48} style={{ opacity: 0.2, marginBottom: 16, display: 'block', margin: '0 auto 16px' }} />
-              <p>No scores recorded yet.</p>
-              <p style={{ fontSize: '0.82rem', marginTop: 6 }}>Add your first score to start participating in draws.</p>
-            </div>
-          ) : (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-              {scores.map((s, i) => (
-                <motion.div
-                  key={s._id}
-                  initial={{ opacity: 0, x: -20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: i * 0.05 }}
-                  style={{
-                    display: 'flex', alignItems: 'center', gap: 16,
-                    padding: '16px 20px', borderRadius: 12,
-                    background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.06)',
-                  }}
-                >
-                  <div style={{
-                    width: 44, height: 44, borderRadius: 10,
-                    background: 'linear-gradient(135deg, rgba(59,130,246,0.2), rgba(139,92,246,0.2))',
-                    border: '1px solid rgba(59,130,246,0.2)',
-                    display: 'flex', alignItems: 'center', justifyContent: 'center',
-                    fontFamily: "'Space Grotesk',sans-serif", fontWeight: 800, color: '#60a5fa', fontSize: '1rem',
-                  }}>
-                    {s.score}
-                  </div>
-                  <div style={{ flex: 1 }}>
-                    <div style={{ fontSize: '0.95rem', fontWeight: 600, marginBottom: 6 }}>
-                      {s.score} Stableford Points
-                    </div>
-                    <div style={{ height: 4, background: 'rgba(255,255,255,0.06)', borderRadius: 2, overflow: 'hidden' }}>
-                      <div className="score-bar" style={{ width: `${(s.score / 45) * 100}%`, height: '100%' }} />
-                    </div>
-                  </div>
-                  <div style={{ textAlign: 'right' }}>
-                    <div style={{ fontSize: '0.82rem', color: 'var(--text-secondary)' }}>
-                      {new Date(s.date).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}
-                    </div>
-                    {i === 0 && <span className="badge badge-blue" style={{ fontSize: '0.65rem', marginTop: 4 }}>Latest</span>}
-                  </div>
-                </motion.div>
-              ))}
-            </div>
-          )}
-        </motion.div>
+    <div className="page-container" style={{ padding: '24px 0' }}>
+      <div style={{ marginBottom: '32px' }}>
+        <h1 style={{ fontSize: '28px', marginBottom: '4px' }}>Score Management</h1>
+        <p className="text-secondary">Enter your latest Stableford scores. The last 5 scores are used for the draw.</p>
       </div>
+
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 350px', gap: '32px', alignItems: 'start' }}>
+        
+        {/* Left Column: History & Trends */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '32px' }}>
+          <Card>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '24px' }}>
+              <TrendingUp color="var(--brand-primary)" />
+              <h3 style={{ fontSize: '18px' }}>Performance Trend</h3>
+            </div>
+            
+            <div style={{ height: '250px', width: '100%' }}>
+              <ResponsiveContainer width="100%" height="100%">
+                <AreaChart data={chartData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+                  <defs>
+                    <linearGradient id="colorScore" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="5%" stopColor="var(--brand-primary)" stopOpacity={0.8}/>
+                      <stop offset="95%" stopColor="var(--brand-primary)" stopOpacity={0}/>
+                    </linearGradient>
+                  </defs>
+                  <XAxis dataKey="date" stroke="var(--text-tertiary)" fontSize={12} tickLine={false} axisLine={false} />
+                  <YAxis stroke="var(--text-tertiary)" fontSize={12} tickLine={false} axisLine={false} domain={[0, 45]} />
+                  <Tooltip 
+                    contentStyle={{ backgroundColor: 'var(--bg-primary)', borderColor: 'var(--border-color)', borderRadius: '8px' }} 
+                    itemStyle={{ color: 'var(--text-primary)' }}
+                  />
+                  <Area type="monotone" dataKey="score" stroke="var(--brand-primary)" strokeWidth={3} fillOpacity={1} fill="url(#colorScore)" />
+                </AreaChart>
+              </ResponsiveContainer>
+            </div>
+          </Card>
+
+          <Card>
+            <h3 style={{ fontSize: '18px', marginBottom: '24px' }}>Recent Scores ({scores.length}/5)</h3>
+            <div style={{ border: '1px solid var(--border-color)', borderRadius: 'var(--radius-sm)', overflow: 'hidden' }}>
+              <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
+                <thead style={{ background: 'var(--bg-secondary)', borderBottom: '1px solid var(--border-color)' }}>
+                  <tr>
+                    <th style={{ padding: '12px 16px', fontSize: '12px', color: 'var(--text-secondary)' }}>Date</th>
+                    <th style={{ padding: '12px 16px', fontSize: '12px', color: 'var(--text-secondary)' }}>Stableford Score</th>
+                    <th style={{ padding: '12px 16px', fontSize: '12px', color: 'var(--text-secondary)', textAlign: 'right' }}>Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <AnimatePresence>
+                    {scores.map((s) => (
+                      <motion.tr 
+                        key={s.id}
+                        initial={{ opacity: 0, height: 0 }}
+                        animate={{ opacity: 1, height: 'auto' }}
+                        exit={{ opacity: 0, height: 0 }}
+                        style={{ borderBottom: '1px solid var(--border-color)' }}
+                      >
+                        <td style={{ padding: '16px' }}>{s.date}</td>
+                        <td style={{ padding: '16px', fontWeight: 600 }}>{s.score}</td>
+                        <td style={{ padding: '16px', textAlign: 'right', display: 'flex', gap: '8px', justifyContent: 'flex-end' }}>
+                          <button style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-secondary)' }}>
+                            <Edit2 size={16} />
+                          </button>
+                          <button onClick={() => handleDelete(s.id)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--color-error)' }}>
+                            <Trash2 size={16} />
+                          </button>
+                        </td>
+                      </motion.tr>
+                    ))}
+                  </AnimatePresence>
+                  {scores.length === 0 && (
+                    <tr>
+                      <td colSpan="3" style={{ padding: '32px', textAlign: 'center', color: 'var(--text-tertiary)' }}>No scores logged yet.</td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </Card>
+        </div>
+
+        {/* Right Column: Entry Form */}
+        <Card style={{ position: 'sticky', top: '24px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '24px' }}>
+            <div style={{ background: 'rgba(79, 70, 229, 0.1)', padding: '8px', borderRadius: '8px' }}>
+              <Target size={20} color="var(--brand-primary)" />
+            </div>
+            <h3 style={{ fontSize: '18px', margin: 0 }}>Log New Score</h3>
+          </div>
+
+          <form onSubmit={handleAddScore}>
+            <Input 
+              label="Date Played"
+              type="date"
+              id="date"
+              name="date"
+              value={form.date}
+              onChange={(e) => setForm({ ...form, date: e.target.value })}
+              iconLeft={<Calendar size={18} />}
+              required
+            />
+            
+            <Input 
+              label="Stableford Score (1-45)"
+              type="number"
+              id="score"
+              name="score"
+              min="1"
+              max="45"
+              placeholder="e.g. 36"
+              value={form.score}
+              onChange={(e) => setForm({ ...form, score: e.target.value })}
+              iconLeft={<Target size={18} />}
+              required
+            />
+
+            <Button type="submit" style={{ width: '100%', marginTop: '16px' }}>
+              Add Score
+            </Button>
+          </form>
+
+          <div style={{ marginTop: '24px', padding: '16px', background: 'var(--bg-secondary)', borderRadius: 'var(--radius-sm)' }}>
+            <h4 style={{ fontSize: '14px', marginBottom: '8px' }}>How it works</h4>
+            <p className="text-secondary text-body-small">
+              Only your most recent 5 scores are kept. Submitting a new score will automatically replace your oldest entry if you already have 5.
+            </p>
+          </div>
+        </Card>
+      </div>
+
+      <style>{`
+        @media (max-width: 900px) {
+          .page-container > div:nth-child(2) {
+            grid-template-columns: 1fr !important;
+          }
+        }
+      `}</style>
     </div>
   );
 }

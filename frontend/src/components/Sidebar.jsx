@@ -4,39 +4,52 @@ import {
   LayoutDashboard, Target, Heart, Trophy, Users,
   Dice5, BarChart2, LogOut, X, Menu,
 } from 'lucide-react';
-import { useAuth } from '../context/AuthContext';
-import { useState, useEffect } from 'react';
+import { useAuth }  from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
-import { Moon, Sun } from 'lucide-react';
+import { useState, useEffect } from 'react';
 
 const userLinks = [
-  { to: '/dashboard', icon: LayoutDashboard, label: 'Overview', end: true },
-  { to: '/dashboard/scores', icon: Target, label: 'My Scores' },
-  { to: '/dashboard/charity', icon: Heart, label: 'Charity' },
-  { to: '/dashboard/winnings', icon: Trophy, label: 'Winnings' },
-  { to: '/login', icon: LogOut, label: 'Login Page' },
+  { to: '/dashboard',          icon: LayoutDashboard, label: 'Overview', end: true },
+  { to: '/dashboard/scores',   icon: Target,          label: 'My Scores' },
+  { to: '/dashboard/charity',  icon: Heart,           label: 'Charity' },
+  { to: '/dashboard/winnings', icon: Trophy,          label: 'Winnings' },
 ];
 
 const adminLinks = [
-  { to: '/admin', icon: LayoutDashboard, label: 'Overview', end: true },
-  { to: '/admin/users', icon: Users, label: 'Users' },
-  { to: '/admin/draw', icon: Dice5, label: 'Draw Control' },
-  { to: '/admin/charities', icon: Heart, label: 'Charities' },
-  { to: '/admin/winners', icon: Trophy, label: 'Winners' },
-  { to: '/admin/analytics', icon: BarChart2, label: 'Analytics' },
+  { to: '/admin',              icon: LayoutDashboard, label: 'Overview', end: true },
+  { to: '/admin/users',        icon: Users,           label: 'Users' },
+  { to: '/admin/draw',         icon: Dice5,           label: 'Draw Control' },
+  { to: '/admin/charities',    icon: Heart,           label: 'Charities' },
+  { to: '/admin/winners',      icon: Trophy,          label: 'Winners' },
+  { to: '/admin/analytics',    icon: BarChart2,       label: 'Analytics' },
 ];
 
+/* ── Theme toggle pill ─────────────────────────────────────────────────── */
+function ThemeTogglePill() {
+  const { theme, toggleTheme } = useTheme();
+  return (
+    <button
+      onClick={toggleTheme}
+      className="theme-toggle"
+      aria-label="Toggle theme"
+      title={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
+    >
+      <div className="theme-toggle-knob">
+        {theme === 'dark' ? '🌙' : '☀️'}
+      </div>
+    </button>
+  );
+}
+
+/* ── Main Sidebar ──────────────────────────────────────────────────────── */
 export default function Sidebar() {
   const { user, logoutUser } = useAuth();
-  const { theme, setTheme } = useTheme();
-  const navigate = useNavigate();
-  const location = useLocation();
+  const navigate    = useNavigate();
+  const location    = useLocation();
   const [drawerOpen, setDrawerOpen] = useState(false);
   const links = user?.role === 'admin' ? adminLinks : userLinks;
 
-  const toggleTheme = () => setTheme(theme === 'dark' ? 'light' : 'dark');
-
-  // Lock body scroll when drawer is open on mobile
+  // Lock body scroll on mobile drawer open
   useEffect(() => {
     document.body.style.overflow = drawerOpen ? 'hidden' : '';
     return () => { document.body.style.overflow = ''; };
@@ -45,91 +58,77 @@ export default function Sidebar() {
   // Close drawer on route change
   useEffect(() => { setDrawerOpen(false); }, [location.pathname]);
 
-  const handleLogout = () => {
-    logoutUser();
-    navigate('/');
-  };
+  const handleLogout = () => { logoutUser(); navigate('/'); };
 
   const SidebarContent = ({ inDrawer = false }) => (
     <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
-      {/* Logo */}
-      <div style={{ padding: inDrawer ? '24px 20px 16px' : '28px 24px 20px', borderBottom: '1px solid var(--glass-border)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-          <div style={{
-            width: 38, height: 38, borderRadius: 10,
-            background: 'linear-gradient(135deg, #3b82f6, #8b5cf6)',
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-            fontSize: '1.2rem', boxShadow: '0 0 20px rgba(59,130,246,0.4)',
-          }}>⛳</div>
-          <div>
-            <div style={{ fontFamily: "'Space Grotesk', sans-serif", fontWeight: 700, color: 'white', fontSize: '1rem' }}>
-              Golf<span className="gradient-text">Win</span>
-            </div>
-            <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.08em' }}>
-              {user?.role === 'admin' ? 'Admin Panel' : 'Dashboard'}
-            </div>
-          </div>
-        </div>
-        {inDrawer && (
-          <button onClick={() => setDrawerOpen(false)} style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 8, color: 'var(--text-secondary)', cursor: 'pointer', padding: 6, display: 'flex', alignItems: 'center', justifyContent: 'center', minWidth: 36, minHeight: 36 }}>
-            <X size={18} />
-          </button>
-        )}
-      </div>
 
-      {/* User info */}
-      <div style={{ padding: '16px 20px', borderBottom: '1px solid var(--glass-border)' }}>
-        <div style={{ background: 'rgba(255,255,255,0.05)', borderRadius: 12, padding: '12px 14px', display: 'flex', alignItems: 'center', gap: 12 }}>
-          <div style={{ width: 36, height: 36, borderRadius: '50%', background: 'linear-gradient(135deg, #3b82f6, #8b5cf6)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 700, fontSize: '0.85rem', color: 'white', flexShrink: 0 }}>
-            {user?.name?.[0]?.toUpperCase() || 'U'}
-          </div>
-          <div style={{ overflow: 'hidden' }}>
-            <div style={{ fontSize: '0.85rem', fontWeight: 600, color: 'white', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-              {user?.name || 'User'}
-            </div>
-            <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>
-              {user?.subscriptionStatus === 'active'
-                ? <span className="badge badge-active" style={{ fontSize: '0.65rem', padding: '2px 8px' }}>● Active</span>
-                : <span className="badge badge-inactive" style={{ fontSize: '0.65rem', padding: '2px 8px' }}>● Inactive</span>}
+      {/* ── Logo ─────────────────────────────────────────── */}
+      <div className="sidebar-logo-area">
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+            <div className="sidebar-logo-icon">⛳</div>
+            <div>
+              <div className="sidebar-logo-text">
+                Golf<span className="gradient-text">Win</span>
+              </div>
+              <div className="sidebar-logo-sub">
+                {user?.role === 'admin' ? 'Admin Panel' : 'Dashboard'}
+              </div>
             </div>
           </div>
+          {inDrawer && (
+            <button
+              onClick={() => setDrawerOpen(false)}
+              style={{ background: 'var(--bg-subtle)', border: '1px solid var(--border)', borderRadius: 8, color: 'var(--text-secondary)', cursor: 'pointer', padding: 6, display: 'flex' }}
+            >
+              <X size={18} />
+            </button>
+          )}
         </div>
       </div>
 
-      {/* Nav links */}
-      <nav style={{ padding: '16px', flex: 1, overflowY: 'auto' }}>
-        <div style={{ fontSize: '0.68rem', fontWeight: 600, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: 8, paddingLeft: 8 }}>
-          Navigation
+      {/* ── User Card ─────────────────────────────────────── */}
+      <div className="sidebar-user-area">
+        <div className="sidebar-user-card">
+          <div className="sidebar-avatar">
+            {user?.name?.[0]?.toUpperCase() || 'G'}
+          </div>
+          <div style={{ overflow: 'hidden', flex: 1 }}>
+            <div style={{ fontSize: '0.875rem', fontWeight: 600, color: 'var(--text-primary)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+              {user?.name || 'Golfer'}
+            </div>
+            <span className={`badge ${user?.subscriptionStatus === 'active' ? 'badge-active' : 'badge-inactive'}`} style={{ fontSize: '0.6rem', padding: '2px 7px' }}>
+              {user?.subscriptionStatus === 'active' ? '● Active' : '● Inactive'}
+            </span>
+          </div>
         </div>
+      </div>
+
+      {/* ── Nav Links ─────────────────────────────────────── */}
+      <nav className="sidebar-nav">
+        <div className="sidebar-nav-label">Navigation</div>
         {links.map(({ to, icon: Icon, label, end }) => (
           <NavLink
-            key={to}
-            to={to}
-            end={end}
+            key={to} to={to} end={end}
             className={({ isActive }) => `sidebar-link ${isActive ? 'active' : ''}`}
           >
-            <Icon size={18} />
+            <Icon size={17} />
             <span>{label}</span>
           </NavLink>
         ))}
       </nav>
 
-      {/* Actions */}
-      <div style={{ padding: '16px', borderTop: '1px solid var(--glass-border)', display: 'flex', flexDirection: 'column', gap: '8px' }}>
-        <button
-          onClick={toggleTheme}
-          className="sidebar-link"
-          style={{ width: '100%', background: 'none', border: 'none', color: 'var(--text-primary)', padding: '12px 20px', display: 'flex', alignItems: 'center', gap: '12px' }}
-        >
-          {theme === 'dark' ? <Sun size={18} /> : <Moon size={18} />}
-          <span>{theme === 'dark' ? 'Light Mode' : 'Dark Mode'}</span>
-        </button>
-        <button
-          onClick={handleLogout}
-          className="sidebar-link"
-          style={{ width: '100%', background: 'none', border: 'none', color: '#f87171', padding: '12px 20px', display: 'flex', alignItems: 'center', gap: '12px' }}
-        >
-          <LogOut size={18} />
+      {/* ── Actions ───────────────────────────────────────── */}
+      <div className="sidebar-actions">
+        {/* Theme toggle row */}
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '8px 4px' }}>
+          <span style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>Theme</span>
+          <ThemeTogglePill />
+        </div>
+
+        <button className="sidebar-link btn-danger" onClick={handleLogout} style={{ color: 'var(--danger)', background: 'none', border: 'none' }}>
+          <LogOut size={17} />
           <span>Logout</span>
         </button>
       </div>
@@ -138,83 +137,66 @@ export default function Sidebar() {
 
   return (
     <>
-      {/* ── DESKTOP SIDEBAR (hidden on mobile via CSS) ── */}
-      <div className="sidebar desktop-sidebar">
+      {/* Desktop sidebar */}
+      <aside className="sidebar">
         <SidebarContent />
-      </div>
+      </aside>
 
-      {/* ── MOBILE TOP HEADER BAR ── */}
+      {/* Mobile top bar */}
       <div className="mobile-topbar">
         <button
-          className="mobile-topbar-btn"
+          style={{ background: 'var(--bg-subtle)', border: '1px solid var(--border)', borderRadius: 8, padding: 8, display: 'flex', cursor: 'pointer', color: 'var(--text-primary)' }}
           onClick={() => setDrawerOpen(true)}
           aria-label="Open menu"
         >
-          <Menu size={22} />
+          <Menu size={20} />
         </button>
 
         <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-          <div style={{ width: 30, height: 30, borderRadius: 8, background: 'linear-gradient(135deg, #3b82f6, #8b5cf6)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1rem' }}>⛳</div>
-          <span style={{ fontFamily: "'Space Grotesk',sans-serif", fontWeight: 700, fontSize: '1rem', color: 'white' }}>
+          <div className="sidebar-logo-icon" style={{ width: 30, height: 30, fontSize: '1rem', borderRadius: 8 }}>⛳</div>
+          <span style={{ fontWeight: 800, fontSize: '0.95rem', color: 'var(--text-primary)' }}>
             Golf<span className="gradient-text">Win</span>
           </span>
         </div>
 
-        <div style={{ width: 36, height: 36, borderRadius: '50%', background: 'linear-gradient(135deg, #3b82f6, #8b5cf6)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 700, fontSize: '0.85rem', color: 'white' }}>
-          {user?.name?.[0]?.toUpperCase() || 'U'}
-        </div>
+        <ThemeTogglePill />
       </div>
 
-      {/* ── MOBILE DRAWER ── */}
+      {/* Mobile drawer */}
       <AnimatePresence>
         {drawerOpen && (
           <>
             <motion.div
               key="overlay"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
+              initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
               transition={{ duration: 0.2 }}
               onClick={() => setDrawerOpen(false)}
-              style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.65)', backdropFilter: 'blur(4px)', zIndex: 59 }}
+              style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(4px)', zIndex: 55 }}
             />
-            <motion.div
+            <motion.aside
               key="drawer"
-              initial={{ x: '-100%' }}
-              animate={{ x: 0 }}
-              exit={{ x: '-100%' }}
+              className="sidebar mobile-open"
+              initial={{ x: '-100%' }} animate={{ x: 0 }} exit={{ x: '-100%' }}
               transition={{ duration: 0.28, ease: [0.16, 1, 0.3, 1] }}
-              style={{
-                position: 'fixed', top: 0, left: 0, bottom: 0,
-                width: 280, zIndex: 60,
-                background: 'rgba(5,5,16,0.98)',
-                backdropFilter: 'blur(24px)',
-                borderRight: '1px solid var(--glass-border)',
-              }}
             >
               <SidebarContent inDrawer />
-            </motion.div>
+            </motion.aside>
           </>
         )}
       </AnimatePresence>
 
-      {/* ── MOBILE BOTTOM TAB BAR ── */}
+      {/* Mobile bottom tab bar */}
       {user?.role !== 'admin' && (
         <nav className="mobile-tabbar">
           {userLinks.map(({ to, icon: Icon, label, end }) => {
             const isActive = end ? location.pathname === to : location.pathname.startsWith(to);
             return (
               <NavLink
-                key={to}
-                to={to}
-                end={end}
-                className="mobile-tab"
-                style={{ color: isActive ? '#60a5fa' : 'var(--text-muted)' }}
+                key={to} to={to} end={end} className="mobile-tab"
+                style={{ color: isActive ? 'var(--brand-vivid)' : 'var(--text-muted)' }}
               >
-                <div className="mobile-tab-icon" style={{ background: isActive ? 'rgba(59,130,246,0.15)' : 'transparent', borderRadius: 10 }}>
-                  <Icon size={20} />
-                </div>
-                <span className="mobile-tab-label" style={{ color: isActive ? '#60a5fa' : 'var(--text-muted)' }}>{label}</span>
+                <Icon size={20} />
+                <span>{label}</span>
               </NavLink>
             );
           })}
