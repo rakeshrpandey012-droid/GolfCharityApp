@@ -33,6 +33,21 @@
         {
           "source": "/(.*)",
           "destination": "/frontend/$1"
+        },
+        {
+          "version": 2,
+          "builds": [
+            {
+              "src": "backend/index.js",
+              "use": "@vercel/node"
+            }
+          ],
+          "routes": [
+            {
+              "src": "/(.*)",
+              "destination": "backend/index.js"
+            }
+          ]
         }
       ]
     }
