@@ -175,7 +175,7 @@ export default function Register() {
                   </button>
                 </div>
               </form>
-            </motion.div>
+            </Motion.div>
           </AnimatePresence>
 
           <div className="divider" style={{ margin: '24px 0' }} />
@@ -183,7 +183,7 @@ export default function Register() {
             Already have an account? <Link to="/login" style={{ fontWeight: 700, color: 'var(--brand)' }}>Log in</Link>
           </p>
         </div>
-      </motion.div>
+      </Motion.div>
     </div>
   );
 }
