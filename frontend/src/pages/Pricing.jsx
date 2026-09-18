@@ -1,7 +1,6 @@
-import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Check, ChevronRight } from 'lucide-react';
-import { motion } from 'framer-motion';
+import { motion as MotionDiv } from 'framer-motion';
 import { useTheme } from '../context/ThemeContext';
 
 function ThemeTogglePill({ style }) {

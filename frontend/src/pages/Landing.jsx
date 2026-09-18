@@ -1,4 +1,4 @@
-import { motion } from 'framer-motion';
+import { motion as Motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import Navbar from '../components/Navbar';
 import GlowButton from '../components/GlowButton';
@@ -32,7 +32,7 @@ export default function Landing() {
         <div className="orb orb-blue" style={{ width: 800, height: 600, top: 100, left: -300 }} />
 
         <div style={{ maxWidth: 900, margin: '0 auto', position: 'relative' }}>
-          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8 }}>
+          <Motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8 }}>
             <div style={{
               display: 'inline-flex', alignItems: 'center', gap: 8,
               padding: '6px 16px',
@@ -43,9 +43,9 @@ export default function Landing() {
               <span style={{ width: 6, height: 6, borderRadius: '50%', background: '#60a5fa', boxShadow: '0 0 8px #60a5fa' }} />
               Platform is Live
             </div>
-          </motion.div>
+          </Motion.div>
 
-          <motion.h1
+          <Motion.h1
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.1 }}
@@ -61,9 +61,9 @@ export default function Landing() {
           >
             Turn Your <span style={{ color: '#e2e8f0', fontWeight: 600 }}>Golf Scores</span> <br />
             Into Returns &amp; <span style={{ color: '#e2e8f0', fontWeight: 600 }}>Real Impact</span>
-          </motion.h1>
+          </Motion.h1>
 
-          <motion.p
+          <Motion.p
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.2 }}
@@ -76,9 +76,9 @@ export default function Landing() {
             }}
           >
             GolfWin is a subscription platform that lets golfers log Stableford scores to enter monthly jackpot draws, while directly funding vital charities.
-          </motion.p>
+          </Motion.p>
 
-          <motion.div
+          <Motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.3 }}
@@ -86,7 +86,7 @@ export default function Landing() {
             <GlowButton size="lg" onClick={() => navigate('/register')} style={{ padding: '0 40px', height: 56, fontSize: '1.05rem' }}>
               Get Started
             </GlowButton>
-          </motion.div>
+          </Motion.div>
         </div>
       </section>
 

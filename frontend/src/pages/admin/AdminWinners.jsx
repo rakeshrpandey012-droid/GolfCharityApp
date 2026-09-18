@@ -1,5 +1,4 @@
 import { useEffect, useState } from 'react';
-import { motion } from 'framer-motion';
 import { Trophy, CheckCircle, Clock, X } from 'lucide-react';
 import { getWinners, updateWinnerStatus } from '../../api/api';
 import { TableRowSkeleton } from '../../components/Skeletons';

@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { motion } from 'framer-motion';
+import { motion as Motion } from 'framer-motion';
 import { Users, Trophy, Heart, BarChart2, TrendingUp, Dice5, ChevronRight } from 'lucide-react';
 import { getAnalytics, getLatestDraw } from '../../api/api';
 import { StatCardSkeleton } from '../../components/Skeletons';
@@ -31,7 +31,7 @@ export default function AdminOverview() {
 
   return (
     <div style={{ paddingBottom: 60 }}>
-      <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className="admin-page-header" style={{ marginBottom: 32, display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', flexWrap: 'wrap', gap: 16 }}>
+      <Motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className="admin-page-header" style={{ marginBottom: 32, display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', flexWrap: 'wrap', gap: 16 }}>
         <div>
           <h1 style={{ fontFamily: "'Inter', sans-serif", fontSize: '2rem', fontWeight: 600, marginBottom: 8, color: 'white' }}>
             System Analytics
@@ -41,38 +41,42 @@ export default function AdminOverview() {
         <GlowButton onClick={() => navigate('/admin/draw')} style={{ paddingLeft: 24, paddingRight: 24 }}>
           <Dice5 size={18} style={{ marginRight: 8 }} /> Execute Draw Engine
         </GlowButton>
-      </motion.div>
+      </Motion.div>
 
       {/* Primary Stats Grid */}
-      <motion.div variants={stagger} initial="initial" animate="animate" className="bento-grid" style={{ marginBottom: 24 }}>
+      <Motion.div variants={stagger} initial="initial" animate="animate" className="bento-grid" style={{ marginBottom: 24 }}>
         {loading
           ? Array.from({ length: 4 }).map((_, i) => <div key={i} className="bento-col-3" style={{ height: 160, background: 'rgba(255,255,255,0.02)', borderRadius: 24, animation: 'pulse 2s infinite' }} />)
-          : stats.map(({ icon: Icon, label, value, color, glow, sub, badgeColor }) => (
-            <motion.div key={label} variants={fadeUp} className="bento-card bento-col-3" style={{ padding: 24, position: 'relative', overflow: 'hidden' }}>
-              <div style={{ position: 'absolute', top: -30, right: -30, width: 140, height: 140, background: glow, filter: 'blur(40px)', borderRadius: '50%' }} />
-              
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 20, position: 'relative', zIndex: 10 }}>
-                <div style={{ width: 48, height: 48, borderRadius: 12, background: `linear-gradient(145deg, ${color}22, transparent)`, border: `1px solid ${color}44`, display: 'flex', alignItems: 'center', justifyContent: 'center', color, boxShadow: `0 4px 12px ${color}22` }}>
-                  <Icon size={24} />
-                </div>
-                {badgeColor && (
-                   <div style={{ width: 12, height: 12, borderRadius: '50%', background: badgeColor, boxShadow: `0 0 12px ${badgeColor}`, marginTop: 8 }} />
-                )}
-              </div>
-              <div style={{ position: 'relative', zIndex: 10 }}>
-                 <div style={{ fontFamily: "'Inter', sans-serif", fontSize: '1.8rem', fontWeight: 600, color: 'white', lineHeight: 1.1, marginBottom: 6 }}>{value}</div>
-                 <div style={{ color: 'var(--text-secondary)', fontSize: '0.85rem', fontWeight: 500 }}>{label}</div>
-                 <div style={{ color: 'var(--text-muted)', fontSize: '0.75rem', marginTop: 8 }}>{sub}</div>
-              </div>
-            </motion.div>
-          ))
+          : stats.map((stat) => {
+              const { icon: Icon, label, value, color, glow, sub, badgeColor } = stat;
+
+              return (
+                <Motion.div key={label} variants={fadeUp} className="bento-card bento-col-3" style={{ padding: 24, position: 'relative', overflow: 'hidden' }}>
+                  <div style={{ position: 'absolute', top: -30, right: -30, width: 140, height: 140, background: glow, filter: 'blur(40px)', borderRadius: '50%' }} />
+
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 20, position: 'relative', zIndex: 10 }}>
+                    <div style={{ width: 48, height: 48, borderRadius: 12, background: `linear-gradient(145deg, ${color}22, transparent)`, border: `1px solid ${color}44`, display: 'flex', alignItems: 'center', justifyContent: 'center', color, boxShadow: `0 4px 12px ${color}22` }}>
+                      <Icon size={24} />
+                    </div>
+                    {badgeColor && (
+                       <div style={{ width: 12, height: 12, borderRadius: '50%', background: badgeColor, boxShadow: `0 0 12px ${badgeColor}`, marginTop: 8 }} />
+                    )}
+                  </div>
+                  <div style={{ position: 'relative', zIndex: 10 }}>
+                     <div style={{ fontFamily: "'Inter', sans-serif", fontSize: '1.8rem', fontWeight: 600, color: 'white', lineHeight: 1.1, marginBottom: 6 }}>{value}</div>
+                     <div style={{ color: 'var(--text-secondary)', fontSize: '0.85rem', fontWeight: 500 }}>{label}</div>
+                     <div style={{ color: 'var(--text-muted)', fontSize: '0.75rem', marginTop: 8 }}>{sub}</div>
+                  </div>
+                </Motion.div>
+              );
+            })
         }
-      </motion.div>
+      </Motion.div>
 
       {/* Complex Bento Row */}
       <div className="bento-grid">
          {/* Live Engine Status */}
-         <motion.div variants={fadeUp} initial="initial" animate="animate" className="bento-card bento-col-8" style={{ padding: 32, display: 'flex', flexDirection: 'column', position: 'relative', overflow: 'hidden' }}>
+         <Motion.div variants={fadeUp} initial="initial" animate="animate" className="bento-card bento-col-8" style={{ padding: 32, display: 'flex', flexDirection: 'column', position: 'relative', overflow: 'hidden' }}>
             <div style={{ position: 'absolute', left: -50, bottom: -100, width: 300, height: 300, background: 'radial-gradient(circle, rgba(59,130,246,0.1) 0%, transparent 60%)', border: '1px solid rgba(59,130,246,0.1)', borderRadius: '50%' }} />
             
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 32, position: 'relative', zIndex: 10 }}>
@@ -130,10 +134,10 @@ export default function AdminOverview() {
                 <p style={{ color: 'var(--text-muted)', fontSize: '0.95rem' }}>The engine has not executed the first sequence yet.</p>
               </div>
             )}
-         </motion.div>
+         </Motion.div>
 
          {/* Admin Action Menu */}
-         <motion.div variants={fadeUp} initial="initial" animate="animate" className="bento-card bento-col-4" style={{ padding: 32, display: 'flex', flexDirection: 'column' }}>
+         <Motion.div variants={fadeUp} initial="initial" animate="animate" className="bento-card bento-col-4" style={{ padding: 32, display: 'flex', flexDirection: 'column' }}>
             <h3 style={{ fontFamily: "'Inter', sans-serif", fontWeight: 600, fontSize: '1.25rem', color: 'white', marginBottom: 24 }}>Control Protocols</h3>
             
             <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
@@ -143,7 +147,7 @@ export default function AdminOverview() {
                  { label: 'Process Payouts', path: '/admin/winners', icon: Trophy, color: '#f59e0b', bg: 'rgba(245,158,11,0.1)' },
                  { label: 'System Logs', path: '/admin/analytics', icon: BarChart2, color: '#8b5cf6', bg: 'rgba(139,92,246,0.1)' },
                ].map((item) => (
-                 <motion.button
+                 <Motion.button
                    key={item.label}
                    whileHover={{ scale: 1.02, x: 4 }}
                    whileTap={{ scale: 0.98 }}
@@ -163,10 +167,10 @@ export default function AdminOverview() {
                       <span style={{ fontWeight: 500, fontSize: '0.95rem' }}>{item.label}</span>
                    </div>
                    <ChevronRight size={16} style={{ color: 'var(--text-muted)' }} />
-                 </motion.button>
+                 </Motion.button>
                ))}
             </div>
-         </motion.div>
+         </Motion.div>
       </div>
     </div>
   );

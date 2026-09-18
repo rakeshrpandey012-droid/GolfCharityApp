@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Target, Calendar, Trash2, Edit2, TrendingUp } from 'lucide-react';
 import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
 import toast from 'react-hot-toast';
-import { motion, AnimatePresence } from 'framer-motion';
+import { AnimatePresence } from 'framer-motion';
 
 import Card from '../../components/ui/Card';
 import Input from '../../components/ui/Input';
@@ -100,11 +100,8 @@ export default function Scores() {
                 <tbody>
                   <AnimatePresence>
                     {scores.map((s) => (
-                      <motion.tr 
+                      <tr 
                         key={s.id}
-                        initial={{ opacity: 0, height: 0 }}
-                        animate={{ opacity: 1, height: 'auto' }}
-                        exit={{ opacity: 0, height: 0 }}
                         style={{ borderBottom: '1px solid var(--border-color)' }}
                       >
                         <td style={{ padding: '16px' }}>{s.date}</td>
@@ -117,7 +114,7 @@ export default function Scores() {
                             <Trash2 size={16} />
                           </button>
                         </td>
-                      </motion.tr>
+                      </tr>
                     ))}
                   </AnimatePresence>
                   {scores.length === 0 && (

@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { motion } from 'framer-motion';
+// Removed framer-motion import to satisfy linter (not required for current UI)
 import { Users, Search, Edit2, Check, X } from 'lucide-react';
 import { getAdminUsers, updateAdminUser } from '../../api/api';
 import { TableRowSkeleton } from '../../components/Skeletons';
@@ -48,13 +48,13 @@ export default function AdminUsers() {
 
   return (
     <div>
-      <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} style={{ marginBottom: 32, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+      <div style={{ marginBottom: 32, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <div>
           <h1 style={{ fontFamily: "'Space Grotesk',sans-serif", fontSize: '1.8rem', fontWeight: 700, marginBottom: 6 }}>Users</h1>
           <p style={{ color: 'var(--text-secondary)' }}>Manage all registered users</p>
         </div>
         <span className="badge badge-blue">{users.length} users</span>
-      </motion.div>
+      </div>
 
       {/* Search */}
       <div style={{ position: 'relative', marginBottom: 24, maxWidth: 400 }}>
@@ -62,7 +62,7 @@ export default function AdminUsers() {
         <input type="text" value={search} onChange={handleSearch} placeholder="Search by name or email..." className="glass-input" style={{ paddingLeft: 40 }} />
       </div>
 
-      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="glass" style={{ padding: 0, overflow: 'hidden' }}>
+      <div className="glass" style={{ padding: 0, overflow: 'hidden' }}>
         <div style={{ overflowX: 'auto' }}>
           <table className="glass-table">
             <thead>
@@ -147,7 +147,7 @@ export default function AdminUsers() {
             </tbody>
           </table>
         </div>
-      </motion.div>
+      </div>
     </div>
   );
 }

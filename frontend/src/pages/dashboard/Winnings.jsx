@@ -5,6 +5,9 @@ import { motion, AnimatePresence } from 'framer-motion';
 import Card from '../../components/ui/Card';
 import Button from '../../components/ui/Button';
 
+const AnimatedNumber = motion.div;
+const AnimatedModal = motion.div;
+
 export default function Winnings() {
   const [showModal, setShowModal] = useState(false);
   const [uploading, setUploading] = useState(false);

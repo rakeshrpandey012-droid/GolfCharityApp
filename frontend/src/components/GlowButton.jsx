@@ -1,5 +1,7 @@
 import { motion } from 'framer-motion';
 
+const MotionButton = motion.button;
+
 export default function GlowButton({
   children, onClick, type = 'button', className = '',
   variant = 'primary', size = 'md', loading = false, disabled = false,
@@ -13,7 +15,7 @@ export default function GlowButton({
     'btn-ghost';
 
   return (
-    <motion.button
+    <MotionButton
       type={type}
       onClick={onClick}
       disabled={disabled || loading}
@@ -43,6 +45,6 @@ export default function GlowButton({
         </span>
       ) : children}
       <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
-    </motion.button>
+    </MotionButton>
   );
 }

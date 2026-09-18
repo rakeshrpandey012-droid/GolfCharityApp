@@ -1,18 +1,20 @@
-import { motion, AnimatePresence } from 'framer-motion';
+import { AnimatePresence, motion } from 'framer-motion';
 import { X } from 'lucide-react';
+
+const Motion = motion;
 
 export default function Modal({ open, onClose, title, children }) {
   return (
     <AnimatePresence>
       {open && (
-        <motion.div
+        <Motion.div
           className="modal-overlay"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           onClick={onClose}
         >
-          <motion.div
+          <Motion.div
             className="glass-strong"
             style={{ width: '100%', maxWidth: 520, padding: 32, position: 'relative' }}
             initial={{ opacity: 0, y: 30, scale: 0.95 }}
@@ -39,8 +41,8 @@ export default function Modal({ open, onClose, title, children }) {
               </button>
             </div>
             {children}
-          </motion.div>
-        </motion.div>
+          </Motion.div>
+        </Motion.div>
       )}
     </AnimatePresence>
   );

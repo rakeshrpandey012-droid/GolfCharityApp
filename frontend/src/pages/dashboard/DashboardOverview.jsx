@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { motion } from 'framer-motion';
+import { motion as Motion } from 'framer-motion';
 import { Target, Trophy, Heart, Gift, ChevronRight, TrendingUp, Clock } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { getAnalytics, getLatestDraw } from '../../api/api';
@@ -47,7 +47,7 @@ export default function DashboardOverview() {
       {/* Stats Grid */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: 20, marginBottom: 32 }}>
         {stats.map((s, i) => (
-          <motion.div
+          <Motion.div
             key={s.label}
             className="stat-card"
             initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.08 }}
@@ -63,7 +63,7 @@ export default function DashboardOverview() {
               )}
               <div className="stat-label">{s.label}</div>
             </div>
-          </motion.div>
+          </Motion.div>
         ))}
       </div>
 
@@ -71,7 +71,7 @@ export default function DashboardOverview() {
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: 24 }}>
 
         {/* Next Draw Card */}
-        <motion.div
+        <Motion.div
           className="glass-card"
           style={{ padding: 28, overflow: 'hidden', position: 'relative' }}
           initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.35 }}
@@ -108,10 +108,10 @@ export default function DashboardOverview() {
               Log Scores
             </button>
           </div>
-        </motion.div>
+        </Motion.div>
 
         {/* Charity Progress */}
-        <motion.div
+        <Motion.div
           className="glass-card"
           style={{ padding: 28 }}
           initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.45 }}
@@ -141,7 +141,7 @@ export default function DashboardOverview() {
               </span>
             </div>
             <div className="progress-track">
-              <motion.div
+              <Motion.div
                 className="progress-fill green"
                 initial={{ width: 0 }}
                 animate={{ width: `${Math.min(100, ((analytics?.charityTotal || 0) / 500) * 100)}%` }}
@@ -149,7 +149,7 @@ export default function DashboardOverview() {
               />
             </div>
           </div>
-        </motion.div>
+        </Motion.div>
 
       </div>
     </div>

@@ -1,11 +1,27 @@
 import { useEffect, useState } from 'react';
-import { motion } from 'framer-motion';
-import { BarChart2, Users, TrendingUp, Heart, Trophy, Target, ChevronDown } from 'lucide-react';
+import { Trophy, ChevronDown } from 'lucide-react';
 import { getAnalytics, getDrawHistory } from '../../api/api';
 import { AreaChart, Area, BarChart, Bar, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 
 // Beautiful Gradient/Brand Colors
 const COLORS = ['#f59e0b', '#10b981', '#3b82f6', '#8b5cf6'];
+
+// Custom tooltips to match the dark aesthetic
+const CustomTooltip = ({ active, payload, label }) => {
+  if (active && payload && payload.length) {
+    return (
+      <div style={{ background: 'rgba(5,5,16,0.9)', border: '1px solid rgba(255,255,255,0.1)', padding: '12px 16px', borderRadius: 12, backdropFilter: 'blur(10px)', boxShadow: '0 10px 30px rgba(0,0,0,0.5)' }}>
+        <p style={{ color: 'var(--text-secondary)', marginBottom: 8, fontSize: '0.85rem' }}>{label}</p>
+        {payload.map((p, i) => (
+          <p key={i} style={{ color: p.color || p.fill, fontWeight: 600, fontSize: '1rem', margin: '4px 0' }}>
+            {p.name}: £{typeof p.value === 'number' ? p.value.toLocaleString() : p.value}
+          </p>
+        ))}
+      </div>
+    );
+  }
+  return null;
+};
 
 export default function AdminAnalytics() {
   const [analytics, setAnalytics] = useState(null);
@@ -46,27 +62,10 @@ export default function AdminAnalytics() {
     { name: 'Tier 3 Pool (25%)', value: Number((pool * 0.25).toFixed(2)) },
   ];
 
-  // Custom tooltips to match the dark aesthetic
-  const CustomTooltip = ({ active, payload, label }) => {
-    if (active && payload && payload.length) {
-      return (
-        <div style={{ background: 'rgba(5,5,16,0.9)', border: '1px solid rgba(255,255,255,0.1)', padding: '12px 16px', borderRadius: 12, backdropFilter: 'blur(10px)', boxShadow: '0 10px 30px rgba(0,0,0,0.5)' }}>
-          <p style={{ color: 'var(--text-secondary)', marginBottom: 8, fontSize: '0.85rem' }}>{label}</p>
-          {payload.map((p, i) => (
-            <p key={i} style={{ color: p.color || p.fill, fontWeight: 600, fontSize: '1rem', margin: '4px 0' }}>
-              {p.name}: £{typeof p.value === 'number' ? p.value.toLocaleString() : p.value}
-            </p>
-          ))}
-        </div>
-      );
-    }
-    return null;
-  };
-
   return (
     <div style={{ paddingBottom: 60 }}>
       {/* Top Navigation / Title Area */}
-      <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} style={{ marginBottom: 32, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+      <div style={{ marginBottom: 32, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <h1 style={{ fontFamily: "'Inter', sans-serif", fontSize: '2rem', fontWeight: 500, color: 'white' }}>
           Platform Analytics
         </h1>
@@ -75,10 +74,10 @@ export default function AdminAnalytics() {
            <button style={{ padding: '6px 16px', background: 'transparent', border: 'none', color: 'var(--text-secondary)', borderRadius: 8, fontSize: '0.85rem' }}>Users</button>
            <button style={{ padding: '6px 16px', background: 'transparent', border: 'none', color: 'var(--text-secondary)', borderRadius: 8, fontSize: '0.85rem' }}>Reports</button>
         </div>
-      </motion.div>
+      </div>
 
       {/* Massive Area Chart Row */}
-      <motion.div initial={{ opacity: 0, scale: 0.98 }} animate={{ opacity: 1, scale: 1 }} className="bento-card" style={{ marginBottom: 24, padding: 32 }}>
+      <div className="bento-card" style={{ marginBottom: 24, padding: 32 }}>
          {/* Chart Header Stats */}
          <div className="analytics-stats-row">
             <div>
@@ -137,13 +136,13 @@ export default function AdminAnalytics() {
               </ResponsiveContainer>
             )}
          </div>
-      </motion.div>
+      </div>
 
       {/* 3-Column Split Widgets */}
       <div className="bento-grid">
          
          {/* Bar Chart Widget */}
-         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }} className="bento-card bento-col-4" style={{ padding: 24, display: 'flex', flexDirection: 'column' }}>
+         <div className="bento-card bento-col-4" style={{ padding: 24, display: 'flex', flexDirection: 'column' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 }}>
                <h3 style={{ fontSize: '1.05rem', fontWeight: 500, color: 'white' }}>User Engagement</h3>
                <button style={{ background: 'rgba(255,255,255,0.05)', border: 'none', padding: '4px 12px', borderRadius: 8, color: 'var(--text-secondary)', fontSize: '0.8rem', display: 'flex', gap: 6, alignItems: 'center' }}>
@@ -165,10 +164,10 @@ export default function AdminAnalytics() {
                  </ResponsiveContainer>
                )}
             </div>
-         </motion.div>
+         </div>
 
          {/* Stats / Progress Metrics */}
-         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="bento-card bento-col-4" style={{ padding: 24 }}>
+         <div className="bento-card bento-col-4" style={{ padding: 24 }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 32 }}>
                <h3 style={{ fontSize: '1.05rem', fontWeight: 500, color: 'white' }}>Current KPI Focus</h3>
                <span style={{ color: 'var(--text-muted)', fontSize: '0.8rem' }}>Live Statistics</span>
@@ -182,7 +181,7 @@ export default function AdminAnalytics() {
                      <span style={{ color: '#10b981', fontSize: '0.85rem', fontWeight: 600 }}>{analytics?.totalUsers || 0} Total</span>
                   </div>
                   <div style={{ height: 12, background: 'rgba(255,255,255,0.05)', borderRadius: 6, overflow: 'hidden' }}>
-                     <motion.div initial={{ width: 0 }} animate={{ width: `${Math.min((analytics?.totalUsers || 0) / 100 * 100, 100)}%` }} transition={{ duration: 1.5, ease: 'easeOut' }} style={{ height: '100%', background: '#10b981', borderRadius: 6, boxShadow: '0 0 10px rgba(16,185,129,0.5)' }} />
+                     <div style={{ width: `${Math.min((analytics?.totalUsers || 0) / 100 * 100, 100)}%`, height: '100%', background: '#10b981', borderRadius: 6, boxShadow: '0 0 10px rgba(16,185,129,0.5)' }} />
                   </div>
                </div>
 
@@ -193,7 +192,7 @@ export default function AdminAnalytics() {
                      <span style={{ color: '#8b5cf6', fontSize: '0.85rem', fontWeight: 600 }}>{analytics?.drawCount || 0} Runs</span>
                   </div>
                   <div style={{ height: 12, background: 'rgba(255,255,255,0.05)', borderRadius: 6, overflow: 'hidden' }}>
-                     <motion.div initial={{ width: 0 }} animate={{ width: `${Math.min((analytics?.drawCount || 0) / 10 * 100, 100)}%` }} transition={{ duration: 1.5, ease: 'easeOut' }} style={{ height: '100%', background: '#8b5cf6', borderRadius: 6, boxShadow: '0 0 10px rgba(139,92,246,0.5)' }} />
+                     <div style={{ width: `${Math.min((analytics?.drawCount || 0) / 10 * 100, 100)}%`, height: '100%', background: '#8b5cf6', borderRadius: 6, boxShadow: '0 0 10px rgba(139,92,246,0.5)' }} />
                   </div>
                </div>
 
@@ -208,10 +207,10 @@ export default function AdminAnalytics() {
                   </div>
                </div>
             </div>
-         </motion.div>
+         </div>
 
          {/* Donut Chart Widget */}
-         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }} className="bento-card bento-col-4" style={{ padding: 24, display: 'flex', flexDirection: 'column' }}>
+         <div className="bento-card bento-col-4" style={{ padding: 24, display: 'flex', flexDirection: 'column' }}>
             <h3 style={{ fontSize: '1.05rem', fontWeight: 500, color: 'white', marginBottom: 8 }}>Prize Disbursal</h3>
             <p style={{ color: 'var(--text-muted)', fontSize: '0.8rem', marginBottom: 16 }}>Engine logic split per draw</p>
             
@@ -252,7 +251,7 @@ export default function AdminAnalytics() {
                   </div>
                ))}
             </div>
-         </motion.div>
+         </div>
       </div>
     </div>
   );

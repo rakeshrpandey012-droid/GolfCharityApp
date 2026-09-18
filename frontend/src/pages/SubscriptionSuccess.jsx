@@ -1,5 +1,6 @@
 import React, { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+/* eslint-disable no-unused-vars */
 import { motion } from 'framer-motion';
 import { CheckCircle2, ArrowRight } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
@@ -11,7 +12,7 @@ export default function SubscriptionSuccess() {
   useEffect(() => {
     // Pull fresh user data from backend so subscription shows as active immediately
     refreshUser && refreshUser();
-  }, []);
+  }, [refreshUser]);
 
   return (
     <div style={{

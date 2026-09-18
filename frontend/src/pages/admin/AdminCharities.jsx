@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { motion } from 'framer-motion';
+import { motion as Motion } from 'framer-motion';
 import { Heart, Plus, Edit2, Trash2, X, Check } from 'lucide-react';
 import { getCharities, createCharity, updateCharity, deleteCharity } from '../../api/api';
 import GlowButton from '../../components/GlowButton';

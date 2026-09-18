@@ -1,6 +1,7 @@
 ﻿import { motion, useMotionValue, useSpring, useTransform } from 'framer-motion';
 
 export const TiltCard = ({ children, className = "", style = {} }) => {
+  const MotionDiv = motion.div;
   const x = useMotionValue(0);
   const y = useMotionValue(0);
 

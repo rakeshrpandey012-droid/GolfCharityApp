@@ -1,8 +1,10 @@
 import { motion } from 'framer-motion';
 
+const MotionDiv = motion.div;
+
 export default function GlassCard({ children, className = '', hover = true, onClick }) {
   return (
-    <motion.div
+    <MotionDiv
       className={`glass ${className}`}
       whileHover={hover ? { y: -4, borderColor: 'rgba(255,255,255,0.2)' } : {}}
       transition={{ duration: 0.3 }}
@@ -10,6 +12,6 @@ export default function GlassCard({ children, className = '', hover = true, onCl
       style={{ cursor: onClick ? 'pointer' : 'default' }}
     >
       {children}
-    </motion.div>
+    </MotionDiv>
   );
 }

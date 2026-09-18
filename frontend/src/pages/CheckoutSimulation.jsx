@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { CreditCard, ShieldCheck, Lock, ChevronRight } from 'lucide-react';
-import { motion } from 'framer-motion';
 import toast from 'react-hot-toast';
 import { createSubscription } from '../api/api';
 import { useAuth } from '../context/AuthContext';
@@ -17,7 +16,7 @@ export default function CheckoutSimulation() {
   const planId = searchParams.get('plan') || 'monthly';
   const plan   = PLAN_INFO[planId] || PLAN_INFO.monthly;
 
-  const { user } = useAuth();
+  useAuth();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [form, setForm]   = useState({ name: '', cardNumber: '', expiry: '', cvv: '' });
@@ -41,7 +40,7 @@ export default function CheckoutSimulation() {
       await createSubscription({ plan: planId, method: 'simulated_card' });
       toast.success('Payment successful! 🎉');
       navigate('/subscription/success');
-    } catch (err) {
+    } catch {
       // Fallback: simulate success for demo
       await new Promise(r => setTimeout(r, 1500));
       toast.success('Payment successful! 🎉');

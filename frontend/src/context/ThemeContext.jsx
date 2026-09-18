@@ -1,8 +1,9 @@
 import { createContext, useContext, useEffect, useState } from 'react';
 
-export const ThemeContext = createContext();
+// keep context internal to this file so the module only exports React components
+const ThemeContext = createContext();
 
-export const ThemeProvider = ({ children }) => {
+const ThemeProvider = ({ children }) => {
   const [theme, setTheme] = useState(() => {
     const saved = localStorage.getItem('gw-theme');
     if (saved) return saved;
@@ -27,4 +28,10 @@ export const ThemeProvider = ({ children }) => {
   );
 };
 
-export const useTheme = () => useContext(ThemeContext);
+// helper hook (kept internal and attached to the provider so this file
+// only exports a React component — satisfying fast refresh requirements)
+const useTheme = () => useContext(ThemeContext);
+
+ThemeProvider.useTheme = useTheme;
+
+export default ThemeProvider;

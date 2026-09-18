@@ -1,3 +1,4 @@
+/* eslint-disable react-refresh/only-export-components */
 import { createContext, useContext, useState, useEffect } from 'react';
 import { getMe } from '../api/api';
 
@@ -8,18 +9,26 @@ export function AuthProvider({ children }) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const token = localStorage.getItem('token');
-    if (token) {
-      getMe()
-        .then((res) => setUser(res.data.user || res.data))
-        .catch(() => {
-          localStorage.removeItem('token');
-          localStorage.removeItem('user');
-        })
-        .finally(() => setLoading(false));
-    } else {
-      setLoading(false);
-    }
+    const initializeAuth = async () => {
+      const token = localStorage.getItem('token');
+
+      if (!token) {
+        setLoading(false);
+        return;
+      }
+
+      try {
+        const res = await getMe();
+        setUser(res.data.user || res.data);
+      } catch {
+        localStorage.removeItem('token');
+        localStorage.removeItem('user');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    initializeAuth();
   }, []);
 
   const loginUser = (token, userData) => {
@@ -49,4 +58,6 @@ export function AuthProvider({ children }) {
   );
 }
 
-export const useAuth = () => useContext(AuthContext);
+const useAuth = () => useContext(AuthContext);
+
+export { useAuth };

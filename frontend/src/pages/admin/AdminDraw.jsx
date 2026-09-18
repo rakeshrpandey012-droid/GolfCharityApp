@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
-import { motion } from 'framer-motion';
-import { Play, Zap, FileText, Settings, Dice5 } from 'lucide-react';
+import { Play, Zap, FileText, Settings } from 'lucide-react';
 import toast from 'react-hot-toast';
 
 import Card from '../../components/ui/Card';
