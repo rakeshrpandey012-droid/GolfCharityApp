@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { User, Mail, Lock, Phone, Calendar, ChevronRight, ArrowLeft } from 'lucide-react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion as Motion, AnimatePresence } from 'framer-motion';
 import toast from 'react-hot-toast';
 import { register } from '../api/api';
 import { useAuth } from '../context/AuthContext';
@@ -96,7 +96,7 @@ export default function Register() {
     <div className="page-bg" style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 24 }}>
       <ThemeTogglePill />
 
-      <motion.div initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} style={{ width: '100%', maxWidth: 480 }}>
+      <Motion.div initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} style={{ width: '100%', maxWidth: 480 }}>
         {/* Header */}
         <div style={{ textAlign: 'center', marginBottom: 32 }}>
           <div className="sidebar-logo-icon" style={{ margin: '0 auto 16px' }}>⛳</div>
@@ -129,7 +129,7 @@ export default function Register() {
 
         <div className="glass-card" style={{ padding: '32px 28px' }}>
           <AnimatePresence mode="wait">
-            <motion.div
+            <Motion.div
               key={step}
               initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }}
               transition={{ duration: 0.25 }}

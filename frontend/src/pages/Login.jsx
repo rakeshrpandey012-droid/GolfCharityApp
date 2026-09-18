@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Eye, EyeOff, Mail, Lock, ShieldCheck, Trophy, Heart, ChevronRight } from 'lucide-react';
-import { motion } from 'framer-motion';
+// animation removed to avoid unused import warnings
 import toast from 'react-hot-toast';
 import { login } from '../api/api';
 import { useAuth } from '../context/AuthContext';
@@ -75,10 +75,10 @@ export default function Login() {
               { icon: Trophy, title: 'Win the Jackpot', desc: 'Match 5 numbers to claim the top prize — rolls over each month if unclaimed.' },
               { icon: Heart,  title: 'Fund Charities',  desc: 'Minimum 10% of your subscription goes directly to your chosen charity.' },
               { icon: ShieldCheck, title: 'Provably Fair', desc: 'All draws are admin-verified and fully transparent before payouts process.' },
-            ].map(({ icon: Icon, title, desc }) => (
+            ].map(({ icon, title, desc }) => (
               <div key={title} style={{ display: 'flex', gap: 16, alignItems: 'flex-start' }}>
                 <div style={{ background: 'rgba(255,255,255,0.15)', padding: 10, borderRadius: 12, flexShrink: 0 }}>
-                  <Icon size={22} color="#fff" />
+                  {icon && icon({ size: 22, color: '#fff' })}
                 </div>
                 <div>
                   <div style={{ color: '#fff', fontWeight: 700, marginBottom: 4 }}>{title}</div>
