@@ -3,8 +3,10 @@ import axios from 'axios';
 // ===== CONFIGURATION =====
 // For local development, make sure backend is running at: http://localhost:5000
 // To deploy, set VITE_API_URL to your backend URL in Vercel.
+// If `VITE_API_URL` is set use it. Otherwise, when in production default to
+// the live backend URL. In development use the local backend.
 const API_BASE_URL = import.meta.env.VITE_API_URL
-  || (import.meta.env.PROD ? '/api' : 'http://localhost:5000/api');
+  || (import.meta.env.PROD ? 'https://golf-charity-app-pkr4.vercel.app/api' : 'http://localhost:5000/api');
 
 console.log('🌐 API Base URL:', API_BASE_URL);
 
