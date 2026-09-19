@@ -1,2 +1,1 @@
-// Ensure the application is bootstrapped when this module is executed
-require("../src/server");
+module.exports = require("../src/app");

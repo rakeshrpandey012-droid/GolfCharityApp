@@ -24,7 +24,7 @@ export default function AdminCharities() {
   useEffect(() => { fetchCharities(); }, []);
 
   const openAdd = () => { setEditing(null); setForm({ name: '', description: '', spotlight: false }); setModal(true); };
-  const openEdit = (c) => { setEditing(c); setForm({ name: c.name, description: c.description || '', spotlight: c.spotlight || false }); setModal(true); };
+  const openEdit = (c) => { setEditing(c); setForm({ name: c.name, description: c.description || '', spotlight: Boolean(c.isSpotlight ?? c.spotlight) }); setModal(true); };
 
   const handleSave = async () => {
     if (!form.name.trim()) { toast.error('Name is required'); return; }
@@ -81,7 +81,7 @@ export default function AdminCharities() {
               className="glass"
               style={{ padding: 24, position: 'relative' }}
             >
-              {c.spotlight && (
+              {(c.isSpotlight ?? c.spotlight) && (
                 <div style={{ position: 'absolute', top: 16, right: 16 }}>
                   <span className="badge badge-pending" style={{ fontSize: '0.65rem' }}>⭐ Spotlight</span>
                 </div>

@@ -31,23 +31,37 @@ export function AuthProvider({ children }) {
     initializeAuth();
   }, []);
 
+  const persistUser = (userData) => {
+    if (userData) {
+      localStorage.setItem('user', JSON.stringify(userData));
+      setUser(userData);
+      return userData;
+    }
+
+    localStorage.removeItem('user');
+    setUser(null);
+    return null;
+  };
+
   const loginUser = (token, userData) => {
     localStorage.setItem('token', token);
-    localStorage.setItem('user', JSON.stringify(userData));
-    setUser(userData);
+    return persistUser(userData);
   };
 
   const logoutUser = () => {
     localStorage.removeItem('token');
-    localStorage.removeItem('user');
-    setUser(null);
+    persistUser(null);
   };
 
   const refreshUser = () => {
     const token = localStorage.getItem('token');
     if (!token) return Promise.resolve();
     return getMe()
-      .then((res) => setUser(res.data.user || res.data))
+      .then((res) => {
+        const nextUser = res.data.user || res.data;
+        persistUser(nextUser);
+        return nextUser;
+      })
       .catch(() => {});
   };
 

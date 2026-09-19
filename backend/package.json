@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "main": "api/index.js",
   "engines": {
-    "node": ">=24.x"
+    "node": "24.x"
   },
   "devDependencies": {
     "nodemon": "^3.1.14"
@@ -26,7 +26,7 @@
     "zod": "^4.6.5"
   },
   "scripts": {
-    "dev": "nodemon api/index.js",
-    "start": "node api/index.js"
+    "dev": "nodemon src/server.js",
+    "start": "node src/server.js"
   }
 }

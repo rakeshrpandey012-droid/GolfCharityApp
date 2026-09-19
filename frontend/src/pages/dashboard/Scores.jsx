@@ -59,12 +59,12 @@ export default function Scores() {
         
         {/* Left Column: History & Trends */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: '32px' }}>
-          <Card>
+          <Card style={{ background: 'var(--bg-primary)', border: '1px solid var(--border-color)', boxShadow: 'var(--shadow-card, 0 8px 24px rgba(15, 23, 42, 0.08))' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '24px' }}>
               <TrendingUp color="var(--brand-primary)" />
-              <h3 style={{ fontSize: '18px' }}>Performance Trend</h3>
+              <h3 style={{ fontSize: '18px', color: 'var(--text-primary)' }}>Performance Trend</h3>
             </div>
-            
+
             <div style={{ height: '250px', width: '100%' }}>
               <ResponsiveContainer width="100%" height="100%">
                 <AreaChart data={chartData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
@@ -76,9 +76,10 @@ export default function Scores() {
                   </defs>
                   <XAxis dataKey="date" stroke="var(--text-tertiary)" fontSize={12} tickLine={false} axisLine={false} />
                   <YAxis stroke="var(--text-tertiary)" fontSize={12} tickLine={false} axisLine={false} domain={[0, 45]} />
-                  <Tooltip 
-                    contentStyle={{ backgroundColor: 'var(--bg-primary)', borderColor: 'var(--border-color)', borderRadius: '8px' }} 
+                  <Tooltip
+                    contentStyle={{ backgroundColor: 'var(--bg-primary)', borderColor: 'var(--border-color)', borderRadius: '8px', color: 'var(--text-primary)' }}
                     itemStyle={{ color: 'var(--text-primary)' }}
+                    labelStyle={{ color: 'var(--text-secondary)' }}
                   />
                   <Area type="monotone" dataKey="score" stroke="var(--brand-primary)" strokeWidth={3} fillOpacity={1} fill="url(#colorScore)" />
                 </AreaChart>
@@ -86,9 +87,9 @@ export default function Scores() {
             </div>
           </Card>
 
-          <Card>
-            <h3 style={{ fontSize: '18px', marginBottom: '24px' }}>Recent Scores ({scores.length}/5)</h3>
-            <div style={{ border: '1px solid var(--border-color)', borderRadius: 'var(--radius-sm)', overflow: 'hidden' }}>
+          <Card style={{ background: 'var(--bg-primary)', border: '1px solid var(--border-color)', boxShadow: 'var(--shadow-card, 0 8px 24px rgba(15, 23, 42, 0.08))' }}>
+            <h3 style={{ fontSize: '18px', marginBottom: '24px', color: 'var(--text-primary)' }}>Recent Scores ({scores.length}/5)</h3>
+            <div style={{ border: '1px solid var(--border-color)', borderRadius: 'var(--radius-sm)', overflow: 'hidden', background: 'var(--bg-primary)' }}>
               <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
                 <thead style={{ background: 'var(--bg-secondary)', borderBottom: '1px solid var(--border-color)' }}>
                   <tr>
@@ -100,12 +101,12 @@ export default function Scores() {
                 <tbody>
                   <AnimatePresence>
                     {scores.map((s) => (
-                      <tr 
+                      <tr
                         key={s.id}
-                        style={{ borderBottom: '1px solid var(--border-color)' }}
+                        style={{ borderBottom: '1px solid var(--border-color)', background: 'var(--bg-primary)' }}
                       >
-                        <td style={{ padding: '16px' }}>{s.date}</td>
-                        <td style={{ padding: '16px', fontWeight: 600 }}>{s.score}</td>
+                        <td style={{ padding: '16px', color: 'var(--text-primary)' }}>{s.date}</td>
+                        <td style={{ padding: '16px', fontWeight: 600, color: 'var(--text-primary)' }}>{s.score}</td>
                         <td style={{ padding: '16px', textAlign: 'right', display: 'flex', gap: '8px', justifyContent: 'flex-end' }}>
                           <button style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-secondary)' }}>
                             <Edit2 size={16} />
@@ -129,48 +130,106 @@ export default function Scores() {
         </div>
 
         {/* Right Column: Entry Form */}
-        <Card style={{ position: 'sticky', top: '24px' }}>
+        <Card style={{
+          position: 'sticky',
+          top: '24px',
+          background: 'var(--bg-primary)',
+          border: '1px solid var(--border-color)',
+          boxShadow: 'var(--shadow-card, 0 8px 24px rgba(15, 23, 42, 0.08))',
+          padding: '24px'
+        }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '24px' }}>
-            <div style={{ background: 'rgba(79, 70, 229, 0.1)', padding: '8px', borderRadius: '8px' }}>
+            <div style={{
+              background: 'var(--brand-dim, rgba(79, 70, 229, 0.12))',
+              padding: '10px',
+              borderRadius: '12px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              border: '1px solid var(--border-color)'
+            }}>
               <Target size={20} color="var(--brand-primary)" />
             </div>
-            <h3 style={{ fontSize: '18px', margin: 0 }}>Log New Score</h3>
+            <div>
+              <p style={{ margin: 0, fontSize: '12px', letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--text-secondary)' }}>
+                Score Entry
+              </p>
+              <h3 style={{ fontSize: '20px', margin: '4px 0 0', color: 'var(--text-primary)' }}>Log New Score</h3>
+            </div>
           </div>
 
-          <form onSubmit={handleAddScore}>
-            <Input 
-              label="Date Played"
-              type="date"
-              id="date"
-              name="date"
-              value={form.date}
-              onChange={(e) => setForm({ ...form, date: e.target.value })}
-              iconLeft={<Calendar size={18} />}
-              required
-            />
-            
-            <Input 
-              label="Stableford Score (1-45)"
-              type="number"
-              id="score"
-              name="score"
-              min="1"
-              max="45"
-              placeholder="e.g. 36"
-              value={form.score}
-              onChange={(e) => setForm({ ...form, score: e.target.value })}
-              iconLeft={<Target size={18} />}
-              required
-            />
+          <form onSubmit={handleAddScore} style={{ display: 'grid', gap: '18px' }}>
+            <div style={{ display: 'grid', gap: '8px' }}>
+              <Input
+                label="Date Played"
+                type="date"
+                id="date"
+                name="date"
+                value={form.date}
+                onChange={(e) => setForm({ ...form, date: e.target.value })}
+                iconLeft={<Calendar size={18} />}
+                required
+                style={{
+                  background: 'var(--bg-secondary)',
+                  border: '1px solid var(--border-color)',
+                  borderRadius: '12px',
+                  boxShadow: 'inset 0 1px 2px rgba(15, 23, 42, 0.04)',
+                  fontSize: '1rem',
+                  color: 'var(--text-primary)'
+                }}
+              />
+            </div>
 
-            <Button type="submit" style={{ width: '100%', marginTop: '16px' }}>
+            <div style={{ display: 'grid', gap: '8px' }}>
+              <Input
+                label="Stableford Score (1-45)"
+                type="number"
+                id="score"
+                name="score"
+                min="1"
+                max="45"
+                placeholder="e.g. 36"
+                value={form.score}
+                onChange={(e) => setForm({ ...form, score: e.target.value })}
+                iconLeft={<Target size={18} />}
+                required
+                style={{
+                  background: 'var(--bg-secondary)',
+                  border: '1px solid var(--border-color)',
+                  borderRadius: '12px',
+                  boxShadow: 'inset 0 1px 2px rgba(15, 23, 42, 0.04)',
+                  fontSize: '1rem',
+                  color: 'var(--text-primary)'
+                }}
+              />
+            </div>
+
+            <Button
+              type="submit"
+              style={{
+                width: '100%',
+                marginTop: '8px',
+                background: 'linear-gradient(135deg, var(--brand-primary), #8b5cf6)',
+                border: 'none',
+                boxShadow: '0 15px 30px rgba(79, 70, 229, 0.18)',
+                fontWeight: 700,
+                letterSpacing: '0.02em',
+                color: '#ffffff'
+              }}
+            >
               Add Score
             </Button>
           </form>
 
-          <div style={{ marginTop: '24px', padding: '16px', background: 'var(--bg-secondary)', borderRadius: 'var(--radius-sm)' }}>
-            <h4 style={{ fontSize: '14px', marginBottom: '8px' }}>How it works</h4>
-            <p className="text-secondary text-body-small">
+          <div style={{
+            marginTop: '24px',
+            padding: '16px 18px',
+            background: 'var(--bg-secondary)',
+            border: '1px solid var(--border-color)',
+            borderRadius: '14px'
+          }}>
+            <h4 style={{ fontSize: '14px', marginBottom: '8px', color: 'var(--text-primary)' }}>How it works</h4>
+            <p className="text-secondary text-body-small" style={{ margin: 0, lineHeight: 1.6 }}>
               Only your most recent 5 scores are kept. Submitting a new score will automatically replace your oldest entry if you already have 5.
             </p>
           </div>

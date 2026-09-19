@@ -13,7 +13,7 @@ async function bootstrap() {
   } catch (err) {
     console.warn("⚠️ Failed to connect to DB, continuing anyway", err);
   }
-  
+
   try {
     startMonthlyDrawJob();
   } catch (err) {
@@ -25,7 +25,11 @@ async function bootstrap() {
   });
 }
 
-bootstrap().catch((error) => {
-  console.error("Failed to start server", error);
-  process.exit(1);
-});
+if (require.main === module) {
+  bootstrap().catch((error) => {
+    console.error("Failed to start server", error);
+    process.exit(1);
+  });
+}
+
+module.exports = app;

@@ -135,7 +135,7 @@ function StatusPill({ status }) {
 
 /* ── Main Component ────────────────────────────────────────────────────────── */
 export default function Subscription() {
-  const { user } = useAuth();
+  const { user, refreshUser } = useAuth();
   const navigate = useNavigate();
   const [sub, setSub]           = useState(null);
   const [loading, setLoading]   = useState(true);
@@ -146,19 +146,27 @@ export default function Subscription() {
 
   useEffect(() => {
     getMySubscription()
-      .then(r => setSub(r.data))
+      .then((r) => {
+        const nextSub = r?.data && typeof r.data === 'object' ? r.data : null;
+        setSub(nextSub && Object.keys(nextSub).length ? nextSub : null);
+      })
       .catch(() => setSub(null))
       .finally(() => setLoading(false));
   }, []);
 
-  const activePlanId = sub?.plan || (user?.subscriptionStatus === 'active' ? 'monthly' : 'free');
-  const activePlan   = PLANS.find(p => p.id === activePlanId) || PLANS[0];
-  const isActive     = sub?.status === 'active' || user?.subscriptionStatus === 'active';
+  const activePlanId =
+    sub?.plan ||
+    (user?.subscriptionStatus === 'active' ? 'monthly' : 'free');
+  const activePlan = PLANS.find((p) => p.id === activePlanId) || PLANS[0];
+  const isActive =
+    (sub?.status === 'active' || sub?.status === 'created') ||
+    user?.subscriptionStatus === 'active';
 
   const handleCancel = async () => {
     setCancelling(true);
     try {
       await cancelSubscription();
+      await refreshUser();
       toast.success('Subscription cancelled. Access continues until period end.');
       setSub(s => ({ ...s, status: 'cancelled' }));
     } catch {
@@ -173,6 +181,7 @@ export default function Subscription() {
     setRenewing(true);
     try {
       await renewSubscription();
+      await refreshUser();
       toast.success('Subscription renewed! 🎉');
       setSub(s => ({ ...s, status: 'active' }));
     } catch {

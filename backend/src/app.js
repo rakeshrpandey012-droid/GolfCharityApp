@@ -33,7 +33,28 @@ const { handleWebhook } = require("./controllers/subscriptionController");
 const { notFound, errorHandler } = require("./middlewares/errorMiddleware");
 
 app.use(helmet());
-app.use(cors());
+
+const allowedOrigins = [
+  process.env.FRONTEND_URL,
+  process.env.FRONTEND_DEPLOY_URL,
+  "http://localhost:5173",
+  "http://localhost:3000",
+].filter(Boolean);
+
+app.use(
+  cors({
+    origin: (origin, callback) => {
+      if (!origin || allowedOrigins.includes(origin) || /^https:\/\/.*\.vercel\.app$/.test(origin)) {
+        callback(null, true);
+        return;
+      }
+
+      callback(new Error("Not allowed by CORS"));
+    },
+    credentials: true,
+  })
+);
+
 app.use(morgan("dev"));
 // app.use(
 //   rateLimit({

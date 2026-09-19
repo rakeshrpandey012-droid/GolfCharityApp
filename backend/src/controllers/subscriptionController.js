@@ -41,19 +41,24 @@ async function createCheckoutSession(req, res, next) {
     const charityPercent = user.charityPercentage || 10;
     const charityAmount = Number(((amount * charityPercent) / 100).toFixed(2));
 
-    await Subscription.create({
+    const subscription = await Subscription.create({
       user: user._id,
       plan,
       stripeSessionId: mockSessionId,
-      status: "created",
+      status: "active",
       amount,
       expiryDate: getExpiry(plan),
       charityAmount
     });
 
+    user.subscriptionStatus = "active";
+    user.subscriptionId = subscription._id;
+    await user.save();
+
     res.status(200).json({
       sessionId: mockSessionId,
-      checkoutUrl: `/checkout-simulation?session_id=${mockSessionId}&amount=${amount}`
+      checkoutUrl: `/checkout-simulation?session_id=${mockSessionId}&amount=${amount}`,
+      subscription
     });
   } catch (error) {
     next(error);
@@ -155,7 +160,16 @@ async function handleWebhook(req, res, next) {
 async function listMySubscriptions(req, res, next) {
   try {
     const subscriptions = await Subscription.find({ user: req.user._id }).sort({ createdAt: -1 });
-    res.status(200).json({ subscriptions });
+    const activeSubscription =
+      subscriptions.find((item) => item.status === "active" && new Date(item.expiryDate) > new Date()) ||
+      subscriptions[0] ||
+      null;
+
+    res.status(200).json({
+      subscriptions,
+      activeSubscription,
+      subscription: activeSubscription
+    });
   } catch (error) {
     next(error);
   }

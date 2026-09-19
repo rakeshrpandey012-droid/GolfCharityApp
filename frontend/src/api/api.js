@@ -2,11 +2,9 @@ import axios from 'axios';
 
 // ===== CONFIGURATION =====
 // For local development, make sure backend is running at: http://localhost:5000
-// To start backend: npm start (in your backend folder)
-const API_BASE_URL = import.meta.env.VITE_API_URL 
-  || (import.meta.env.PROD
-    ? 'https://golf-charity-backend.vercel.app/api'
-    : 'http://localhost:5000/api');
+// To deploy, set VITE_API_URL to your backend URL in Vercel.
+const API_BASE_URL = import.meta.env.VITE_API_URL
+  || (import.meta.env.PROD ? '/api' : 'http://localhost:5000/api');
 
 console.log('🌐 API Base URL:', API_BASE_URL);
 
@@ -111,27 +109,45 @@ export const updateAdminScore = (id, data) => API.patch(`/scores/admin/${id}`, d
 export const deleteScore = (id) => API.delete(`/scores/${id}`);
 
 // ==================== SUBSCRIPTIONS ====================
-export const createSubscription = (data) => API.post('/subscriptions', {
+export const createSubscription = (data = {}) => API.post('/subscriptions', {
+  plan: data.plan || data.planType || 'monthly',
   charityId: data.charityId,
   contributionPercentage: data.contributionPercentage,
-  planType: data.planType || 'monthly',
 });
-export const getMySubscription = () => API.get('/subscriptions/me');
+export const getMySubscription = async () => {
+  const res = await API.get('/subscriptions/me');
+  const payload = res.data || {};
+  const items = Array.isArray(payload.subscriptions) ? payload.subscriptions : [];
+  const active = payload.activeSubscription || items.find((item) => item.status === 'active') || items[0] || {};
+  return { ...res, data: active && Object.keys(active).length ? active : payload.subscription || payload || {} };
+};
 export const cancelSubscription = () => API.post('/subscriptions/cancel');
-export const renewSubscription = () => API.post('/subscriptions/renew');
+export const renewSubscription = (data = {}) => API.post('/subscriptions/renew', {
+  plan: data.plan || 'monthly',
+});
 export const getAdminSubscriptions = (status) => API.get(`/subscriptions/admin${status ? `?status=${status}` : ''}`);
 export const simulatePayment = (data) => API.post('/subscriptions/simulate-webhook', data);
 
 // ==================== CHARITIES ====================
 export const getCharities = () => API.get('/charities');
-export const selectCharity = (charityId) => API.post('/charities/select', { charityId });
+export const selectCharity = (charityId, percentage = 10) => API.post('/charities/select', {
+  charityId,
+  charityPercentage: Number(percentage),
+});
 export const createCharity = (data) => API.post('/charities', {
   name: data.name,
   description: data.description,
-  image: data.image,
+  image: data.image || '',
   events: data.events || [],
+  isSpotlight: Boolean(data.spotlight ?? data.isSpotlight),
 });
-export const updateCharity = (id, data) => API.patch(`/charities/${id}`, data);
+export const updateCharity = (id, data) => API.patch(`/charities/${id}`, {
+  name: data.name,
+  description: data.description,
+  image: data.image || '',
+  events: data.events || [],
+  isSpotlight: Boolean(data.spotlight ?? data.isSpotlight),
+});
 export const deleteCharity = (id) => API.delete(`/charities/${id}`);
 export const donateToCharity = (id, amount) => API.post(`/charities/${id}/donate`, { amount });
 

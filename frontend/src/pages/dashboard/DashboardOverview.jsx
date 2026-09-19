@@ -33,54 +33,91 @@ export default function DashboardOverview() {
 
   return (
     <div>
-      {/* Greeting */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 16, marginBottom: 32 }}>
+      <div
+        style={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          flexWrap: 'wrap',
+          gap: 16,
+          marginBottom: 28,
+          padding: '22px 24px',
+          borderRadius: '22px',
+          background: 'linear-gradient(135deg, rgba(79, 70, 229, 0.12), rgba(14, 165, 233, 0.08), rgba(16, 185, 129, 0.08))',
+          border: '1px solid var(--border-color)',
+          boxShadow: 'var(--shadow-card, 0 12px 30px rgba(15, 23, 42, 0.08))'
+        }}
+      >
         <div>
-          <h2 style={{ marginBottom: 4 }}>Welcome back, {user?.name?.split(' ')[0] || 'Golfer'}! ⛳</h2>
-          <p>Here's your performance and impact at a glance.</p>
+          <p style={{ margin: 0, fontSize: '12px', letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--text-secondary)' }}>
+            Dashboard
+          </p>
+          <h2 style={{ margin: '6px 0 0', fontSize: 'clamp(1.8rem, 3vw, 2.6rem)' }}>
+            Welcome back, {user?.name?.split(' ')[0] || 'Golfer'}! ⛳
+          </h2>
+          <p style={{ margin: '8px 0 0', color: 'var(--text-secondary)' }}>
+            Here's your performance and impact at a glance.
+          </p>
         </div>
-        <button onClick={() => navigate('/dashboard/scores')} className="btn btn-primary" style={{ fontSize: '0.9rem' }}>
+        <button onClick={() => navigate('/dashboard/scores')} className="btn btn-primary" style={{ fontSize: '0.9rem', padding: '0 18px', minHeight: 44 }}>
           Log Score <ChevronRight size={16} />
         </button>
       </div>
 
-      {/* Stats Grid */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: 20, marginBottom: 32 }}>
         {stats.map((s, i) => (
           <Motion.div
             key={s.label}
             className="stat-card"
-            initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.08 }}
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: i * 0.08 }}
+            style={{
+              background: 'var(--bg-primary)',
+              border: '1px solid var(--border-color)',
+              boxShadow: 'var(--shadow-card, 0 12px 24px rgba(15,23,42,0.08))',
+              borderRadius: '20px',
+              padding: '20px 18px',
+              display: 'flex',
+              alignItems: 'center',
+              gap: 16,
+              minHeight: 120
+            }}
           >
-            <div className="stat-icon" style={{ background: s.bg }}>
+            <div className="stat-icon" style={{ background: s.bg, width: 52, height: 52, borderRadius: '16px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
               <s.icon size={22} color={s.color} />
             </div>
             <div>
               {loadingA ? (
                 <div className="skeleton" style={{ width: 64, height: 24, marginBottom: 6 }} />
               ) : (
-                <div className="stat-value">{s.value}</div>
+                <div className="stat-value" style={{ fontSize: '1.6rem', lineHeight: 1.2 }}>{s.value}</div>
               )}
-              <div className="stat-label">{s.label}</div>
+              <div className="stat-label" style={{ fontSize: '0.78rem', letterSpacing: '0.04em', textTransform: 'uppercase' }}>{s.label}</div>
             </div>
           </Motion.div>
         ))}
       </div>
 
-      {/* Bottom Row */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: 24 }}>
-
-        {/* Next Draw Card */}
         <Motion.div
           className="glass-card"
-          style={{ padding: 28, overflow: 'hidden', position: 'relative' }}
-          initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.35 }}
+          style={{
+            padding: 28,
+            overflow: 'hidden',
+            position: 'relative',
+            background: 'linear-gradient(180deg, rgba(79, 70, 229, 0.10), rgba(15, 23, 42, 0.02))',
+            border: '1px solid var(--border-color)',
+            boxShadow: 'var(--shadow-card, 0 12px 30px rgba(15, 23, 42, 0.08))'
+          }}
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.35 }}
         >
-          {/* Background glow */}
           <div style={{ position: 'absolute', top: -40, right: -40, width: 180, height: 180, background: 'var(--grad-brand)', borderRadius: '50%', opacity: 0.06, filter: 'blur(30px)' }} />
 
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 20, position: 'relative', zIndex: 1 }}>
-            <h3 style={{ fontSize: '1rem' }}>🏆 Upcoming Draw</h3>
+            <h3 style={{ fontSize: '1rem', margin: 0, color: 'var(--text-primary)' }}>🏆 Upcoming Draw</h3>
             <span className="badge badge-pending" style={{ display: 'flex', gap: 5, alignItems: 'center' }}>
               <Clock size={10} /> {loadingD ? '...' : draw?.month || 'Monthly'}
             </span>
@@ -97,7 +134,7 @@ export default function DashboardOverview() {
             )}
           </div>
 
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', position: 'relative', zIndex: 1 }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 12, position: 'relative', zIndex: 1 }}>
             <div>
               <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginBottom: 4 }}>Scores Needed</div>
               <div style={{ fontWeight: 700, color: analytics?.scoreCount >= 5 ? 'var(--success)' : 'var(--warning)' }}>
@@ -110,25 +147,31 @@ export default function DashboardOverview() {
           </div>
         </Motion.div>
 
-        {/* Charity Progress */}
         <Motion.div
           className="glass-card"
-          style={{ padding: 28 }}
-          initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.45 }}
+          style={{
+            padding: 28,
+            background: 'linear-gradient(180deg, rgba(16, 185, 129, 0.08), rgba(15, 23, 42, 0.02))',
+            border: '1px solid var(--border-color)',
+            boxShadow: 'var(--shadow-card, 0 12px 30px rgba(15, 23, 42, 0.08))'
+          }}
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.45 }}
         >
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
-            <h3 style={{ fontSize: '1rem' }}>♻️ Charity Impact</h3>
+            <h3 style={{ fontSize: '1rem', margin: 0, color: 'var(--text-primary)' }}>♻️ Charity Impact</h3>
             <button onClick={() => navigate('/dashboard/charity')} className="btn btn-ghost" style={{ fontSize: '0.8rem', padding: '4px 10px', minHeight: 'unset' }}>
               Change →
             </button>
           </div>
 
           <div style={{ display: 'flex', alignItems: 'center', gap: 14, marginBottom: 20 }}>
-            <div style={{ width: 48, height: 48, borderRadius: 12, background: 'var(--success-dim)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <div style={{ width: 52, height: 52, borderRadius: 14, background: 'var(--success-dim)', display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1px solid rgba(16, 185, 129, 0.15)' }}>
               <Heart size={22} color="var(--success)" />
             </div>
             <div>
-              <div style={{ fontWeight: 700, fontSize: '0.95rem' }}>{analytics?.charity?.name || 'No charity selected'}</div>
+              <div style={{ fontWeight: 700, fontSize: '0.95rem', color: 'var(--text-primary)' }}>{analytics?.charity?.name || 'No charity selected'}</div>
               <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>{analytics?.charity?.category || 'Select a cause'}</div>
             </div>
           </div>
@@ -140,17 +183,17 @@ export default function DashboardOverview() {
                 £{analytics?.charityTotal?.toFixed(2) || '0.00'}
               </span>
             </div>
-            <div className="progress-track">
+            <div className="progress-track" style={{ background: 'var(--bg-secondary)', height: 10, borderRadius: 999 }}>
               <Motion.div
                 className="progress-fill green"
                 initial={{ width: 0 }}
                 animate={{ width: `${Math.min(100, ((analytics?.charityTotal || 0) / 500) * 100)}%` }}
                 transition={{ duration: 1.2, ease: 'easeOut' }}
+                style={{ background: 'linear-gradient(90deg, #10b981, #34d399)', height: 10, borderRadius: 999 }}
               />
             </div>
           </div>
         </Motion.div>
-
       </div>
     </div>
   );
