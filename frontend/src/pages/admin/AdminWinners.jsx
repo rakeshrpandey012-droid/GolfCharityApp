@@ -1,49 +1,46 @@
 import { useEffect, useState } from 'react';
-import { Trophy, CheckCircle, Clock, X } from 'lucide-react';
-import { getWinners, updateWinnerStatus } from '../../api/api';
-import { TableRowSkeleton } from '../../components/Skeletons';
-import GlowButton from '../../components/GlowButton';
-import toast from 'react-hot-toast';
+import { Trophy } from 'lucide-react';
+import { getWinners, updateWinnerStatus } from '../../api/api'
+import { TableRowSkeleton } from '../../components/Skeletons'
+import toast from 'react-hot-toast'
 
 const statusConfig = {
   pending: { cls: 'badge-pending', label: 'Pending' },
   approved: { cls: 'badge-active', label: 'Approved' },
   rejected: { cls: 'badge-inactive', label: 'Rejected' },
   paid: { cls: 'badge-blue', label: 'Paid' },
-};
+}
 
-export default function AdminWinners() {
-  const [winners, setWinners] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [updating, setUpdating] = useState(null);
+export default function AdminWinners(){
+  const [winners, setWinners] = useState([])
+  const [loading, setLoading] = useState(true)
+  const [updating, setUpdating] = useState(null)
 
   const fetchWinners = () =>
     getWinners()
       .then(r => setWinners(r.data.winners || r.data || []))
       .catch(() => {})
-      .finally(() => setLoading(false));
+      .finally(() => setLoading(false))
 
-  useEffect(() => { fetchWinners(); }, []);
+  useEffect(()=>{ fetchWinners() },[])
 
   const handleStatus = async (id, status) => {
-    setUpdating(id + status);
-    try {
-      await updateWinnerStatus(id, { status });
-      toast.success(`Status updated to ${status}`);
-      fetchWinners();
-    } catch (err) {
-      toast.error(err.response?.data?.message || 'Update failed');
-    } finally { setUpdating(null); }
-  };
+    setUpdating(id + status)
+    try{
+      await updateWinnerStatus(id, { status })
+      toast.success(`Status updated to ${status}`)
+      fetchWinners()
+    }catch(err){ toast.error(err.response?.data?.message || 'Update failed') }
+    finally{ setUpdating(null) }
+  }
 
   return (
     <div>
-      <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} style={{ marginBottom: 32 }}>
+      <div style={{ marginBottom: 32 }}>
         <h1 style={{ fontFamily: "'Space Grotesk',sans-serif", fontSize: '1.8rem', fontWeight: 700, marginBottom: 6 }}>Winners</h1>
         <p style={{ color: 'var(--text-secondary)' }}>Verify winner submissions and manage payouts</p>
-      </motion.div>
+      </div>
 
-      {/* Summary */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', gap: 16, marginBottom: 24 }}>
         {[
           { label: 'Total Winners', value: winners.length, color: '#3b82f6' },
@@ -58,7 +55,7 @@ export default function AdminWinners() {
         ))}
       </div>
 
-      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="glass" style={{ padding: 0, overflow: 'hidden' }}>
+      <div className="glass" style={{ padding: 0, overflow: 'hidden' }}>
         <div style={{ overflowX: 'auto' }}>
           <table className="glass-table">
             <thead>
@@ -75,7 +72,7 @@ export default function AdminWinners() {
                     </td>
                   </tr>
                 ) : winners.map(w => {
-                  const s = statusConfig[w.status] || statusConfig.pending;
+                  const s = statusConfig[w.status] || statusConfig.pending
                   return (
                     <tr key={w._id}>
                       <td>
@@ -108,12 +105,12 @@ export default function AdminWinners() {
                         </div>
                       </td>
                     </tr>
-                  );
+                  )
                 })}
             </tbody>
           </table>
         </div>
-      </motion.div>
+      </div>
     </div>
-  );
+  )
 }

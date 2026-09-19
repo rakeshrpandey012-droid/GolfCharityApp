@@ -1,3 +1,4 @@
+/* eslint-disable react-refresh/only-export-components */
 import { createContext, useContext, useEffect, useState } from 'react';
 
 const ThemeContext = createContext();
@@ -28,7 +29,6 @@ const ThemeProvider = ({ children }) => {
   );
 };
 
-/* eslint-disable-next-line react-refresh/only-export-components */
 // Named export — all consumers use: import { useTheme } from '...'
 export const useTheme = () => useContext(ThemeContext);
 

@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { motion, AnimatePresence } from 'framer-motion';
+import { AnimatePresence } from 'framer-motion';
 import {
   CreditCard, Check, Crown, Zap, Shield, ChevronRight,
   AlertCircle, RefreshCw, XCircle, ArrowUpRight, Gift,
@@ -101,19 +101,6 @@ const MOCK_HISTORY = [
 ];
 
 /* ── Helpers ───────────────────────────────────────────────────────────────── */
-function PlanIcon({ Icon, gradient, size = 22 }) {
-  return (
-    <div style={{
-      width: 44, height: 44, borderRadius: 12,
-      background: gradient, display: 'flex', alignItems: 'center',
-      justifyContent: 'center', flexShrink: 0,
-      boxShadow: '0 4px 12px rgba(0,0,0,0.2)',
-    }}>
-      <Icon size={size} color="#fff" />
-    </div>
-  );
-}
-
 function StatusPill({ status }) {
   const map = {
     active:    { bg: 'var(--success-dim)', color: 'var(--success)', label: '● Active' },
@@ -207,10 +194,7 @@ export default function Subscription() {
   return (
     <div>
       {/* ── Page Header ───────────────────────────────────────────────── */}
-      <motion.div
-        initial={{ opacity: 0, y: -16 }} animate={{ opacity: 1, y: 0 }}
-        style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: 16, marginBottom: 32 }}
-      >
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: 16, marginBottom: 32 }}>
         <div>
           <h2 style={{ marginBottom: 4 }}>Subscription</h2>
           <p>Manage your plan, billing, and payment history.</p>
@@ -220,12 +204,10 @@ export default function Subscription() {
             Upgrade Plan <ChevronRight size={16} />
           </button>
         )}
-      </motion.div>
+      </div>
 
       {/* ── Active Plan Card ───────────────────────────────────────────── */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.05 }}
-        className="glass-card"
+      <div className="glass-card"
         style={{
           padding: 28, marginBottom: 32, overflow: 'hidden', position: 'relative',
           border: isActive ? '1px solid var(--border-brand)' : '1px solid var(--border)',
@@ -284,20 +266,20 @@ export default function Subscription() {
               { label: 'Draws Entered', value: sub?.drawsEntered ?? '12', icon: TrendingUp },
               { label: 'Charity Donated', value: sub?.charityTotal ? `£${Number(sub.charityTotal).toFixed(2)}` : '£84.00', icon: CheckCircle2 },
               { label: 'Next Billing', value: sub?.renewsAt ? new Date(sub.renewsAt).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' }) : '1 Oct 2026', icon: Clock },
-            ].map(({ label, value, icon: Icon }) => (
-              <div key={label} style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+            ].map((item) => (
+              <div key={item.label} style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
                 <div style={{ width: 32, height: 32, borderRadius: 8, background: 'var(--brand-dim)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                  <Icon size={15} color="var(--brand-vivid)" />
+                  <item.icon size={15} color="var(--brand-vivid)" />
                 </div>
                 <div>
-                  <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.08em' }}>{label}</div>
-                  <div style={{ fontWeight: 700, fontSize: '0.9rem', color: 'var(--text-primary)' }}>{value}</div>
+                  <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.08em' }}>{item.label}</div>
+                  <div style={{ fontWeight: 700, fontSize: '0.9rem', color: 'var(--text-primary)' }}>{item.value}</div>
                 </div>
               </div>
             ))}
           </div>
         )}
-      </motion.div>
+      </div>
 
       {/* ── Tab Nav ───────────────────────────────────────────────────── */}
       <div style={{ display: 'flex', gap: 4, background: 'var(--bg-subtle)', padding: 4, borderRadius: 'var(--r-md)', marginBottom: 28, width: 'fit-content' }}>
@@ -326,18 +308,13 @@ export default function Subscription() {
 
         {/* ── PLAN CARDS TAB ─────────────────────────────────────────── */}
         {activeTab === 'plan' && (
-          <motion.div
-            key="plan"
-            initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -8 }}
-            style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: 20 }}
-          >
-            {PLANS.map((plan, i) => {
+          <div key="plan" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: 20 }}>
+            {PLANS.map((plan) => {
               const isCurrent = plan.id === activePlanId;
               const Icon = plan.icon;
               return (
-                <motion.div
+                <div
                   key={plan.id}
-                  initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.07 }}
                   className="glass-card hoverable"
                   style={{
                     padding: '24px 20px',
@@ -425,18 +402,15 @@ export default function Subscription() {
                   >
                     {isCurrent ? '✓ Current Plan' : plan.cta}
                   </button>
-                </motion.div>
+                </div>
               );
             })}
-          </motion.div>
+          </div>
         )}
 
         {/* ── BILLING HISTORY TAB ────────────────────────────────────── */}
         {activeTab === 'history' && (
-          <motion.div
-            key="history"
-            initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -8 }}
-          >
+          <div key="history">
             <div className="glass-card" style={{ overflow: 'hidden' }}>
               <div style={{ padding: '20px 24px', borderBottom: '1px solid var(--border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                 <h3 style={{ fontSize: '1rem' }}>Payment History</h3>
@@ -459,17 +433,14 @@ export default function Subscription() {
                     </tr>
                   </thead>
                   <tbody>
-                    {MOCK_HISTORY.map((inv, i) => (
-                      <motion.tr
-                        key={inv.id}
-                        initial={{ opacity: 0, x: -16 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: i * 0.05 }}
-                      >
+                    {MOCK_HISTORY.map((inv) => (
+                      <tr key={inv.id}>
                         <td style={{ fontWeight: 600, fontFamily: 'monospace', fontSize: '0.8rem' }}>{inv.id}</td>
                         <td style={{ color: 'var(--text-secondary)' }}>{inv.date}</td>
                         <td>{inv.plan}</td>
                         <td style={{ fontWeight: 700 }}>{inv.amount}</td>
                         <td><StatusPill status={inv.status} /></td>
-                      </motion.tr>
+                      </tr>
                     ))}
                   </tbody>
                 </table>
@@ -483,15 +454,12 @@ export default function Subscription() {
                 Invoices are automatically emailed to <strong style={{ color: 'var(--text-primary)' }}>{user?.email || 'your account email'}</strong> after each payment.
               </p>
             </div>
-          </motion.div>
+          </div>
         )}
 
         {/* ── COMPARE PLANS TAB ─────────────────────────────────────── */}
         {activeTab === 'compare' && (
-          <motion.div
-            key="compare"
-            initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -8 }}
-          >
+          <div key="compare">
             <div className="glass-card" style={{ overflow: 'auto' }}>
               <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: 600 }}>
                 <thead>
@@ -550,20 +518,20 @@ export default function Subscription() {
                 </tbody>
               </table>
             </div>
-          </motion.div>
+          </div>
         )}
       </AnimatePresence>
 
       {/* ── Cancel Confirmation Modal ──────────────────────────────────── */}
       <AnimatePresence>
         {showCancel && (
-          <motion.div
+          <div
             key="cancel-modal"
             initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
             style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(8px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 200, padding: 24 }}
             onClick={() => setShowCancel(false)}
           >
-            <motion.div
+            <div
               initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.9, opacity: 0 }}
               className="glass-card"
               style={{ maxWidth: 440, width: '100%', padding: 32 }}
@@ -593,8 +561,8 @@ export default function Subscription() {
                   {cancelling ? <span className="spinner" style={{ borderColor: 'rgba(255,255,255,0.3)', borderTopColor: '#fff' }} /> : 'Yes, Cancel'}
                 </button>
               </div>
-            </motion.div>
-          </motion.div>
+            </div>
+          </div>
         )}
       </AnimatePresence>
     </div>

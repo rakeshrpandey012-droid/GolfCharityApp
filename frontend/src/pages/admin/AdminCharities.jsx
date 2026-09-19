@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { motion as Motion } from 'framer-motion';
-import { Heart, Plus, Edit2, Trash2, X, Check } from 'lucide-react';
+import { Plus, Edit2, Trash2 } from 'lucide-react';
 import { getCharities, createCharity, updateCharity, deleteCharity } from '../../api/api';
 import GlowButton from '../../components/GlowButton';
 import Modal from '../../components/Modal';
@@ -58,13 +58,13 @@ export default function AdminCharities() {
 
   return (
     <div>
-      <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} style={{ marginBottom: 32, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+      <Motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} style={{ marginBottom: 32, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <div>
           <h1 style={{ fontFamily: "'Space Grotesk',sans-serif", fontSize: '1.8rem', fontWeight: 700, marginBottom: 6 }}>Charities</h1>
           <p style={{ color: 'var(--text-secondary)' }}>Manage charity listings and spotlight features</p>
         </div>
         <GlowButton onClick={openAdd}><Plus size={16} /> Add Charity</GlowButton>
-      </motion.div>
+      </Motion.div>
 
       {loading ? (
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: 20 }}>
@@ -73,7 +73,7 @@ export default function AdminCharities() {
       ) : (
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: 20 }}>
           {charities.map((c, i) => (
-            <motion.div
+            <Motion.div
               key={c._id}
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
@@ -103,7 +103,7 @@ export default function AdminCharities() {
                   <Trash2 size={13} /> Delete
                 </button>
               </div>
-            </motion.div>
+            </Motion.div>
           ))}
         </div>
       )}

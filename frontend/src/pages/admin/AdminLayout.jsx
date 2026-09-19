@@ -18,7 +18,6 @@ export default function AdminLayout() {
   return (
     <div className="page-bg dashboard-root">
       <Sidebar />
-      {/* Spacer for fixed mobile top bar */}
       <div className="mobile-topbar-spacer" />
       <main className="dashboard-main dashboard-content">
         <Outlet />

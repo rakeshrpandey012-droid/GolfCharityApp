@@ -1,7 +1,6 @@
 import { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, Navigate, useNavigate } from 'react-router-dom';
 import { Eye, EyeOff, Mail, Lock, ShieldCheck, Trophy, Heart, ChevronRight } from 'lucide-react';
-import { motion } from 'framer-motion';
 import toast from 'react-hot-toast';
 import { login } from '../api/api';
 import { useAuth } from '../context/AuthContext';
@@ -26,11 +25,21 @@ export default function Login() {
   const [showPass, setShowPass] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
-  const { loginUser } = useAuth();
+  const { user, loginUser } = useAuth();
   const navigate = useNavigate();
+
+  if (user) {
+    const destination = user.role === 'admin' ? '/admin' : '/dashboard';
+    return <Navigate to={destination} replace />;
+  }
 
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
+    setError('');
+  };
+
+  const useAdminDemo = () => {
+    setForm({ email: 'admin@golfplatform.com', password: 'Admin@123' });
     setError('');
   };
 
@@ -127,14 +136,14 @@ export default function Login() {
               { icon: Trophy, title: 'Win the Jackpot', desc: 'Match 5 numbers to claim the top prize — rolls over each month if unclaimed.' },
               { icon: Heart, title: 'Fund Charities', desc: 'Minimum 10% of your subscription goes directly to your chosen charity.' },
               { icon: ShieldCheck, title: 'Provably Fair', desc: 'All draws are admin-verified and fully transparent before payouts process.' },
-            ].map(({ icon: IconComponent, title, desc }) => (
-              <div key={title} style={{ display: 'flex', gap: 16, alignItems: 'flex-start' }}>
+            ].map((item) => (
+              <div key={item.title} style={{ display: 'flex', gap: 16, alignItems: 'flex-start' }}>
                 <div style={{ background: 'rgba(255,255,255,0.15)', padding: 10, borderRadius: 12, flexShrink: 0 }}>
-                  <IconComponent size={22} color="#fff" />
+                  <item.icon size={22} color="#fff" />
                 </div>
                 <div>
-                  <div style={{ color: '#fff', fontWeight: 700, marginBottom: 4 }}>{title}</div>
-                  <div style={{ color: 'rgba(255,255,255,0.75)', fontSize: '0.85rem', lineHeight: 1.6 }}>{desc}</div>
+                  <div style={{ color: '#fff', fontWeight: 700, marginBottom: 4 }}>{item.title}</div>
+                  <div style={{ color: 'rgba(255,255,255,0.75)', fontSize: '0.85rem', lineHeight: 1.6 }}>{item.desc}</div>
                 </div>
               </div>
             ))}
@@ -154,18 +163,27 @@ export default function Login() {
       }}>
         <ThemeTogglePill />
 
-        <motion.div
-          initial={{ opacity: 0, y: 24 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
-          style={{ width: '100%', maxWidth: 420 }}
-        >
+        <div style={{ width: '100%', maxWidth: 420 }}>
           <div style={{ marginBottom: 36 }}>
             <h2 style={{ marginBottom: 8, fontWeight: 700 }}>Welcome back</h2>
             <p style={{ color: 'var(--text-secondary)', fontSize: '14px' }}>Sign in to your GolfWin account</p>
           </div>
 
           <div className="glass-card" style={{ padding: '32px 28px' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 12, marginBottom: 18 }}>
+              <div style={{ fontSize: '0.78rem', letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--text-secondary)' }}>
+                Admin Access
+              </div>
+              <button
+                type="button"
+                onClick={useAdminDemo}
+                className="btn btn-ghost"
+                style={{ padding: '8px 12px', fontSize: '0.75rem', borderRadius: '999px' }}
+              >
+                Use Demo Admin
+              </button>
+            </div>
+
             <form onSubmit={handleSubmit}>
               {/* Error Alert */}
               {error && (
@@ -253,17 +271,18 @@ export default function Login() {
           {/* Demo credentials */}
           <div style={{ 
             marginTop: 20, 
-            background: 'var(--brand-dim)', 
+            background: 'linear-gradient(135deg, rgba(139, 92, 246, 0.14), rgba(6, 182, 212, 0.12))',
             border: '1px solid var(--border-brand)', 
             borderRadius: 'var(--r-md)', 
             padding: '12px 16px', 
             fontSize: '0.8rem', 
             textAlign: 'center', 
-            color: 'var(--text-secondary)' 
+            color: 'var(--text-secondary)',
+            boxShadow: '0 10px 30px rgba(93, 66, 196, 0.12)'
           }}>
             <strong style={{ color: 'var(--brand-vivid)' }}>Demo Admin:</strong> admin@golfplatform.com / Admin@123
           </div>
-        </motion.div>
+        </div>
       </div>
 
       <style>{`

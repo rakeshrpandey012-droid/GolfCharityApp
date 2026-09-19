@@ -1,8 +1,7 @@
 import { useEffect, useState } from 'react';
 import { motion as Motion } from 'framer-motion';
-import { Users, Trophy, Heart, BarChart2, TrendingUp, Dice5, ChevronRight } from 'lucide-react';
+import { Users, Trophy, Heart, TrendingUp, Dice5 } from 'lucide-react';
 import { getAnalytics, getLatestDraw } from '../../api/api';
-import { StatCardSkeleton } from '../../components/Skeletons';
 import GlowButton from '../../components/GlowButton';
 import { useNavigate } from 'react-router-dom';
 
@@ -43,7 +42,6 @@ export default function AdminOverview() {
         </GlowButton>
       </Motion.div>
 
-      {/* Primary Stats Grid */}
       <Motion.div variants={stagger} initial="initial" animate="animate" className="bento-grid" style={{ marginBottom: 24 }}>
         {loading
           ? Array.from({ length: 4 }).map((_, i) => <div key={i} className="bento-col-3" style={{ height: 160, background: 'rgba(255,255,255,0.02)', borderRadius: 24, animation: 'pulse 2s infinite' }} />)
@@ -73,12 +71,9 @@ export default function AdminOverview() {
         }
       </Motion.div>
 
-      {/* Complex Bento Row */}
       <div className="bento-grid">
-         {/* Live Engine Status */}
          <Motion.div variants={fadeUp} initial="initial" animate="animate" className="bento-card bento-col-8" style={{ padding: 32, display: 'flex', flexDirection: 'column', position: 'relative', overflow: 'hidden' }}>
             <div style={{ position: 'absolute', left: -50, bottom: -100, width: 300, height: 300, background: 'radial-gradient(circle, rgba(59,130,246,0.1) 0%, transparent 60%)', border: '1px solid rgba(59,130,246,0.1)', borderRadius: '50%' }} />
-            
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 32, position: 'relative', zIndex: 10 }}>
                <div>
                  <h3 style={{ fontFamily: "'Inter', sans-serif", fontWeight: 600, fontSize: '1.25rem', color: 'white', marginBottom: 4 }}>Live Engine Interface</h3>
@@ -136,42 +131,28 @@ export default function AdminOverview() {
             )}
          </Motion.div>
 
-         {/* Admin Action Menu */}
          <Motion.div variants={fadeUp} initial="initial" animate="animate" className="bento-card bento-col-4" style={{ padding: 32, display: 'flex', flexDirection: 'column' }}>
             <h3 style={{ fontFamily: "'Inter', sans-serif", fontWeight: 600, fontSize: '1.25rem', color: 'white', marginBottom: 24 }}>Control Protocols</h3>
-            
             <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
                {[
                  { label: 'Manage Accounts', path: '/admin/users', icon: Users, color: '#3b82f6', bg: 'rgba(59,130,246,0.1)' },
                  { label: 'Verify Charities', path: '/admin/charities', icon: Heart, color: '#10b981', bg: 'rgba(16,185,129,0.1)' },
                  { label: 'Process Payouts', path: '/admin/winners', icon: Trophy, color: '#f59e0b', bg: 'rgba(245,158,11,0.1)' },
-                 { label: 'System Logs', path: '/admin/analytics', icon: BarChart2, color: '#8b5cf6', bg: 'rgba(139,92,246,0.1)' },
                ].map((item) => (
-                 <Motion.button
-                   key={item.label}
-                   whileHover={{ scale: 1.02, x: 4 }}
-                   whileTap={{ scale: 0.98 }}
-                   onClick={() => navigate(item.path)}
-                   style={{
-                     display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-                     padding: '16px 20px', background: 'rgba(255,255,255,0.02)',
-                     border: '1px solid rgba(255,255,255,0.05)', borderRadius: 12,
-                     color: 'white', cursor: 'pointer', textAlign: 'left',
-                     transition: 'all 0.2s ease', fontFamily: "'Inter', sans-serif"
-                   }}
-                 >
-                   <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
-                      <div style={{ width: 36, height: 36, borderRadius: 8, background: item.bg, color: item.color, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                         <item.icon size={16} />
-                      </div>
-                      <span style={{ fontWeight: 500, fontSize: '0.95rem' }}>{item.label}</span>
+                 <div key={item.label} style={{ display: 'flex', alignItems: 'center', gap: 12, padding: 12, borderRadius: 12, background: item.bg }}>
+                   <div style={{ width: 40, height: 40, borderRadius: 10, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(255,255,255,0.03)' }}>
+                     <item.icon size={18} color={item.color} />
                    </div>
-                   <ChevronRight size={16} style={{ color: 'var(--text-muted)' }} />
-                 </Motion.button>
+                   <div style={{ flex: 1 }}>
+                     <div style={{ fontWeight: 700 }}>{item.label}</div>
+                     <div style={{ fontSize: '0.82rem', color: 'var(--text-muted)' }}>{item.path}</div>
+                   </div>
+                   <button onClick={() => navigate(item.path)} style={{ padding: '8px 12px', borderRadius: 8, background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.04)' }}>Open</button>
+                 </div>
                ))}
             </div>
          </Motion.div>
       </div>
     </div>
-  );
+  )
 }

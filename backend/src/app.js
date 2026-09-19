@@ -7,13 +7,22 @@ const path = require("path");
 
 const app = express();
 
-// Making changes for Vercel
 const connectDB = require("./config/db");
 const env = require("./config/env");
 
+let dbReady = false;
+
+async function ensureDbConnection() {
+  if (!env.mongoUri) return;
+  if (dbReady) return;
+
+  await connectDB(env.mongoUri);
+  dbReady = true;
+}
+
 app.use(async (req, res, next) => {
   try {
-    await connectDB(env.mongoUri);
+    await ensureDbConnection();
     next();
   } catch (err) {
     console.error("DB connection failed:", err);
@@ -35,10 +44,11 @@ const { notFound, errorHandler } = require("./middlewares/errorMiddleware");
 app.use(helmet());
 
 const allowedOrigins = [
-  process.env.FRONTEND_URL,
-  process.env.FRONTEND_DEPLOY_URL,
-  "http://localhost:5173",
+  env.frontendUrl,
+  env.frontendDeployUrl,
+  ...env.corsOrigins,
   "http://localhost:3000",
+  "http://127.0.0.1:3000",
 ].filter(Boolean);
 
 app.use(
@@ -52,6 +62,8 @@ app.use(
       callback(new Error("Not allowed by CORS"));
     },
     credentials: true,
+    methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization", "x-requested-with"],
   })
 );
 

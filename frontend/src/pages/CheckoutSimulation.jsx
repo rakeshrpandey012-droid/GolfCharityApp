@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { CreditCard, ShieldCheck, Lock, ChevronRight } from 'lucide-react';
-import { motion } from 'framer-motion';
 import toast from 'react-hot-toast';
 import { createSubscription } from '../api/api';
 import { useAuth } from '../context/AuthContext';
@@ -56,7 +55,7 @@ export default function CheckoutSimulation() {
   return (
     <div className="page-bg" style={{ minHeight: '100vh', paddingTop: 40, paddingBottom: 60 }}>
       <div className="container" style={{ maxWidth: 960 }}>
-        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
+        <div>
           <div style={{ marginBottom: 36 }}>
             <h2 style={{ marginBottom: 6 }}>Checkout</h2>
             <p>Complete your subscription to start entering monthly draws.</p>
@@ -163,7 +162,7 @@ export default function CheckoutSimulation() {
             </div>
 
           </div>
-        </motion.div>
+        </div>
       </div>
     </div>
   );

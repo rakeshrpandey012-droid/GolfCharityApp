@@ -93,11 +93,11 @@ export default function Landing() {
       {/* ── BENTO BOX SHOWCASE ── */}
       <section className="landing-section" style={{ padding: '0 24px 120px', position: 'relative', zIndex: 20 }}>
         <div style={{ maxWidth: 1100, margin: '0 auto' }}>
-          <motion.div variants={stagger} initial="initial" whileInView="animate" viewport={{ once: true, margin: "-100px" }} className="bento-grid">
+          <Motion.div variants={stagger} initial="initial" whileInView="animate" viewport={{ once: true, margin: "-100px" }} className="bento-grid">
 
             {/* Top Left: Score Tracking Component */}
             <TiltCard className="bento-col-4">
-              <motion.div variants={fadeUp} className="bento-card" style={{ padding: 32, display: 'flex', flexDirection: 'column', height: '100%' }}>
+              <Motion.div variants={fadeUp} className="bento-card" style={{ padding: 32, display: 'flex', flexDirection: 'column', height: '100%' }}>
                 <div style={{ marginBottom: 'auto' }}>
                   <Target size={24} style={{ color: '#06b6d4', marginBottom: 16 }} />
                   <h3 style={{ fontSize: '1.25rem', fontWeight: 500, color: 'white', marginBottom: 8 }}>Score Tracking</h3>
@@ -114,12 +114,12 @@ export default function Landing() {
                     </div>
                   ))}
                 </div>
-              </motion.div>
+              </Motion.div>
             </TiltCard>
 
             {/* Top Center: The Draw Engine (Hero Bento) */}
             <TiltCard className="bento-col-8">
-              <motion.div variants={fadeUp} className="bento-card" style={{ padding: 0, display: 'flex', flexDirection: 'column', position: 'relative', height: '100%' }}>
+              <Motion.div variants={fadeUp} className="bento-card" style={{ padding: 0, display: 'flex', flexDirection: 'column', position: 'relative', height: '100%' }}>
                 <div style={{ padding: '32px 32px 0', zIndex: 10, position: 'relative' }}>
                   <Trophy size={24} style={{ color: '#3b82f6', marginBottom: 16 }} />
                   <h3 style={{ fontSize: '1.25rem', fontWeight: 500, color: 'white', marginBottom: 8 }}>Monthly Random Draws</h3>
@@ -139,12 +139,12 @@ export default function Landing() {
                     ))}
                   </div>
                 </div>
-              </motion.div>
+              </Motion.div>
             </TiltCard>
 
             {/* Bottom Row - 3 cols */}
             <TiltCard className="bento-col-4">
-              <motion.div variants={fadeUp} className="bento-card" style={{ padding: 32, height: '100%' }}>
+              <Motion.div variants={fadeUp} className="bento-card" style={{ padding: 32, height: '100%' }}>
                 <Heart size={24} style={{ color: '#10b981', marginBottom: 16 }} />
                 <h3 style={{ fontSize: '1.1rem', fontWeight: 500, color: 'white', marginBottom: 8 }}>Charity Impact</h3>
                 <p style={{ color: 'var(--text-secondary)', fontSize: '0.9rem', marginBottom: 24 }}>A minimum 10% of every subscription automatically funds verified charitable causes.</p>
@@ -153,19 +153,19 @@ export default function Landing() {
                     <span key={c} style={{ background: 'rgba(16,185,129,0.1)', color: '#10b981', padding: '4px 10px', borderRadius: 99, fontSize: '0.75rem', border: '1px solid rgba(16,185,129,0.2)' }}>{c}</span>
                   ))}
                 </div>
-              </motion.div>
+              </Motion.div>
             </TiltCard>
 
             <TiltCard className="bento-col-4">
-              <motion.div variants={fadeUp} className="bento-card" style={{ padding: 32, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', textAlign: 'center', height: '100%' }}>
+              <Motion.div variants={fadeUp} className="bento-card" style={{ padding: 32, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', textAlign: 'center', height: '100%' }}>
                 <Shield size={32} style={{ color: '#8b5cf6', marginBottom: 16, opacity: 0.8 }} />
                 <h3 style={{ fontSize: '1.1rem', fontWeight: 500, color: 'white', marginBottom: 8 }}>Secure &amp; Verified</h3>
                 <p style={{ color: 'var(--text-secondary)', fontSize: '0.9rem' }}>All prize distributions are verified by admin review before payouts process.</p>
-              </motion.div>
+              </Motion.div>
             </TiltCard>
 
             <TiltCard className="bento-col-4">
-              <motion.div variants={fadeUp} className="bento-card" style={{ padding: 32, height: '100%' }}>
+              <Motion.div variants={fadeUp} className="bento-card" style={{ padding: 32, height: '100%' }}>
                 <FileText size={24} style={{ color: '#f59e0b', marginBottom: 16 }} />
                 <h3 style={{ fontSize: '1.1rem', fontWeight: 500, color: 'white', marginBottom: 8 }}>Transparent Ledgers</h3>
                 <p style={{ color: 'var(--text-secondary)', fontSize: '0.9rem', marginBottom: 24 }}>Real-time analytics on prize pools, subscriber counts, and charitable donations.</p>
@@ -173,47 +173,47 @@ export default function Landing() {
                   <span style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>Current Pool</span>
                   <span style={{ fontSize: '0.9rem', color: '#f59e0b', fontWeight: 600 }}>£12,450.00</span>
                 </div>
-              </motion.div>
+              </Motion.div>
             </TiltCard>
 
-          </motion.div>
+          </Motion.div>
         </div>
       </section>
 
       {/* ── HOW IT WORKS ── */}
       <section id="how-it-works" className="landing-section" style={{ padding: '100px 24px', maxWidth: 1100, margin: '0 auto', position: 'relative', zIndex: 20 }}>
-        <motion.div variants={fadeUp} initial="initial" whileInView="animate" viewport={{ once: true }} style={{ textAlign: 'center', marginBottom: 64 }}>
+        <Motion.div variants={fadeUp} initial="initial" whileInView="animate" viewport={{ once: true }} style={{ textAlign: 'center', marginBottom: 64 }}>
           <h2 style={{ fontFamily: "'Inter', sans-serif", fontSize: 'clamp(2rem, 4vw, 2.5rem)', fontWeight: 500, color: 'white' }}>How It Works</h2>
           <p style={{ color: 'var(--text-secondary)', marginTop: 12, maxWidth: 500, margin: '12px auto 0', lineHeight: 1.6 }}>Three simple steps to enter the draws and start making a real impact.</p>
-        </motion.div>
+        </Motion.div>
 
-        <motion.div variants={stagger} initial="initial" whileInView="animate" viewport={{ once: true }} className="bento-grid">
+        <Motion.div variants={stagger} initial="initial" whileInView="animate" viewport={{ once: true }} className="bento-grid">
           {[
             { step: '01', icon: Shield, title: 'Subscribe & Connect', desc: 'Join the platform and select your preferred charity. A minimum 10% of your subscription goes directly to them.' },
             { step: '02', icon: Target, title: 'Log 5 Scores', desc: 'Enter 5 Stableford scores (1-45) via the dashboard. We automatically use your most recent 5 scores for every draw.' },
             { step: '03', icon: Trophy, title: 'Win Monthly', desc: 'Match your scores against our provably fair monthly draw. Match 3, 4, or 5 numbers to claim your share of the pool.' }
           ].map((item, i) => (
-            <motion.div key={i} variants={fadeUp} className="bento-card bento-col-4" style={{ padding: 40, textAlign: 'center', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+            <Motion.div key={i} variants={fadeUp} className="bento-card bento-col-4" style={{ padding: 40, textAlign: 'center', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
               <div style={{ color: 'rgba(255,255,255,0.1)', fontSize: '4rem', fontWeight: 800, lineHeight: 1, position: 'absolute', top: 20, right: 20, fontFamily: "'Inter', sans-serif" }}>{item.step}</div>
               <div style={{ width: 64, height: 64, borderRadius: '50%', background: 'rgba(59,130,246,0.1)', border: '1px solid rgba(59,130,246,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 24, color: '#60a5fa' }}>
                 <item.icon size={28} />
               </div>
               <h3 style={{ fontSize: '1.25rem', fontWeight: 500, color: 'white', marginBottom: 12 }}>{item.title}</h3>
               <p style={{ color: 'var(--text-secondary)', fontSize: '0.95rem', lineHeight: 1.6 }}>{item.desc}</p>
-            </motion.div>
+            </Motion.div>
           ))}
-        </motion.div>
+        </Motion.div>
       </section>
 
       {/* ── PRIZES ── */}
       <section id="prizes" className="landing-section" style={{ padding: '100px 24px', background: 'rgba(255,255,255,0.01)', borderTop: '1px solid rgba(255,255,255,0.05)', borderBottom: '1px solid rgba(255,255,255,0.05)', position: 'relative', zIndex: 20 }}>
         <div style={{ maxWidth: 1100, margin: '0 auto' }}>
-          <motion.div variants={fadeUp} initial="initial" whileInView="animate" viewport={{ once: true }} style={{ textAlign: 'center', marginBottom: 64 }}>
+          <Motion.div variants={fadeUp} initial="initial" whileInView="animate" viewport={{ once: true }} style={{ textAlign: 'center', marginBottom: 64 }}>
             <h2 style={{ fontFamily: "'Inter', sans-serif", fontSize: 'clamp(2rem, 4vw, 2.5rem)', fontWeight: 500, color: 'white' }}>Prize Pool Tiers</h2>
             <p style={{ color: 'var(--text-secondary)', marginTop: 12, maxWidth: 500, margin: '12px auto 0', lineHeight: 1.6 }}>The total prize pool is divided fairly based on how many numbers you match.</p>
-          </motion.div>
+          </Motion.div>
 
-          <motion.div variants={stagger} initial="initial" whileInView="animate" viewport={{ once: true }} className="bento-grid">
+          <Motion.div variants={stagger} initial="initial" whileInView="animate" viewport={{ once: true }} className="bento-grid">
             {[
               { match: '5-Number Match', share: '40%', color: '#f59e0b', label: 'Jackpot (Rollover if no winner)', glow: 'rgba(245,158,11,0.15)' },
               { match: '4-Number Match', share: '35%', color: '#3b82f6', label: 'Second Tier', glow: 'rgba(59,130,246,0.1)' },

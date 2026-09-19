@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { motion, AnimatePresence } from 'framer-motion';
+import { AnimatePresence } from 'framer-motion';
 import { Trophy, Heart, ShieldCheck, ChevronRight, Menu, X, Star, Zap, Users } from 'lucide-react';
 import { useTheme } from '../context/ThemeContext';
 
@@ -97,13 +97,13 @@ export default function Landing() {
       <AnimatePresence>
         {mobileMenuOpen && (
           <>
-            <motion.div
+            <div
               key="mobile-overlay"
               initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
               onClick={() => setMobileMenuOpen(false)}
               style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', backdropFilter: 'blur(4px)', zIndex: 99 }}
             />
-            <motion.div
+            <div
               key="mobile-drawer"
               initial={{ x: '100%' }} animate={{ x: 0 }} exit={{ x: '100%' }}
               transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
@@ -153,7 +153,7 @@ export default function Landing() {
                   <ThemeTogglePill />
                 </div>
               </div>
-            </motion.div>
+            </div>
           </>
         )}
       </AnimatePresence>
@@ -161,7 +161,7 @@ export default function Landing() {
       {/* ── HERO ───────────────────────────────────────────── */}
       <section style={{ paddingTop: '140px', paddingBottom: '100px', textAlign: 'center', position: 'relative', zIndex: 1 }}>
         <div className="container">
-          <motion.div initial={{ opacity: 0, y: 40 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7 }}>
+          <div initial={{ opacity: 0, y: 40 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7 }}>
             <div className="hero-badge" style={{ marginBottom: 32 }}>
               🏆 Monthly Jackpot Draws · Charity-First Platform
             </div>
@@ -180,30 +180,24 @@ export default function Landing() {
                 How It Works
               </a>
             </div>
-          </motion.div>
+          </div>
 
           {/* Trust badges */}
-          <motion.div
-            initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.5 }}
-            style={{ display: 'flex', gap: 20, justifyContent: 'center', flexWrap: 'wrap', marginTop: 48 }}
-          >
+          <div style={{ display: 'flex', gap: 20, justifyContent: 'center', flexWrap: 'wrap', marginTop: 48 }}>
             {[
               { icon: ShieldCheck, label: 'Verified & Secure' },
               { icon: Star,        label: 'Rated 4.9/5' },
               { icon: Users,       label: '2,400+ Golfers' },
               { icon: Zap,         label: 'Instant Payouts' },
-            ].map(({ icon: Icon, label }) => (
-              <div key={label} style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: '0.8rem', color: 'var(--text-muted)', fontWeight: 600 }}>
-                <Icon size={14} color="var(--brand-vivid)" /> {label}
+            ].map((item) => (
+              <div key={item.label} style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: '0.8rem', color: 'var(--text-muted)', fontWeight: 600 }}>
+                <item.icon size={14} color="var(--brand-vivid)" /> {item.label}
               </div>
             ))}
-          </motion.div>
+          </div>
 
           {/* Hero stats strip */}
-          <motion.div
-            initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7, delay: 0.3 }}
-            style={{ display: 'flex', gap: 40, justifyContent: 'center', flexWrap: 'wrap', marginTop: 72, paddingTop: 40, borderTop: '1px solid var(--border)' }}
-          >
+          <div style={{ display: 'flex', gap: 40, justifyContent: 'center', flexWrap: 'wrap', marginTop: 72, paddingTop: 40, borderTop: '1px solid var(--border)' }}>
             {[
               { label: 'Active Golfers',     value: '2,400+' },
               { label: 'Monthly Prize Pool', value: '£14,480' },
@@ -215,7 +209,7 @@ export default function Landing() {
                 <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginTop: 4 }}>{label}</div>
               </div>
             ))}
-          </motion.div>
+          </div>
         </div>
       </section>
 
@@ -232,18 +226,17 @@ export default function Landing() {
               { icon: '⛳', step: '02', title: 'Log Your Scores', desc: 'Enter your five latest Stableford scores (1–45) through your dashboard. Your most recent five are always used.' },
               { icon: '🏆', step: '03', title: 'Match & Collect', desc: 'If your scores match the monthly drawn numbers, you win your share of the prize pool. 3, 4, or 5 matches pay out.' },
             ].map(({ icon, step, title, desc }) => (
-              <motion.div
+              <div
                 key={step}
                 className="glass-card"
                 style={{ padding: 32, position: 'relative', overflow: 'hidden' }}
-                initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}
               >
                 <div style={{ fontSize: '0.65rem', fontWeight: 800, letterSpacing: '0.15em', color: 'var(--brand-vivid)', marginBottom: 16, textTransform: 'uppercase' }}>Step {step}</div>
                 <div style={{ fontSize: '2.5rem', marginBottom: 16 }}>{icon}</div>
                 <h3 style={{ marginBottom: 12 }}>{title}</h3>
                 <p style={{ fontSize: '0.9rem', lineHeight: 1.7 }}>{desc}</p>
                 <div style={{ position: 'absolute', top: -20, right: -20, fontSize: '5rem', opacity: 0.04, fontWeight: 900 }}>{step}</div>
-              </motion.div>
+              </div>
             ))}
           </div>
         </div>
@@ -262,7 +255,7 @@ export default function Landing() {
               { pct: '35%', match: '4-Number Match', desc: 'Second Tier Prize', color: 'var(--brand-vivid)', glow: 'rgba(99,102,241,0.3)', border: 'rgba(99,102,241,0.3)' },
               { pct: '25%', match: '3-Number Match', desc: 'Third Tier Prize', color: 'var(--accent)', glow: 'rgba(6,182,212,0.3)', border: 'rgba(6,182,212,0.3)' },
             ].map(({ pct, match, desc, color, glow, border }) => (
-              <motion.div
+              <div
                 key={pct}
                 className="glass-card hoverable"
                 style={{ padding: 36, textAlign: 'center', border: `1px solid ${border}`, boxShadow: `0 8px 32px ${glow}` }}
@@ -271,7 +264,7 @@ export default function Landing() {
                 <div style={{ fontSize: '3rem', fontWeight: 900, color, marginBottom: 12, lineHeight: 1 }}>{pct}</div>
                 <div style={{ fontSize: '1rem', fontWeight: 700, marginBottom: 8, color: 'var(--text-primary)' }}>{match}</div>
                 <div style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>{desc}</div>
-              </motion.div>
+              </div>
             ))}
           </div>
         </div>
@@ -305,7 +298,7 @@ export default function Landing() {
                     <span style={{ fontWeight: 700, color: 'var(--success)' }}>{amount}</span>
                   </div>
                   <div className="progress-track">
-                    <motion.div
+                    <div
                       className="progress-fill green"
                       initial={{ width: 0 }} whileInView={{ width: `${pct}%` }}
                       viewport={{ once: true }} transition={{ duration: 1, ease: 'easeOut' }}
@@ -330,7 +323,7 @@ export default function Landing() {
               { name: 'Sarah M.', handle: '@smacmillan', text: 'Finally a platform that ties golf to something meaningful. My Cancer Research UK total is now £62.50 and counting!', stars: 5 },
               { name: 'Robert K.', handle: '@rob_k82', text: 'The dashboard is slick and everything just works. Managed to log all 5 scores within minutes of signing up.', stars: 5 },
             ].map(({ name, handle, text, stars }) => (
-              <motion.div
+              <div
                 key={name}
                 className="glass-card"
                 style={{ padding: 28 }}
@@ -351,7 +344,7 @@ export default function Landing() {
                     <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)' }}>{handle}</div>
                   </div>
                 </div>
-              </motion.div>
+              </div>
             ))}
           </div>
         </div>

@@ -1,50 +1,49 @@
-import { useEffect, useState } from 'react';
-// Removed framer-motion import to satisfy linter (not required for current UI)
-import { Users, Search, Edit2, Check, X } from 'lucide-react';
-import { getAdminUsers, updateAdminUser } from '../../api/api';
-import { TableRowSkeleton } from '../../components/Skeletons';
-import GlowButton from '../../components/GlowButton';
-import toast from 'react-hot-toast';
+import React, { useEffect, useState } from 'react'
+import { Users, Search, Edit2, Check, X } from 'lucide-react'
+import { getAdminUsers, updateAdminUser } from '../../api/api'
+import { TableRowSkeleton } from '../../components/Skeletons'
+import GlowButton from '../../components/GlowButton'
+import toast from 'react-hot-toast'
 
 export default function AdminUsers() {
-  const [users, setUsers] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [search, setSearch] = useState('');
-  const [editing, setEditing] = useState(null);
-  const [editForm, setEditForm] = useState({});
-  const [saving, setSaving] = useState(false);
+  const [users, setUsers] = useState([])
+  const [loading, setLoading] = useState(true)
+  const [search, setSearch] = useState('')
+  const [editing, setEditing] = useState(null)
+  const [editForm, setEditForm] = useState({})
+  const [saving, setSaving] = useState(false)
 
   const fetchUsers = (q = '') =>
     getAdminUsers(q)
       .then(r => setUsers(r.data.users || r.data || []))
       .catch(() => {})
-      .finally(() => setLoading(false));
+      .finally(() => setLoading(false))
 
-  useEffect(() => { fetchUsers(); }, []);
+  useEffect(() => { fetchUsers(); }, [])
 
   const handleSearch = (e) => {
-    setSearch(e.target.value);
-    fetchUsers(e.target.value);
-  };
+    setSearch(e.target.value)
+    fetchUsers(e.target.value)
+  }
 
   const startEdit = (user) => {
-    setEditing(user._id);
-    setEditForm({ name: user.name, subscriptionStatus: user.subscriptionStatus, role: user.role });
-  };
+    setEditing(user._id)
+    setEditForm({ name: user.name, subscriptionStatus: user.subscriptionStatus, role: user.role })
+  }
 
   const saveEdit = async (id) => {
-    setSaving(true);
+    setSaving(true)
     try {
-      await updateAdminUser(id, editForm);
-      toast.success('User updated');
-      setEditing(null);
-      fetchUsers(search);
+      await updateAdminUser(id, editForm)
+      toast.success('User updated')
+      setEditing(null)
+      fetchUsers(search)
     } catch (err) {
-      toast.error(err.response?.data?.message || 'Update failed');
+      toast.error(err.response?.data?.message || 'Update failed')
     } finally {
-      setSaving(false);
+      setSaving(false)
     }
-  };
+  }
 
   return (
     <div>
@@ -56,7 +55,6 @@ export default function AdminUsers() {
         <span className="badge badge-blue">{users.length} users</span>
       </div>
 
-      {/* Search */}
       <div style={{ position: 'relative', marginBottom: 24, maxWidth: 400 }}>
         <Search size={16} style={{ position: 'absolute', left: 14, top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
         <input type="text" value={search} onChange={handleSearch} placeholder="Search by name or email..." className="glass-input" style={{ paddingLeft: 40 }} />
@@ -149,5 +147,5 @@ export default function AdminUsers() {
         </div>
       </div>
     </div>
-  );
+  )
 }
