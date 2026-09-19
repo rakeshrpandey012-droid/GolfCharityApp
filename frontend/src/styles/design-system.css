@@ -650,3 +650,148 @@ a:hover { color: var(--brand-vivid); }
   h1 { font-size: 2rem; }
   h2 { font-size: 1.5rem; }
 }
+
+/* ── ENHANCED ANIMATIONS ─────────────────────────────────────────────────── */
+@keyframes float {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-8px); }
+}
+
+@keyframes glow-pulse {
+  0%, 100% { box-shadow: 0 0 20px rgba(99,102,241,0.2); }
+  50% { box-shadow: 0 0 40px rgba(99,102,241,0.45), 0 0 80px rgba(99,102,241,0.15); }
+}
+
+@keyframes gradient-shift {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+@keyframes shimmer {
+  0% { background-position: -200% center; }
+  100% { background-position: 200% center; }
+}
+
+@keyframes bounce-in {
+  0% { transform: scale(0.85); opacity: 0; }
+  60% { transform: scale(1.04); }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+/* Animated hero gradient text */
+.gradient-text-animated {
+  background: linear-gradient(270deg, #6366F1, #8B5CF6, #06B6D4, #10B981, #6366F1);
+  background-size: 300% 300%;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  animation: gradient-shift 5s ease infinite;
+}
+
+/* Floating card animation */
+.float-card { animation: float 4s ease-in-out infinite; }
+.float-card:nth-child(2) { animation-delay: 0.5s; }
+.float-card:nth-child(3) { animation-delay: 1s; }
+
+/* Glow card */
+.glow-card {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-brand);
+  border-radius: var(--r-xl);
+  animation: glow-pulse 3s ease-in-out infinite;
+}
+
+/* Shimmer button variant */
+.btn-shimmer {
+  background: linear-gradient(135deg, #6366F1 0%, #8B5CF6 25%, #06B6D4 50%, #8B5CF6 75%, #6366F1 100%);
+  background-size: 200% auto;
+  color: #fff;
+  animation: shimmer 3s linear infinite;
+}
+.btn-shimmer:hover { transform: translateY(-2px); box-shadow: 0 12px 36px rgba(99,102,241,0.5); }
+
+/* ── SUBSCRIPTION TIER STYLES ────────────────────────────────────────────── */
+.tier-card {
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r-xl);
+  padding: 28px 24px;
+  display: flex; flex-direction: column;
+  position: relative; overflow: hidden;
+  transition: border-color 0.25s, box-shadow 0.25s, transform 0.25s;
+  cursor: default;
+}
+.tier-card:hover {
+  border-color: var(--border-brand);
+  box-shadow: var(--shadow-brand);
+  transform: translateY(-4px);
+}
+.tier-card.featured {
+  border-color: var(--brand);
+  box-shadow: var(--shadow-brand);
+}
+.tier-card .tier-badge {
+  position: absolute; top: 16px; right: 16px;
+  background: var(--grad-gold); color: #fff;
+  padding: 3px 12px; border-radius: var(--r-full);
+  font-size: 0.65rem; font-weight: 800; letter-spacing: 0.06em; text-transform: uppercase;
+}
+.tier-feature {
+  display: flex; align-items: center; gap: 10px;
+  font-size: 0.875rem; color: var(--text-primary);
+  padding: 5px 0;
+}
+.tier-feature.disabled { opacity: 0.35; text-decoration: line-through; }
+
+/* ── IMPROVED GLASS CARD DEPTH ───────────────────────────────────────────── */
+.glass-card-deep {
+  background: var(--bg-elevated);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--r-xl);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  box-shadow: var(--shadow-lg), inset 0 1px 0 rgba(255,255,255,0.06);
+}
+
+/* ── HERO BADGE GLOW ─────────────────────────────────────────────────────── */
+.hero-badge {
+  display: inline-flex; align-items: center; gap: 8px;
+  background: var(--brand-dim);
+  border: 1px solid var(--border-brand);
+  border-radius: var(--r-full);
+  padding: 6px 18px;
+  font-size: 0.78rem; font-weight: 700;
+  color: var(--brand-vivid);
+  text-transform: uppercase; letter-spacing: 0.06em;
+  box-shadow: 0 0 24px rgba(99,102,241,0.15);
+}
+
+/* ── STAT CARD GLOW ON HOVER ────────────────────────────────────────────── */
+.stat-card-glow:hover {
+  border-color: var(--brand) !important;
+  box-shadow: 0 0 0 1px var(--brand), var(--shadow-glow) !important;
+}
+
+/* ── MOBILE NAV DRAWER ───────────────────────────────────────────────────── */
+.mobile-nav-drawer {
+  position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+  background: var(--bg-base);
+  z-index: 100;
+  display: flex; flex-direction: column;
+  padding: 24px;
+}
+.mobile-nav-drawer-links {
+  display: flex; flex-direction: column; gap: 8px; margin-top: 48px;
+}
+.mobile-nav-drawer-link {
+  display: block; padding: 14px 20px;
+  font-size: 1.1rem; font-weight: 600;
+  color: var(--text-primary); text-decoration: none;
+  border-radius: var(--r-md);
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  transition: background 0.2s, color 0.2s;
+}
+.mobile-nav-drawer-link:hover { background: var(--brand-dim); color: var(--brand-vivid); border-color: var(--border-brand); }
+

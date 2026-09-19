@@ -1,6 +1,5 @@
-import { useNavigate } from 'react-router-dom';
-import { Check, ChevronRight } from 'lucide-react';
-import { motion as MotionDiv } from 'framer-motion';
+import { useNavigate, Link } from 'react-router-dom';
+import { Check, ChevronRight, ArrowLeft } from 'lucide-react';
 import { useTheme } from '../context/ThemeContext';
 
 function ThemeTogglePill({ style }) {
@@ -53,6 +52,13 @@ export default function Pricing() {
   return (
     <div className="page-bg" style={{ minHeight: '100vh', paddingTop: 80, paddingBottom: 80 }}>
       <ThemeTogglePill style={{ position: 'fixed', top: 16, right: 16, zIndex: 100 }} />
+
+      {/* Back link */}
+      <div className="container" style={{ marginBottom: 0 }}>
+        <Link to="/" style={{ display: 'inline-flex', alignItems: 'center', gap: 6, color: 'var(--text-muted)', fontSize: '0.875rem', marginBottom: 32 }}>
+          <ArrowLeft size={16} /> Back to home
+        </Link>
+      </div>
 
       <div className="container">
         <motion.div

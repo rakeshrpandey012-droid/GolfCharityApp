@@ -1,22 +1,22 @@
 import { createContext, useContext, useEffect, useState } from 'react';
 
-// keep context internal to this file so the module only exports React components
 const ThemeContext = createContext();
 
 const ThemeProvider = ({ children }) => {
   const [theme, setTheme] = useState(() => {
-    const saved = localStorage.getItem('gw-theme');
-    if (saved) return saved;
+    try {
+      const saved = localStorage.getItem('gw-theme');
+      if (saved === 'light' || saved === 'dark') return saved;
+    } catch { /* ignore */ }
     return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
   });
 
   useEffect(() => {
     const root = document.documentElement;
-    // Remove both, then add the current one
     root.classList.remove('light', 'dark');
     root.classList.add(theme);
     root.setAttribute('data-theme', theme);
-    localStorage.setItem('gw-theme', theme);
+    try { localStorage.setItem('gw-theme', theme); } catch { /* ignore */ }
   }, [theme]);
 
   const toggleTheme = () => setTheme(t => (t === 'dark' ? 'light' : 'dark'));
@@ -28,10 +28,9 @@ const ThemeProvider = ({ children }) => {
   );
 };
 
-// helper hook (kept internal and attached to the provider so this file
-// only exports a React component — satisfying fast refresh requirements)
-const useTheme = () => useContext(ThemeContext);
-
-ThemeProvider.useTheme = useTheme;
+/* eslint-disable-next-line react-refresh/only-export-components */
+// Named export — all consumers use: import { useTheme } from '...'
+export const useTheme = () => useContext(ThemeContext);
 
 export default ThemeProvider;
+

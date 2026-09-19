@@ -1,61 +1,141 @@
 import axios from 'axios';
 
+// ===== CONFIGURATION =====
+// For local development, make sure backend is running at: http://localhost:5000
+// To start backend: npm start (in your backend folder)
+const API_BASE_URL = import.meta.env.VITE_API_URL 
+  || (import.meta.env.PROD
+    ? 'https://golf-charity-backend.vercel.app/api'
+    : 'http://localhost:5000/api');
+
+console.log('🌐 API Base URL:', API_BASE_URL);
+
 const API = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || '/api',
-  headers: { 'Content-Type': 'application/json' },
+  baseURL: API_BASE_URL,
+  headers: {
+    'Content-Type': 'application/json',
+  },
+  timeout: 10000,
 });
 
-API.interceptors.request.use((req) => {
-  const token = localStorage.getItem('token');
-  if (token) req.headers.Authorization = `Bearer ${token}`;
-  return req;
-});
-
-API.interceptors.response.use(
-  (res) => res,
-  (err) => {
-    if (err.response?.status === 401) {
-      localStorage.removeItem('token');
-      localStorage.removeItem('user');
-      window.location.href = '/login';
+// Request interceptor
+API.interceptors.request.use(
+  (req) => {
+    const token = localStorage.getItem('token');
+    if (token) {
+      req.headers.Authorization = `Bearer ${token}`;
     }
+    console.log('📤 API Request:', req.method.toUpperCase(), req.url);
+    return req;
+  },
+  (err) => {
+    console.error('❌ Request Error:', err);
     return Promise.reject(err);
   }
 );
 
-// Auth
-export const login = (data) => API.post('/auth/login', data);
-export const register = (data) => API.post('/auth/register', data);
+// Response interceptor
+API.interceptors.response.use(
+  (res) => {
+    console.log('📥 API Response:', res.status, res.config.url);
+    return res;
+  },
+  (err) => {
+    console.error('❌ Response Error:', {
+      status: err.response?.status,
+      message: err.message,
+      url: err.config?.url,
+      data: err.response?.data,
+    });
+
+    if (err.response?.status === 401) {
+      // Token expired or invalid
+      localStorage.removeItem('token');
+      localStorage.removeItem('user');
+      window.location.href = '/login';
+    }
+    
+    // Handle different error types
+    if (!err.response) {
+      if (err.code === 'ECONNABORTED') {
+        err.message = '⏱️ Request timeout. Backend server might be slow or offline.';
+      } else if (err.message === 'Network Error') {
+        err.message = `🚫 Backend server is not running at ${API_BASE_URL}\n\nMake sure your backend server is running:\n- Check backend is running on port 5000\n- Run: npm start (in backend folder)\n- Check VITE_API_URL in .env`;
+      } else {
+        err.message = `🌐 Network error: ${err.message}`;
+      }
+    }
+    
+    return Promise.reject(err);
+  }
+);
+
+// ==================== AUTH ====================
+export const login = (data) => {
+  console.log('🔐 Logging in:', data.email);
+  return API.post('/auth/login', {
+    email: data.email,
+    password: data.password,
+  });
+};
+
+export const register = (data) => {
+  console.log('📝 Registering:', data.email);
+  return API.post('/auth/register', {
+    name: data.name,
+    email: data.email,
+    password: data.password,
+    dob: data.dob,
+    phone: data.phone || '',
+  });
+};
+
 export const getMe = () => API.get('/auth/me');
 
-// User
+// ==================== USER ====================
 export const getProfile = () => API.get('/user/profile');
+export const updateProfile = (data) => API.patch('/user/profile', data);
 export const getAnalytics = () => API.get('/user/analytics');
 export const getAdminUsers = (q) => API.get(`/user/admin/users${q ? `?q=${q}` : ''}`);
 export const updateAdminUser = (id, data) => API.patch(`/user/admin/users/${id}`, data);
 
-// Scores
+// ==================== SCORES ====================
 export const getScores = () => API.get('/scores');
-export const addScore = (data) => API.post('/scores', data);
+export const addScore = (data) => API.post('/scores', {
+  date: data.date,
+  score: data.score,
+  courseId: data.courseId,
+  holeCount: data.holeCount,
+});
 export const updateAdminScore = (id, data) => API.patch(`/scores/admin/${id}`, data);
+export const deleteScore = (id) => API.delete(`/scores/${id}`);
 
-// Subscriptions
-export const createSubscription = (data) => API.post('/subscriptions', data);
+// ==================== SUBSCRIPTIONS ====================
+export const createSubscription = (data) => API.post('/subscriptions', {
+  charityId: data.charityId,
+  contributionPercentage: data.contributionPercentage,
+  planType: data.planType || 'monthly',
+});
 export const getMySubscription = () => API.get('/subscriptions/me');
 export const cancelSubscription = () => API.post('/subscriptions/cancel');
 export const renewSubscription = () => API.post('/subscriptions/renew');
 export const getAdminSubscriptions = (status) => API.get(`/subscriptions/admin${status ? `?status=${status}` : ''}`);
 export const simulatePayment = (data) => API.post('/subscriptions/simulate-webhook', data);
 
-// Charities
+// ==================== CHARITIES ====================
 export const getCharities = () => API.get('/charities');
-export const selectCharity = (data) => API.post('/charities/select', data);
-export const createCharity = (data) => API.post('/charities', data);
+export const selectCharity = (charityId) => API.post('/charities/select', { charityId });
+export const createCharity = (data) => API.post('/charities', {
+  name: data.name,
+  description: data.description,
+  image: data.image,
+  events: data.events || [],
+});
 export const updateCharity = (id, data) => API.patch(`/charities/${id}`, data);
 export const deleteCharity = (id) => API.delete(`/charities/${id}`);
-export const donateToCharity = (id, data) => API.post(`/charities/${id}/donate`, data);
+export const donateToCharity = (id, amount) => API.post(`/charities/${id}/donate`, { amount });
 
-// Draw
+// ==================== DRAW ====================
 export const getLatestDraw = () => API.get('/draw/latest');
 export const getDrawHistory = () => API.get('/draw/history');
 export const createDraftDraw = (data) => API.post('/draw/draft', data);
@@ -63,27 +143,11 @@ export const simulateDraw = (id) => API.post(`/draw/${id}/simulate`);
 export const publishDraw = (id) => API.post(`/draw/${id}/publish`);
 export const runDraw = (data) => API.post('/draw/run', data);
 
-// Winners
+// ==================== WINNERS ====================
 export const getWinners = () => API.get('/winners');
-export const uploadWinnerProof = (data) => API.post('/winners/proof', data, {
+export const uploadWinnerProof = (formData) => API.post('/winners/proof', formData, {
   headers: { 'Content-Type': 'multipart/form-data' },
 });
 export const updateWinnerStatus = (id, data) => API.patch(`/winners/${id}/status`, data);
 
 export default API;
-
-const API_BASE_URL = import.meta.env.VITE_API_URL ||
-  (import.meta.env.PROD
-    ? 'https://golf-charity-backend.vercel.app'
-    : 'http://localhost:5000');
-
-export const apiCall = async (endpoint, options = {}) => {
-  const response = await fetch(`${API_BASE_URL}/api${endpoint}`, {
-    ...options,
-    headers: {
-      'Content-Type': 'application/json',
-      ...options.headers,
-    },
-  });
-  return response.json();
-};

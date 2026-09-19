@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { CreditCard, ShieldCheck, Lock, ChevronRight } from 'lucide-react';
+import { motion } from 'framer-motion';
 import toast from 'react-hot-toast';
 import { createSubscription } from '../api/api';
 import { useAuth } from '../context/AuthContext';

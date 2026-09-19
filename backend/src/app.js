@@ -7,7 +7,7 @@ const path = require("path");
 
 const app = express();
 
-//making changes for vercel
+// Making changes for Vercel
 const connectDB = require("./config/db");
 const env = require("./config/env");
 
@@ -21,7 +21,6 @@ app.use(async (req, res, next) => {
   }
 });
 
-
 const authRoutes = require("./routes/authRoutes");
 const userRoutes = require("./routes/userRoutes");
 const scoreRoutes = require("./routes/scoreRoutes");
@@ -32,7 +31,6 @@ const winnerRoutes = require("./routes/winnerRoutes");
 const { handleWebhook } = require("./controllers/subscriptionController");
 
 const { notFound, errorHandler } = require("./middlewares/errorMiddleware");
-
 
 app.use(helmet());
 app.use(cors());
@@ -45,7 +43,7 @@ app.use(morgan("dev"));
 // );
 
 app.get("/", (req, res) => {
-  res.status(200).json({ status: "Backend in running" });
+  res.status(200).json({ status: "Backend is running" });
 });
 
 app.use("/api/subscriptions/webhook", express.raw({ type: "application/json" }));

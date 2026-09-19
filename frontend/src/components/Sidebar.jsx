@@ -2,17 +2,18 @@ import { NavLink, useNavigate, useLocation } from 'react-router-dom';
 import { AnimatePresence, motion as FramerMotion } from 'framer-motion';
 import {
   LayoutDashboard, Target, Heart, Trophy, Users,
-  Dice5, BarChart2, LogOut, X, Menu,
+  Dice5, BarChart2, LogOut, X, Menu, CreditCard,
 } from 'lucide-react';
 import { useAuth }  from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
 import { useState, useEffect } from 'react';
 
 const userLinks = [
-  { to: '/dashboard',          icon: LayoutDashboard, label: 'Overview', end: true },
-  { to: '/dashboard/scores',   icon: Target,          label: 'My Scores' },
-  { to: '/dashboard/charity',  icon: Heart,           label: 'Charity' },
-  { to: '/dashboard/winnings', icon: Trophy,          label: 'Winnings' },
+  { to: '/dashboard',              icon: LayoutDashboard, label: 'Overview',     end: true },
+  { to: '/dashboard/scores',       icon: Target,          label: 'My Scores' },
+  { to: '/dashboard/charity',      icon: Heart,           label: 'Charity' },
+  { to: '/dashboard/winnings',     icon: Trophy,          label: 'Winnings' },
+  { to: '/dashboard/subscription', icon: CreditCard,      label: 'Subscription' },
 ];
 
 const adminLinks = [

@@ -1,11 +1,8 @@
 import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Trophy, Heart, ShieldCheck, Target, Check, ChevronRight, Menu, X } from 'lucide-react';
+import { Trophy, Heart, ShieldCheck, ChevronRight, Menu, X, Star, Zap, Users } from 'lucide-react';
 import { useTheme } from '../context/ThemeContext';
-
-void motion;
-void AnimatePresence;
 
 function ThemeTogglePill() {
   const { theme, toggleTheme } = useTheme();
@@ -34,6 +31,12 @@ export default function Landing() {
     return () => window.removeEventListener('scroll', handler);
   }, []);
 
+  // Lock body scroll when mobile menu is open
+  useEffect(() => {
+    document.body.style.overflow = mobileMenuOpen ? 'hidden' : '';
+    return () => { document.body.style.overflow = ''; };
+  }, [mobileMenuOpen]);
+
   return (
     <div className="page-bg" style={{ minHeight: '100vh' }}>
 
@@ -47,6 +50,7 @@ export default function Landing() {
             </span>
           </Link>
 
+          {/* Desktop links */}
           <div className="navbar-links" style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
             {NAV_LINKS.map(({ label, href }) =>
               href.startsWith('/') ? (
@@ -64,8 +68,8 @@ export default function Landing() {
           <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
             <ThemeTogglePill />
             <Link to="/login"
-              style={{ padding: '8px 16px', borderRadius: 8, border: '1px solid var(--border)', color: 'var(--text-primary)', fontWeight: 600, fontSize: '0.875rem', transition: 'all 0.2s' }}
               className="navbar-auth-btns"
+              style={{ padding: '8px 16px', borderRadius: 8, border: '1px solid var(--border)', color: 'var(--text-primary)', fontWeight: 600, fontSize: '0.875rem', transition: 'all 0.2s' }}
             >
               Log In
             </Link>
@@ -76,6 +80,7 @@ export default function Landing() {
             >
               Get Started
             </button>
+            {/* Mobile hamburger */}
             <button
               onClick={() => setMobileMenuOpen(v => !v)}
               style={{ display: 'none', background: 'var(--bg-subtle)', border: '1px solid var(--border)', borderRadius: 8, padding: 8, cursor: 'pointer', color: 'var(--text-primary)' }}
@@ -88,16 +93,81 @@ export default function Landing() {
         </div>
       </nav>
 
+      {/* ── MOBILE DRAWER MENU ───────────────────────────────── */}
+      <AnimatePresence>
+        {mobileMenuOpen && (
+          <>
+            <motion.div
+              key="mobile-overlay"
+              initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+              onClick={() => setMobileMenuOpen(false)}
+              style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', backdropFilter: 'blur(4px)', zIndex: 99 }}
+            />
+            <motion.div
+              key="mobile-drawer"
+              initial={{ x: '100%' }} animate={{ x: 0 }} exit={{ x: '100%' }}
+              transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
+              style={{
+                position: 'fixed', top: 0, right: 0, bottom: 0, width: '80%', maxWidth: 360,
+                background: 'var(--bg-elevated)', borderLeft: '1px solid var(--border)',
+                backdropFilter: 'blur(24px)', zIndex: 100,
+                display: 'flex', flexDirection: 'column', padding: 24,
+              }}
+            >
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 32 }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                  <div className="sidebar-logo-icon" style={{ width: 32, height: 32, fontSize: '1rem', borderRadius: 8 }}>⛳</div>
+                  <span style={{ fontWeight: 800, color: 'var(--text-primary)' }}>Golf<span className="gradient-text">Win</span></span>
+                </div>
+                <button onClick={() => setMobileMenuOpen(false)} style={{ background: 'var(--bg-subtle)', border: '1px solid var(--border)', borderRadius: 8, padding: 8, cursor: 'pointer', color: 'var(--text-primary)', display: 'flex' }}>
+                  <X size={20} />
+                </button>
+              </div>
+
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 8, flex: 1 }}>
+                {NAV_LINKS.map(({ label, href }) =>
+                  href.startsWith('/') ? (
+                    <Link key={label} to={href} onClick={() => setMobileMenuOpen(false)}
+                      style={{ display: 'block', padding: '14px 18px', borderRadius: 'var(--r-md)', background: 'var(--bg-surface)', border: '1px solid var(--border)', color: 'var(--text-primary)', fontWeight: 600, fontSize: '1rem', textDecoration: 'none' }}>
+                      {label}
+                    </Link>
+                  ) : (
+                    <a key={label} href={href} onClick={() => setMobileMenuOpen(false)}
+                      style={{ display: 'block', padding: '14px 18px', borderRadius: 'var(--r-md)', background: 'var(--bg-surface)', border: '1px solid var(--border)', color: 'var(--text-primary)', fontWeight: 600, fontSize: '1rem', textDecoration: 'none' }}>
+                      {label}
+                    </a>
+                  )
+                )}
+              </div>
+
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 10, paddingTop: 24, borderTop: '1px solid var(--border)' }}>
+                <Link to="/login" onClick={() => setMobileMenuOpen(false)}
+                  style={{ display: 'block', padding: '14px', borderRadius: 'var(--r-md)', border: '1px solid var(--border)', color: 'var(--text-primary)', fontWeight: 600, fontSize: '1rem', textDecoration: 'none', textAlign: 'center' }}>
+                  Log In
+                </Link>
+                <button onClick={() => { setMobileMenuOpen(false); navigate('/register'); }}
+                  className="btn btn-primary" style={{ width: '100%', fontSize: '1rem' }}>
+                  Get Started Free →
+                </button>
+                <div style={{ display: 'flex', justifyContent: 'center', marginTop: 8 }}>
+                  <ThemeTogglePill />
+                </div>
+              </div>
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
+
       {/* ── HERO ───────────────────────────────────────────── */}
       <section style={{ paddingTop: '140px', paddingBottom: '100px', textAlign: 'center', position: 'relative', zIndex: 1 }}>
         <div className="container">
           <motion.div initial={{ opacity: 0, y: 40 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7 }}>
-            <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, background: 'var(--brand-dim)', border: '1px solid var(--border-brand)', borderRadius: 'var(--r-full)', padding: '6px 16px', marginBottom: 32, fontSize: '0.8rem', fontWeight: 700, color: 'var(--brand-vivid)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+            <div className="hero-badge" style={{ marginBottom: 32 }}>
               🏆 Monthly Jackpot Draws · Charity-First Platform
             </div>
             <h1 style={{ marginBottom: 24, maxWidth: 700, margin: '0 auto 24px' }}>
               Golf, Win Big,<br />
-              <span className="gradient-text">Fund Good Causes</span>
+              <span className="gradient-text-animated">Fund Good Causes</span>
             </h1>
             <p style={{ fontSize: '1.15rem', maxWidth: 560, margin: '0 auto 48px', lineHeight: 1.7 }}>
               Log your Stableford scores to enter monthly prize draws. A guaranteed 10% of every subscription goes straight to the charity you choose.
@@ -112,13 +182,30 @@ export default function Landing() {
             </div>
           </motion.div>
 
+          {/* Trust badges */}
+          <motion.div
+            initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.5 }}
+            style={{ display: 'flex', gap: 20, justifyContent: 'center', flexWrap: 'wrap', marginTop: 48 }}
+          >
+            {[
+              { icon: ShieldCheck, label: 'Verified & Secure' },
+              { icon: Star,        label: 'Rated 4.9/5' },
+              { icon: Users,       label: '2,400+ Golfers' },
+              { icon: Zap,         label: 'Instant Payouts' },
+            ].map(({ icon: Icon, label }) => (
+              <div key={label} style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: '0.8rem', color: 'var(--text-muted)', fontWeight: 600 }}>
+                <Icon size={14} color="var(--brand-vivid)" /> {label}
+              </div>
+            ))}
+          </motion.div>
+
           {/* Hero stats strip */}
           <motion.div
             initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7, delay: 0.3 }}
-            style={{ display: 'flex', gap: 40, justifyContent: 'center', flexWrap: 'wrap', marginTop: 80, paddingTop: 40, borderTop: '1px solid var(--border)' }}
+            style={{ display: 'flex', gap: 40, justifyContent: 'center', flexWrap: 'wrap', marginTop: 72, paddingTop: 40, borderTop: '1px solid var(--border)' }}
           >
             {[
-              { label: 'Active Golfers', value: '2,400+' },
+              { label: 'Active Golfers',     value: '2,400+' },
               { label: 'Monthly Prize Pool', value: '£14,480' },
               { label: 'Donated to Charity', value: '£84,200+' },
               { label: 'Verified Charities', value: '12' },
@@ -208,9 +295,9 @@ export default function Landing() {
             </div>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
               {[
-                { name: 'Cancer Research UK', amount: '£34,200', pct: 72 },
-                { name: 'Mental Health Support',    amount: '£28,500', pct: 60 },
-                { name: 'Child Welfare Fund',  amount: '£21,800', pct: 46 },
+                { name: 'Cancer Research UK',  amount: '£34,200', pct: 72 },
+                { name: 'Mental Health Support', amount: '£28,500', pct: 60 },
+                { name: 'Child Welfare Fund',   amount: '£21,800', pct: 46 },
               ].map(({ name, amount, pct }) => (
                 <div key={name} className="glass-card" style={{ padding: '16px 20px' }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 10 }}>
@@ -231,6 +318,45 @@ export default function Landing() {
         </div>
       </section>
 
+      {/* ── TESTIMONIALS ──────────────────────────────────── */}
+      <section style={{ padding: '80px 0', position: 'relative', zIndex: 1, background: 'var(--bg-subtle)' }}>
+        <div className="container">
+          <div style={{ textAlign: 'center', marginBottom: 48 }}>
+            <h2>What Our Golfers Say</h2>
+          </div>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 24 }}>
+            {[
+              { name: 'James T.', handle: '@james_golfer', text: 'Won my first £140 on a 3-match in only my second month. The charity donation tracking is a brilliant feature.', stars: 5 },
+              { name: 'Sarah M.', handle: '@smacmillan', text: 'Finally a platform that ties golf to something meaningful. My Cancer Research UK total is now £62.50 and counting!', stars: 5 },
+              { name: 'Robert K.', handle: '@rob_k82', text: 'The dashboard is slick and everything just works. Managed to log all 5 scores within minutes of signing up.', stars: 5 },
+            ].map(({ name, handle, text, stars }) => (
+              <motion.div
+                key={name}
+                className="glass-card"
+                style={{ padding: 28 }}
+                initial={{ opacity: 0, y: 24 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}
+              >
+                <div style={{ display: 'flex', gap: 4, marginBottom: 16 }}>
+                  {Array.from({ length: stars }).map((_, i) => (
+                    <Star key={i} size={14} fill="var(--warning)" color="var(--warning)" />
+                  ))}
+                </div>
+                <p style={{ fontSize: '0.9rem', lineHeight: 1.7, marginBottom: 20 }}>{`"${text}"`}</p>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                  <div style={{ width: 36, height: 36, borderRadius: '50%', background: 'var(--grad-brand)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', fontWeight: 800, fontSize: '0.85rem' }}>
+                    {name[0]}
+                  </div>
+                  <div>
+                    <div style={{ fontWeight: 700, fontSize: '0.9rem', color: 'var(--text-primary)' }}>{name}</div>
+                    <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)' }}>{handle}</div>
+                  </div>
+                </div>
+              </motion.div>
+            ))}
+          </div>
+        </div>
+      </section>
+
       {/* ── CTA ────────────────────────────────────────────── */}
       <section style={{ padding: '80px 0', position: 'relative', zIndex: 1 }}>
         <div className="container">
@@ -242,9 +368,14 @@ export default function Landing() {
               <p style={{ color: 'rgba(255,255,255,0.85)', marginBottom: 36, maxWidth: 480, margin: '0 auto 36px', fontSize: '1.05rem' }}>
                 Join thousands of golfers making a real-world impact while competing for life-changing prizes.
               </p>
-              <button onClick={() => navigate('/register')} className="btn" style={{ background: '#fff', color: 'var(--brand)', fontWeight: 700, padding: '14px 36px', fontSize: '1rem', minHeight: 'unset' }}>
-                Create Free Account →
-              </button>
+              <div style={{ display: 'flex', gap: 16, justifyContent: 'center', flexWrap: 'wrap' }}>
+                <button onClick={() => navigate('/register')} className="btn" style={{ background: '#fff', color: 'var(--brand)', fontWeight: 700, padding: '14px 36px', fontSize: '1rem', minHeight: 'unset' }}>
+                  Create Free Account →
+                </button>
+                <Link to="/pricing" className="btn" style={{ background: 'rgba(255,255,255,0.15)', color: '#fff', border: '1px solid rgba(255,255,255,0.3)', fontWeight: 600, padding: '14px 28px', fontSize: '1rem', minHeight: 'unset' }}>
+                  View Pricing
+                </Link>
+              </div>
             </div>
           </div>
         </div>
@@ -273,6 +404,7 @@ export default function Landing() {
         @media (max-width: 768px) {
           .mobile-hamburger { display: flex !important; }
           .navbar-auth-btns { display: none !important; }
+          .navbar-links { display: none !important; }
         }
       `}</style>
     </div>
