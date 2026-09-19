@@ -1,3 +1,2 @@
-const app = require("../src/app");
-
-module.exports = app;
+// Ensure the application is bootstrapped when this module is executed
+require("../src/server");

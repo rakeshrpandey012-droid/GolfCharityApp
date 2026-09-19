@@ -62,7 +62,7 @@ export default function App() {
             <Route path="/subscription/success"    element={<SubscriptionSuccess />} />
 
             {/* User Dashboard */}
-            <Route path="/dashboard" element={<DashboardLayout />}>
+            <Route path="/dashboard/*" element={<DashboardLayout />}>
               <Route index                    element={<DashboardOverview />} />
               <Route path="scores"            element={<Scores />} />
               <Route path="charity"           element={<Charity />} />
@@ -71,7 +71,7 @@ export default function App() {
             </Route>
 
             {/* Admin Panel */}
-            <Route path="/admin" element={<AdminLayout />}>
+            <Route path="/admin/*" element={<AdminLayout />}>
               <Route index                    element={<AdminOverview />} />
               <Route path="users"             element={<AdminUsers />} />
               <Route path="draw"              element={<AdminDraw />} />

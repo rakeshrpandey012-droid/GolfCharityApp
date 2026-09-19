@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-// import { motion } from 'framer-motion';
+import { motion } from 'framer-motion';
 import { Search, Heart } from 'lucide-react';
 import toast from 'react-hot-toast';
 

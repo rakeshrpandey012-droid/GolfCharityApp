@@ -13,9 +13,11 @@ app.use(cors({
 app.use(express.json());
 
 // MongoDB Connection
-mongoose.connect(process.env.MONGODB_URI, {
+const mongoUri = process.env.MONGODB_URI || 'mongodb://localhost:27017/golf-charity';
+console.log('Connecting to MongoDB at:', mongoUri);
+mongoose.connect(mongoUri, {
   useNewUrlParser: true,
-  useUnifiedTopology: true,
+  useUnifiedTopology: true
 })
 .then(() => console.log('MongoDB connected'))
 .catch(err => console.log('MongoDB error:', err));
@@ -26,17 +28,20 @@ app.get('/api/health', (req, res) => {
 });
 
 // Add your routes here
-app.use('/api/auth', require('./routes/auth'));
-app.use('/api/users', require('./routes/users'));
-app.use('/api/scores', require('./routes/scores'));
-app.use('/api/charities', require('./routes/charities'));
+app.use('/api/auth', require('./src/routes/authRoutes'));
+app.use('/api/users', require('./src/routes/userRoutes'));
+app.use('/api/scores', require('./src/routes/scoreRoutes'));
+app.use('/api/charities', require('./src/routes/charityRoutes'));
+app.use('/api/draws', require('./src/routes/drawRoutes'));
+app.use('/api/subscriptions', require('./src/routes/subscriptionRoutes'));
+app.use('/api/winners', require('./src/routes/winnerRoutes'));
 
 if (process.env.NODE_ENV === 'production') {
   const path = require('path');
   app.use(express.static(path.join(__dirname, '..', 'frontend', 'dist')));
   // Serve SPA entry point for any unmatched route
   app.get('*', (req, res) => {
-    res.sendFile(path.join(__dirname, '..', 'frontend', 'dist', 'index.html')));
+    res.sendFile(path.join(__dirname, '..', 'frontend', 'dist', 'index.html'));
   });
 }
 

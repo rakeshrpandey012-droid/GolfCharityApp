@@ -21,6 +21,26 @@ function ThemeTogglePill() {
   );
 }
 
+const Field = ({ label, name, type = 'text', placeholder, icon: Icon, value, onChange, error, disabled, ...rest }) => (
+  <div className="form-group">
+    <label className="form-label">{label}</label>
+    <div className="form-input-wrap">
+      {Icon && <span className="input-icon input-icon-l"><Icon size={18} /></span>}
+      <input
+        type={type}
+        name={name}
+        placeholder={placeholder}
+        value={value}
+        onChange={onChange}
+        disabled={disabled}
+        className={`form-input${Icon ? ' has-icon-l' : ''}${error ? ' error' : ''}`}
+        {...rest}
+      />
+    </div>
+    {error && <span className="form-error">{error}</span>}
+  </div>
+);
+
 const STEPS = ['Account', 'Details', 'Confirm'];
 
 export default function Register() {
@@ -130,25 +150,7 @@ export default function Register() {
     }
   };
 
-  const Field = ({ label, name, type = 'text', placeholder, icon: Icon, ...rest }) => (
-    <div className="form-group">
-      <label className="form-label">{label}</label>
-      <div className="form-input-wrap">
-        {Icon && <span className="input-icon input-icon-l"><Icon size={18} /></span>}
-        <input
-          type={type}
-          name={name}
-          placeholder={placeholder}
-          value={form[name]}
-          onChange={handleChange}
-          disabled={loading}
-          className={`form-input${Icon ? ' has-icon-l' : ''}${errors[name] ? ' error' : ''}`}
-          {...rest}
-        />
-      </div>
-      {errors[name] && <span className="form-error">{errors[name]}</span>}
-    </div>
-  );
+  // Field component is declared above Register to avoid remounting on every render
 
   return (
     <div className="page-bg" style={{ 
@@ -243,6 +245,10 @@ export default function Register() {
                       icon={User}
                       placeholder="John Doe"
                       required
+                      value={form.name}
+                      onChange={handleChange}
+                      error={errors.name}
+                      disabled={loading}
                     />
                     <Field 
                       label="Email Address"
@@ -251,6 +257,10 @@ export default function Register() {
                       icon={Mail}
                       placeholder="you@example.com"
                       required
+                      value={form.email}
+                      onChange={handleChange}
+                      error={errors.email}
+                      disabled={loading}
                     />
                   </>
                 )}
@@ -264,6 +274,10 @@ export default function Register() {
                       icon={Lock}
                       placeholder="Min 8 characters, 1 uppercase, 1 number"
                       required
+                      value={form.password}
+                      onChange={handleChange}
+                      error={errors.password}
+                      disabled={loading}
                     />
                     <Field 
                       label="Confirm Password"
@@ -272,6 +286,10 @@ export default function Register() {
                       icon={Lock}
                       placeholder="Repeat your password"
                       required
+                      value={form.confirmPassword}
+                      onChange={handleChange}
+                      error={errors.confirmPassword}
+                      disabled={loading}
                     />
                   </>
                 )}
@@ -284,6 +302,10 @@ export default function Register() {
                       type="date"
                       icon={Calendar}
                       required
+                      value={form.dob}
+                      onChange={handleChange}
+                      error={errors.dob}
+                      disabled={loading}
                     />
                     <Field 
                       label="Phone Number (Optional)"
@@ -291,6 +313,10 @@ export default function Register() {
                       type="tel"
                       icon={Phone}
                       placeholder="+44 7700 900000"
+                      value={form.phone}
+                      onChange={handleChange}
+                      error={errors.phone}
+                      disabled={loading}
                     />
                     <div className="form-group" style={{ marginTop: 16 }}>
                       <label style={{ 
