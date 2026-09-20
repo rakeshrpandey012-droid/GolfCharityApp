@@ -1,208 +1,111 @@
-import { Link, useNavigate } from 'react-router-dom';
-import { AnimatePresence } from 'framer-motion';
-import { useState, useEffect } from 'react';
-import { useAuth } from '../context/AuthContext';
-import { useTheme } from '../context/ThemeContext';
-import GlowButton from './GlowButton';
-import { Menu, X, Moon, Sun } from 'lucide-react';
+import React, { useState } from 'react';
+import { Link, useLocation } from 'react-router-dom';
+import { motion } from 'framer-motion';
+import { Menu, X, Golf } from 'lucide-react';
 
-export default function Navbar() {
-  const { user, logoutUser } = useAuth();
-  const navigate = useNavigate();
-  const [menuOpen, setMenuOpen] = useState(false);
-
-  // Close menu on resize to desktop
-  useEffect(() => {
-    const handleResize = () => {
-      if (window.innerWidth >= 768) setMenuOpen(false);
-    };
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
-  }, []);
-
-  // Lock body scroll when menu is open
-  useEffect(() => {
-    document.body.style.overflow = menuOpen ? 'hidden' : '';
-    return () => { document.body.style.overflow = ''; };
-  }, [menuOpen]);
+const Navbar = () => {
+  const [isOpen, setIsOpen] = useState(false);
+  const location = useLocation();
 
   const navLinks = [
-    { label: 'How It Works', id: 'how-it-works' },
-    { label: 'Prizes', id: 'prizes' },
-    { label: 'Charities', id: 'charities' },
-    { label: 'Pricing', id: 'pricing' },
+    { path: '/', label: 'Home' },
+    { path: '/how-it-works', label: 'How It Works' },
+    { path: '/charities', label: 'Charities' },
+    { path: '/pricing', label: 'Pricing' },
   ];
 
-  const handleNavClick = (id) => {
-    setMenuOpen(false);
-    setTimeout(() => {
-      document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' });
-    }, 300);
-  };
-
-  const { theme, setTheme } = useTheme();
-
-  const toggleTheme = () => {
-    setTheme(theme === 'dark' ? 'light' : 'dark');
-  };
+  const isActive = (path) => location.pathname === path;
 
   return (
-    <>
-      <nav className="navbar" style={{ padding: '0 20px' }}>
-        <div style={{
-          maxWidth: 1200, margin: '0 auto',
-          display: 'flex', alignItems: 'center',
-          justifyContent: 'space-between', height: 64,
-        }}>
+    <nav className="fixed w-full top-0 z-50 bg-gradient-to-b from-slate-900 to-transparent backdrop-blur-md border-b border-slate-700/50">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="flex justify-between items-center h-16">
           {/* Logo */}
-          <Link to="/" style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', gap: 10 }}>
-            <div style={{
-              width: 36, height: 36, borderRadius: 10,
-              background: 'linear-gradient(135deg, #3b82f6, #8b5cf6)',
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-              fontSize: '1.1rem', fontWeight: 800,
-              boxShadow: '0 0 20px rgba(59,130,246,0.4)',
-              flexShrink: 0,
-            }}>
-              ⛳
-            </div>
-            <span style={{ fontFamily: "'Space Grotesk', sans-serif", fontWeight: 700, fontSize: '1.1rem', color: 'var(--text-primary)' }}>
-              Golf<span className="gradient-text">Win</span>
+          <Link to="/" className="flex items-center gap-2 group">
+            <motion.div
+              whileHover={{ rotate: 20 }}
+              className="w-10 h-10 bg-gradient-to-r from-blue-500 to-cyan-500 rounded-lg flex items-center justify-center"
+            >
+              <Golf size={24} className="text-white" />
+            </motion.div>
+            <span className="text-xl font-bold bg-gradient-to-r from-blue-400 to-cyan-400 bg-clip-text text-transparent">
+              GolfWin
             </span>
           </Link>
 
-          {/* Desktop Nav Links */}
-          <div className="navbar-links">
+          {/* Desktop Navigation */}
+          <div className="hidden md:flex items-center gap-1">
             {navLinks.map((link) => (
-              <a
-                key={link.id}
-                href={`#${link.id}`}
-                style={{
-                  color: 'var(--text-secondary)', textDecoration: 'none',
-                  fontSize: '0.9rem', fontWeight: 500, transition: 'color 0.2s',
-                }}
-                onMouseEnter={e => e.target.style.color = 'var(--text-primary)'}
-                onMouseLeave={e => e.target.style.color = 'var(--text-secondary)'}
+              <Link
+                key={link.path}
+                to={link.path}
+                className="relative px-4 py-2 text-gray-300 hover:text-white transition-colors"
               >
+                {isActive(link.path) && (
+                  <motion.div
+                    layoutId="navbar-underline"
+                    className="absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r from-blue-500 to-cyan-500"
+                    transition={{ duration: 0.3 }}
+                  />
+                )}
                 {link.label}
-              </a>
+              </Link>
             ))}
           </div>
 
-          {/* Desktop Auth Buttons */}
-          <div className="navbar-auth">
-            <button
-              onClick={toggleTheme}
-              style={{
-                background: 'transparent',
-                border: 'none',
-                color: 'var(--text-primary)',
-                cursor: 'pointer',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                padding: '8px',
-                marginRight: '8px',
-                borderRadius: '50%'
-              }}
+          {/* CTA Button */}
+          <div className="hidden md:flex items-center gap-4">
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              className="px-6 py-2 rounded-lg bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700 text-white font-semibold transition-all"
             >
-              {theme === 'dark' ? <Sun size={20} /> : <Moon size={20} />}
-            </button>
-            {user ? (
-              <>
-                <GlowButton variant="ghost" size="sm" onClick={() => navigate(user.role === 'admin' ? '/admin' : '/dashboard')}>Dashboard</GlowButton>
-                <GlowButton size="sm" onClick={logoutUser}>Logout</GlowButton>
-              </>
-            ) : (
-              <>
-                <GlowButton variant="ghost" size="sm" onClick={() => navigate('/login')}>Login</GlowButton>
-                <GlowButton size="sm" onClick={() => navigate('/register')}>Get Started</GlowButton>
-              </>
-            )}
+              Get Started
+            </motion.button>
           </div>
 
-          {/* Hamburger – mobile only */}
+          {/* Mobile Menu Button */}
           <button
-            className="hamburger-btn"
-            onClick={() => setMenuOpen(o => !o)}
-            aria-label="Toggle menu"
-            style={{
-              background: 'none', border: 'none', cursor: 'pointer',
-              color: 'white', padding: 8, borderRadius: 8,
-              display: 'none', alignItems: 'center', justifyContent: 'center',
-              minWidth: 44, minHeight: 44,
-            }}
+            onClick={() => setIsOpen(!isOpen)}
+            className="md:hidden text-gray-300 hover:text-white"
           >
-            {menuOpen ? <X size={24} /> : <Menu size={24} />}
+            {isOpen ? <X size={24} /> : <Menu size={24} />}
           </button>
         </div>
-      </nav>
 
-      {/* Mobile overlay + drawer */}
-      <AnimatePresence>
-        {menuOpen && (
-          <>
-            <motion.div
-              key="overlay"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.2 }}
-              onClick={() => setMenuOpen(false)}
-              style={{
-                position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.6)',
-                backdropFilter: 'blur(4px)', zIndex: 49,
-              }}
-            />
-            <motion.div
-              key="drawer"
-              initial={{ opacity: 0, y: -20 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -20 }}
-              transition={{ duration: 0.25, ease: [0.16, 1, 0.3, 1] }}
-              style={{
-                position: 'fixed', top: 64, left: 0, right: 0, zIndex: 50,
-                background: 'rgba(5,5,16,0.97)', backdropFilter: 'blur(24px)',
-                borderBottom: '1px solid rgba(255,255,255,0.08)',
-                padding: '24px 20px 32px',
-                display: 'flex', flexDirection: 'column', gap: 8,
-              }}
+        {/* Mobile Navigation */}
+        {isOpen && (
+          <motion.div
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="md:hidden bg-slate-800/95 backdrop-blur-md border-t border-slate-700/50 py-4"
+          >
+            {navLinks.map((link) => (
+              <Link
+                key={link.path}
+                to={link.path}
+                onClick={() => setIsOpen(false)}
+                className={`block px-4 py-2 transition-colors ${
+                  isActive(link.path)
+                    ? 'text-blue-400 bg-slate-700/50'
+                    : 'text-gray-300 hover:text-white'
+                }`}
+              >
+                {link.label}
+              </Link>
+            ))}
+            <motion.button
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.95 }}
+              className="w-full mx-4 mt-4 px-6 py-2 rounded-lg bg-gradient-to-r from-blue-600 to-cyan-600 text-white font-semibold"
             >
-              {navLinks.map((link) => (
-                <button
-                  key={link.id}
-                  onClick={() => handleNavClick(link.id)}
-                  style={{
-                    background: 'none', border: 'none',
-                    color: 'var(--text-secondary)', textAlign: 'left',
-                    fontSize: '1.05rem', fontWeight: 500, cursor: 'pointer',
-                    padding: '14px 16px', borderRadius: 12,
-                    transition: 'all 0.2s', minHeight: 44,
-                  }}
-                  onMouseEnter={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.06)'; e.currentTarget.style.color = 'white'; }}
-                  onMouseLeave={e => { e.currentTarget.style.background = 'none'; e.currentTarget.style.color = 'var(--text-secondary)'; }}
-                >
-                  {link.label}
-                </button>
-              ))}
-
-              <div style={{ height: 1, background: 'rgba(255,255,255,0.06)', margin: '12px 0' }} />
-
-              {user ? (
-                <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-                  <GlowButton variant="ghost" style={{ width: '100%', minHeight: 48 }} onClick={() => { setMenuOpen(false); navigate(user.role === 'admin' ? '/admin' : '/dashboard'); }}>Dashboard</GlowButton>
-                  <GlowButton style={{ width: '100%', minHeight: 48 }} onClick={() => { setMenuOpen(false); logoutUser(); }}>Logout</GlowButton>
-                </div>
-              ) : (
-                <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-                  <GlowButton variant="ghost" style={{ width: '100%', minHeight: 48 }} onClick={() => { setMenuOpen(false); navigate('/login'); }}>Login</GlowButton>
-                  <GlowButton style={{ width: '100%', minHeight: 48 }} onClick={() => { setMenuOpen(false); navigate('/register'); }}>Get Started</GlowButton>
-                </div>
-              )}
-            </motion.div>
-          </>
+              Get Started
+            </motion.button>
+          </motion.div>
         )}
-      </AnimatePresence>
-    </>
+      </div>
+    </nav>
   );
-}
+};
+
+export default Navbar;

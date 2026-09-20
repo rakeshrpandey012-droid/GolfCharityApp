@@ -1,154 +1,288 @@
-// import { motion } from 'framer-motion';
-import { useNavigate, Link } from 'react-router-dom';
-import { Check, ChevronRight, ArrowLeft } from 'lucide-react';
-import { useTheme } from '../context/ThemeContext';
+import React, { useState } from 'react';
+import { Check } from 'lucide-react';
 
-function ThemeTogglePill({ style }) {
-  const { theme, toggleTheme } = useTheme();
+const Pricing = () => {
+  const [,setHoveredPlan] = useState(null);
+
+  const pricingPlans = [
+    {
+      id: 1,
+      name: 'Casual Golfer',
+      price: 4.99,
+      period: 'month',
+      description: 'Perfect for occasional players',
+      color: 'from-blue-500 to-cyan-500',
+      features: [
+        'Scorecard tracking',
+        'Basic statistics',
+        '2 Charity draws per month',
+        'Weekly leaderboards',
+        'Email support',
+      ],
+      cta: 'Start Free Trial',
+      ctaStyle: 'bg-blue-600 hover:bg-blue-700',
+    },
+    {
+      id: 2,
+      name: 'Serious Competitor',
+      price: 9.99,
+      period: 'month',
+      description: 'For dedicated golf enthusiasts',
+      color: 'from-purple-500 to-pink-500',
+      features: [
+        'Everything in Casual',
+        'Advanced analytics & insights',
+        'Unlimited charity draws',
+        'Private group tournaments',
+        'Priority support',
+        'Custom handicap tracking',
+        'Performance reports',
+      ],
+      cta: 'Get Premium',
+      ctaStyle: 'bg-purple-600 hover:bg-purple-700',
+      popular: true,
+    },
+    {
+      id: 3,
+      name: 'Pro Champion',
+      price: 19.99,
+      period: 'month',
+      description: 'For tournament players',
+      color: 'from-yellow-500 to-orange-500',
+      features: [
+        'Everything in Serious',
+        'Tournament organization tools',
+        'Live scoring updates',
+        'Professional stats dashboard',
+        '24/7 phone & email support',
+        'Custom branding for events',
+        'API access for developers',
+        'Dedicated account manager',
+      ],
+      cta: 'Contact Sales',
+      ctaStyle: 'bg-yellow-600 hover:bg-yellow-700',
+    },
+  ];
+
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.2,
+        delayChildren: 0.3,
+      },
+    },
+  };
+
+  const cardVariants = {
+    hidden: { opacity: 0, y: 50 },
+    visible: {
+      opacity: 1,
+      y: 0,
+      transition: {
+        duration: 0.8,
+        ease: 'easeOut',
+      },
+    },
+  };
+
+  const scaleVariants = {
+    hover: {
+      scale: 1.05,
+      transition: {
+        duration: 0.3,
+        ease: 'easeOut',
+      },
+    },
+  };
+
   return (
-    <button onClick={toggleTheme} className="theme-toggle" aria-label="Toggle theme" style={style}>
-      <div className="theme-toggle-knob">{theme === 'dark' ? '🌙' : '☀️'}</div>
-    </button>
-  );
-}
-
-const PLANS = [
-  {
-    id: 'monthly',
-    name: 'Monthly',
-    price: '£9.99',
-    per: '/mo',
-    desc: 'Perfect for getting started and entering monthly draws.',
-    features: ['Enter 1 draw per month', '10% Charity Donation', 'Score Tracking Dashboard', 'Email Support'],
-    cta: 'Subscribe Monthly',
-    highlight: false,
-  },
-  {
-    id: 'yearly',
-    name: 'Yearly',
-    price: '£99.99',
-    per: '/yr',
-    savings: 'Save £19.89 vs Monthly',
-    desc: 'Maximum value — all 12 monthly draws included.',
-    features: ['Enter all 12 monthly draws', 'Guaranteed 10% Charity Share', 'Priority Support Access', 'Early Draw Results'],
-    cta: 'Subscribe Yearly',
-    highlight: true,
-    badge: 'Most Popular',
-  },
-  {
-    id: 'proplus',
-    name: 'Pro Plus',
-    price: '£19.99',
-    per: '/mo',
-    desc: 'For dedicated golfers who want maximum impact and benefits.',
-    features: ['Everything in Standard', '20% Charity Donation', 'Exclusive Founder Badge', 'Dedicated Account Manager'],
-    cta: 'Get Pro Plus',
-    highlight: false,
-  },
-];
-
-export default function Pricing() {
-  const navigate = useNavigate();
-
-  return (
-    <div className="page-bg" style={{ minHeight: '100vh', paddingTop: 80, paddingBottom: 80 }}>
-      <ThemeTogglePill style={{ position: 'fixed', top: 16, right: 16, zIndex: 100 }} />
-
-      {/* Back link */}
-      <div className="container" style={{ marginBottom: 0 }}>
-        <Link to="/" style={{ display: 'inline-flex', alignItems: 'center', gap: 6, color: 'var(--text-muted)', fontSize: '0.875rem', marginBottom: 32 }}>
-          <ArrowLeft size={16} /> Back to home
-        </Link>
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 text-white py-12 px-4 sm:px-6 lg:px-8">
+      {/* Background decorative elements */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute top-20 right-20 w-96 h-96 bg-purple-500/10 rounded-full blur-3xl"></div>
+        <div className="absolute bottom-20 left-20 w-96 h-96 bg-blue-500/10 rounded-full blur-3xl"></div>
       </div>
 
-      <div className="container">
+      <motion.div
+        className="relative z-10 max-w-7xl mx-auto"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.8 }}
+      >
+        {/* Header Section */}
         <motion.div
-          initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }}
-          style={{ textAlign: 'center', marginBottom: 64 }}
+          className="text-center mb-12"
+          initial={{ opacity: 0, y: -30 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8, delay: 0.2 }}
         >
-          <div style={{ display: 'inline-block', background: 'var(--brand-dim)', border: '1px solid var(--border-brand)', borderRadius: 'var(--r-full)', padding: '5px 16px', fontSize: '0.75rem', fontWeight: 700, color: 'var(--brand-vivid)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 20 }}>
-            Transparent Pricing
+          <div className="inline-block mb-4">
+            <span className="px-4 py-2 rounded-full bg-gradient-to-r from-purple-500/20 to-pink-500/20 border border-purple-500/50 text-sm font-semibold">
+              🎯 PRICING PLANS
+            </span>
           </div>
-          <h2 style={{ marginBottom: 16 }}>Choose Your Plan</h2>
-          <p style={{ maxWidth: 500, margin: '0 auto', fontSize: '1.05rem' }}>
-            Every plan funds verified charities and enters you into the monthly jackpot draw.
+          <h1 className="text-5xl md:text-6xl font-bold mb-4 bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400 bg-clip-text text-transparent">
+            Simple, Transparent Pricing
+          </h1>
+          <p className="text-xl text-gray-300 max-w-2xl mx-auto">
+            Choose the perfect plan to elevate your golf game and support charities you care about
           </p>
         </motion.div>
 
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: 24, maxWidth: 1000, margin: '0 auto' }}>
-          {PLANS.map((plan, i) => (
+        {/* Pricing Cards */}
+        <motion.div
+          className="grid md:grid-cols-3 gap-8 mb-16"
+          variants={containerVariants}
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true, amount: 0.2 }}
+        >
+          {pricingPlans.map((plan) => (
             <motion.div
               key={plan.id}
-              initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.1 }}
-              style={{ position: 'relative' }}
+              variants={cardVariants}
+              onHoverStart={() => setHoveredPlan(plan.id)}
+              onHoverEnd={() => setHoveredPlan(null)}
+              whileHover="hover"
+              className="relative h-full"
             >
-              {plan.badge && (
-                <div style={{ position: 'absolute', top: -12, left: '50%', transform: 'translateX(-50%)', background: 'var(--brand)', color: '#fff', padding: '4px 14px', borderRadius: 'var(--r-full)', fontSize: '0.7rem', fontWeight: 800, letterSpacing: '0.06em', textTransform: 'uppercase', whiteSpace: 'nowrap', zIndex: 2 }}>
-                  {plan.badge}
-                </div>
+              {/* Popular Badge */}
+              {plan.popular && (
+                <motion.div
+                  className="absolute -top-5 left-1/2 -translate-x-1/2 z-10"
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.5 }}
+                >
+                  <span className="bg-gradient-to-r from-purple-500 to-pink-500 text-white px-4 py-1 rounded-full text-sm font-bold">
+                    MOST POPULAR
+                  </span>
+                </motion.div>
               )}
-              <div
-                className="glass-card"
-                style={{
-                  padding: '32px 28px',
-                  display: 'flex', flexDirection: 'column',
-                  height: '100%',
-                  border: plan.highlight ? '2px solid var(--brand)' : '1px solid var(--border)',
-                  boxShadow: plan.highlight ? 'var(--shadow-brand)' : 'var(--shadow-sm)',
-                }}
+
+              <motion.div
+                variants={scaleVariants}
+                className={`relative h-full rounded-2xl border transition-all duration-300 ${
+                  plan.popular
+                    ? 'border-purple-500/50 bg-gradient-to-br from-purple-900/30 to-pink-900/30 pt-8'
+                    : 'border-slate-700/50 bg-gradient-to-br from-slate-800/50 to-slate-900/50'
+                } p-8 flex flex-col hover:shadow-2xl hover:shadow-purple-500/20`}
               >
-                <div style={{ marginBottom: 24 }}>
-                  <h3 style={{ marginBottom: 8, color: plan.highlight ? 'var(--brand-vivid)' : 'var(--text-primary)' }}>{plan.name}</h3>
-                  <div style={{ display: 'flex', alignItems: 'baseline', gap: 4, marginBottom: 8 }}>
-                    <span style={{ fontSize: '2.6rem', fontWeight: 900, color: 'var(--text-primary)' }}>{plan.price}</span>
-                    <span style={{ color: 'var(--text-muted)', fontSize: '0.9rem' }}>{plan.per}</span>
+                {/* Plan Header */}
+                <div className="mb-8">
+                  <div className={`w-12 h-12 rounded-lg bg-gradient-to-r ${plan.color} mb-4`}></div>
+                  <h3 className="text-2xl font-bold mb-2">{plan.name}</h3>
+                  <p className="text-gray-400 text-sm mb-4">{plan.description}</p>
+
+                  {/* Price */}
+                  <div className="flex items-baseline gap-1 mb-4">
+                    <span className="text-5xl font-bold">${plan.price}</span>
+                    <span className="text-gray-400 text-lg">/{plan.period}</span>
                   </div>
-                  {plan.savings && (
-                    <span style={{ display: 'inline-block', background: 'var(--success-dim)', color: 'var(--success)', fontSize: '0.72rem', fontWeight: 700, padding: '3px 10px', borderRadius: 'var(--r-full)', marginBottom: 10 }}>
-                      {plan.savings}
-                    </span>
+
+                  {plan.id === 1 && (
+                    <p className="text-sm text-blue-400">First month free</p>
                   )}
-                  <p style={{ fontSize: '0.875rem', lineHeight: 1.6 }}>{plan.desc}</p>
                 </div>
 
-                <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 12, marginBottom: 32 }}>
-                  {plan.features.map(f => (
-                    <div key={f} style={{ display: 'flex', gap: 10, alignItems: 'flex-start' }}>
-                      <div style={{ width: 20, height: 20, borderRadius: '50%', background: 'var(--success-dim)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, marginTop: 1 }}>
-                        <Check size={12} color="var(--success)" strokeWidth={3} />
+                {/* CTA Button */}
+                <motion.button
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                  className={`w-full py-3 px-6 rounded-lg font-semibold text-white mb-8 transition-all duration-300 ${plan.ctaStyle}`}
+                >
+                  {plan.cta}
+                </motion.button>
+
+                {/* Features List */}
+                <div className="flex-grow space-y-4">
+                  {plan.features.map((feature, index) => (
+                    <motion.div
+                      key={index}
+                      className="flex items-start gap-3"
+                      initial={{ opacity: 0, x: -10 }}
+                      whileInView={{ opacity: 1, x: 0 }}
+                      transition={{ delay: index * 0.05 }}
+                      viewport={{ once: true }}
+                    >
+                      <div className={`flex-shrink-0 w-5 h-5 rounded-full mt-0.5 bg-gradient-to-r ${plan.color} flex items-center justify-center`}>
+                        <Check size={16} className="text-white" />
                       </div>
-                      <span style={{ fontSize: '0.875rem', color: 'var(--text-primary)' }}>{f}</span>
-                    </div>
+                      <span className="text-gray-300 text-sm">{feature}</span>
+                    </motion.div>
                   ))}
                 </div>
-
-                <button
-                  onClick={() => navigate(`/checkout-simulation?plan=${plan.id}`)}
-                  className={`btn ${plan.highlight ? 'btn-primary' : 'btn-secondary'}`}
-                  style={{ width: '100%', fontSize: '0.95rem' }}
-                >
-                  {plan.cta} <ChevronRight size={16} />
-                </button>
-              </div>
+              </motion.div>
             </motion.div>
           ))}
-        </div>
+        </motion.div>
 
-        {/* FAQ */}
-        <div style={{ maxWidth: 700, margin: '80px auto 0' }}>
-          <h3 style={{ textAlign: 'center', marginBottom: 32, fontSize: '1.4rem' }}>Common Questions</h3>
-          {[
-            { q: 'How is the charity donation calculated?', a: 'The stated percentage is automatically deducted from your subscription fee every billing cycle and routed to your chosen charity. You can track your lifetime impact on your dashboard.' },
-            { q: 'Can I change my plan at any time?', a: 'Yes — you can upgrade, downgrade, or cancel at any time from your account settings. Changes take effect at the start of your next billing cycle.' },
-            { q: 'What happens if no one wins the jackpot?', a: 'The 40% jackpot pool rolls over to the next month and accumulates until someone matches all 5 numbers.' },
-          ].map(({ q, a }) => (
-            <div key={q} className="glass-card" style={{ padding: '20px 24px', marginBottom: 12 }}>
-              <h4 style={{ marginBottom: 8, fontSize: '0.95rem' }}>{q}</h4>
-              <p style={{ fontSize: '0.875rem', lineHeight: 1.7, margin: 0 }}>{a}</p>
-            </div>
-          ))}
-        </div>
-      </div>
+        {/* FAQ Section */}
+        <motion.div
+          className="max-w-3xl mx-auto"
+          initial={{ opacity: 0, y: 30 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8 }}
+          viewport={{ once: true, amount: 0.3 }}
+        >
+          <h2 className="text-3xl font-bold text-center mb-12">Frequently Asked Questions</h2>
+
+          <div className="space-y-4">
+            {[
+              {
+                question: 'Can I change my plan anytime?',
+                answer: 'Yes, you can upgrade or downgrade your plan at any time. Changes take effect on your next billing cycle.',
+              },
+              {
+                question: 'Is there a free trial?',
+                answer: 'Absolutely! All plans include a free trial period so you can explore all features before committing.',
+              },
+              {
+                question: 'What payment methods do you accept?',
+                answer: 'We accept all major credit cards, PayPal, and Apple Pay for your convenience.',
+              },
+              {
+                question: 'Can I cancel anytime?',
+                answer: 'Yes, cancel anytime without penalties. Your access continues until the end of your billing period.',
+              },
+            ].map((faq, index) => (
+              <motion.div
+                key={index}
+                className="bg-slate-800/50 border border-slate-700/50 rounded-lg p-6 hover:border-slate-600/50 transition-colors"
+                initial={{ opacity: 0 }}
+                whileInView={{ opacity: 1 }}
+                transition={{ delay: index * 0.1 }}
+                viewport={{ once: true }}
+              >
+                <h3 className="font-semibold text-lg mb-2">{faq.question}</h3>
+                <p className="text-gray-400">{faq.answer}</p>
+              </motion.div>
+            ))}
+          </div>
+        </motion.div>
+
+        {/* Footer CTA */}
+        <motion.div
+          className="text-center mt-16"
+          initial={{ opacity: 0 }}
+          whileInView={{ opacity: 1 }}
+          transition={{ duration: 0.8 }}
+          viewport={{ once: true }}
+        >
+          <p className="text-gray-400 mb-4">Questions about plans? We're here to help.</p>
+          <motion.button
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            className="px-8 py-3 rounded-lg bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 font-semibold transition-all"
+          >
+            Contact Support
+          </motion.button>
+        </motion.div>
+      </motion.div>
     </div>
   );
-}
+};
+
+export default Pricing;
