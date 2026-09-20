@@ -1,6 +1,6 @@
 /* eslint-disable react-refresh/only-export-components */
 import { createContext, useContext, useState, useEffect } from 'react';
-import { getMe } from '../api/api';
+// import { getMe } from '../api/api';
 
 const AuthContext = createContext(null);
 
@@ -18,8 +18,8 @@ export function AuthProvider({ children }) {
       }
 
       try {
-        const res = await getMe();
-        setUser(res.data.user || res.data);
+        // const res = await getMe();
+        // setUser(res.data.user || res.data);
       } catch {
         localStorage.removeItem('token');
         localStorage.removeItem('user');
@@ -56,13 +56,13 @@ export function AuthProvider({ children }) {
   const refreshUser = () => {
     const token = localStorage.getItem('token');
     if (!token) return Promise.resolve();
-    return getMe()
-      .then((res) => {
-        const nextUser = res.data.user || res.data;
-        persistUser(nextUser);
-        return nextUser;
-      })
-      .catch(() => {});
+    // return getMe()
+    //   .then((res) => {
+    //     const nextUser = res.data.user || res.data;
+    //     persistUser(nextUser);
+    //     return nextUser;
+    //   })
+      // .catch(() => {});
   };
 
   return (
