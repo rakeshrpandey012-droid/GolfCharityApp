@@ -1,73 +1,149 @@
-const app = require("./app");
-const env = require("./config/env");
-const connectDB = require("./config/db");
-const { ensureAdminUser } = require("./config/admin");
-const { startMonthlyDrawJob } = require("./jobs/monthlyDrawJob");
+import express from 'express';
+import mongoose from 'mongoose';
+import cors from 'cors';
+import dotenv from 'dotenv';
+import authRoutes from './routes/auth.js';
 
-async function listenWithFallback(startPort, maxAttempts = 10) {
-  let currentPort = startPort;
+dotenv.config();
 
-  for (let attempt = 0; attempt < maxAttempts; attempt += 1) {
-    try {
-      const server = await new Promise((resolve, reject) => {
-        const listener = app.listen(currentPort, () => resolve(listener));
-        listener.on("error", (error) => {
-          if (error.code === "EADDRINUSE") {
-            reject(error);
-            return;
-          }
-          reject(error);
-        });
-      });
+const app = express();
 
-      console.log(`Server running on port ${currentPort}`);
-      return { server, port: currentPort };
-    } catch (error) {
-      if (error.code === "EADDRINUSE") {
-        console.warn(`Port ${currentPort} is busy. Trying ${currentPort + 1} instead...`);
-        currentPort += 1;
-        continue;
-      }
-      throw error;
-    }
-  }
+// ============================================
+// 1. MIDDLEWARE SETUP
+// ============================================
 
-  throw new Error(`Unable to start server after trying ports ${startPort} to ${currentPort}`);
-}
+// CORS Configuration - CRITICAL FIX
+const allowedOrigins = [
+  'http://localhost:5173',
+  'http://localhost:3000',
+  'https://digital-heroes-41vy.vercel.app', // Your frontend URL
+  process.env.CLIENT_URL,
+].filter(Boolean);
 
-async function bootstrap() {
-  try {
-    if (env.mongoUri) {
-      await connectDB(env.mongoUri);
-      await ensureAdminUser(process.env);
-      console.log("✅ Admin account ready:", env.seedAdminEmail);
+app.use(cors({
+  origin: function (origin, callback) {
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
     } else {
-      console.warn("⚠️ No MONGO_URI provided, running without DB connection");
+      console.warn(`CORS BLOCKED: ${origin}`);
+      callback(new Error('Blocked by CORS policy'));
     }
-  } catch (err) {
-    console.warn("⚠️ Failed to connect to DB, continuing anyway", err);
-  }
+  },
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+}));
 
-  try {
-    startMonthlyDrawJob();
-  } catch (err) {
-    console.warn("⚠️ Failed to start background job", err);
-  }
+app.use(express.json({ limit: '10mb' }));
+app.use(express.urlencoded({ limit: '10mb', extended: true }));
 
+// ============================================
+// 2. DATABASE CONNECTION - FIXED TIMEOUT
+// ============================================
+const connectDB = async () => {
   try {
-    const { port } = await listenWithFallback(env.port || 5000);
-    process.env.PORT = String(port);
+    const MONGO_URI = process.env.MONGODB_URI;
+    
+    if (!MONGO_URI) {
+      throw new Error('MONGODB_URI not defined in .env');
+    }
+
+    await mongoose.connect(MONGO_URI, {
+      // CRITICAL: Timeout settings
+      connectTimeoutMS: 30000, // 30 seconds
+      serverSelectionTimeoutMS: 30000, // 30 seconds
+      socketTimeoutMS: 45000, // 45 seconds
+      maxPoolSize: 10,
+      minPoolSize: 5,
+      retryWrites: true,
+      w: 'majority',
+    });
+
+    console.log('✅ MongoDB connected successfully');
+    return true;
   } catch (error) {
-    console.error("Failed to start server:", error);
+    console.error('❌ MongoDB Connection Error:', error.message);
+    // Retry connection after 5 seconds
+    setTimeout(() => {
+      console.log('🔄 Retrying MongoDB connection...');
+      connectDB();
+    }, 5000);
+    return false;
+  }
+};
+
+// Monitor MongoDB connection
+mongoose.connection.on('disconnected', () => {
+  console.warn('⚠️  MongoDB disconnected');
+  connectDB();
+});
+
+mongoose.connection.on('error', (error) => {
+  console.error('MongoDB Error:', error);
+});
+
+// ============================================
+// 3. ROUTES
+// ============================================
+
+// Health check endpoint
+app.get('/api/health', (req, res) => {
+  res.json({
+    status: 'OK',
+    mongo: mongoose.connection.readyState === 1 ? 'connected' : 'disconnected',
+    timestamp: new Date().toISOString(),
+  });
+});
+
+// Auth routes
+app.use('/api/auth', authRoutes);
+
+// 404 handler
+app.use('*', (req, res) => {
+  res.status(404).json({ message: 'Route not found' });
+});
+
+// ============================================
+// 4. ERROR HANDLING MIDDLEWARE
+// ============================================
+
+app.use((err, req, res, next) => {
+  console.error('❌ Server Error:', err);
+  
+  res.status(err.status || 500).json({
+    message: err.message || 'Internal Server Error',
+    status: err.status || 500,
+  });
+});
+
+// ============================================
+// 5. SERVER STARTUP
+// ============================================
+
+const PORT = process.env.PORT || 5000;
+
+const startServer = async () => {
+  try {
+    // Connect to MongoDB first
+    await connectDB();
+
+    // Start Express server
+    app.listen(PORT, () => {
+      console.log(`
+╔════════════════════════════════════════╗
+║  🌍 GolfWin Server Running             ║
+║  PORT: ${PORT}                           ║
+║  ENV: ${process.env.NODE_ENV || 'development'}                    ║
+║  API: http://localhost:${PORT}/api      ║
+╚════════════════════════════════════════╝
+      `);
+    });
+  } catch (error) {
+    console.error('Failed to start server:', error);
     process.exit(1);
   }
-}
+};
 
-if (require.main === module) {
-  bootstrap().catch((error) => {
-    console.error("Failed to start server", error);
-    process.exit(1);
-  });
-}
+startServer();
 
-module.exports = app;
+export default app;

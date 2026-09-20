@@ -1,366 +1,268 @@
 import axios from 'axios';
 
-// ===== CONFIGURATION =====
-// For local development, make sure backend is running at: http://localhost:5000
-// To deploy, set VITE_API_URL to your backend URL in Vercel environment variables.
-// Priority: VITE_API_URL env var → Production backend → Local development backend
-const DEFAULT_LOCAL_API = 'http://localhost:5000/api';
-const API_BASE_URL = (
-  import.meta.env.VITE_API_URL || 
-  (import.meta.env.PROD 
-    ? 'https://golf-charity-backend-three.vercel.app/api' 
-    : DEFAULT_LOCAL_API)
-).replace(/\/$/, '');
+// ============================================
+// API CONFIGURATION
+// ============================================
 
-console.log('🌐 API Base URL:', API_BASE_URL);
-console.log('📦 Environment:', import.meta.env.MODE);
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
 
-const API = axios.create({
+console.log('🔌 API Base URL:', API_BASE_URL);
+
+// Create axios instance with proper timeout settings
+const apiClient = axios.create({
   baseURL: API_BASE_URL,
+  timeout: 30000, // 30 second timeout - CRITICAL FIX
   headers: {
     'Content-Type': 'application/json',
   },
-  timeout: 10000,
+  withCredentials: true,
 });
 
-// ==================== REQUEST INTERCEPTOR ====================
-API.interceptors.request.use(
-  (req) => {
+// ============================================
+// REQUEST INTERCEPTOR
+// ============================================
+apiClient.interceptors.request.use(
+  (config) => {
+    // Add authentication token if available
     const token = localStorage.getItem('token');
     if (token) {
-      req.headers.Authorization = `Bearer ${token}`;
-    }
-    console.log(`📤 [${req.method.toUpperCase()}] ${req.url}`);
-    return req;
-  },
-  (err) => {
-    console.error('❌ Request Error:', err.message);
-    return Promise.reject(err);
-  }
-);
-
-// ==================== RESPONSE INTERCEPTOR ====================
-API.interceptors.response.use(
-  (res) => {
-    console.log(`📥 [${res.status}] ${res.config.url}`);
-    return res;
-  },
-  (err) => {
-    const errorInfo = {
-      status: err.response?.status,
-      message: err.message,
-      url: err.config?.url,
-      data: err.response?.data,
-    };
-    console.error('❌ Response Error:', errorInfo);
-
-    // Handle authentication errors
-    if (err.response?.status === 401) {
-      console.warn('🔑 Token expired or invalid - Redirecting to login');
-      localStorage.removeItem('token');
-      localStorage.removeItem('user');
-      window.location.href = '/login';
-    }
-
-    // Handle network errors
-    if (!err.response) {
-      if (err.code === 'ECONNABORTED') {
-        err.message = '⏱️ Request timeout. Backend server might be slow or offline.';
-      } else if (err.message === 'Network Error') {
-        err.message = `🚫 Cannot connect to backend at ${API_BASE_URL}\n\nMake sure your backend server is running:\n- Port: 5000\n- Run: npm start (in backend folder)\n- Check VITE_API_URL in .env file`;
-      } else {
-        err.message = `🌐 Network error: ${err.message}`;
-      }
-    } else if (err.response?.status === 400) {
-      // Bad request - likely validation error from backend
-      err.message = err.response?.data?.message || 'Invalid request data';
-    } else if (err.response?.status === 403) {
-      // Forbidden
-      err.message = 'You do not have permission to perform this action';
-    } else if (err.response?.status === 404) {
-      // Not found
-      err.message = 'Resource not found';
-    } else if (err.response?.status === 500) {
-      // Server error
-      err.message = err.response?.data?.message || 'Server error - please try again later';
+      config.headers.Authorization = `Bearer ${token}`;
     }
     
-    return Promise.reject(err);
+    console.log(`📤 API Request: ${config.method?.toUpperCase()} ${config.url}`);
+    return config;
+  },
+  (error) => {
+    console.error('❌ Request Interceptor Error:', error);
+    return Promise.reject(error);
   }
 );
 
-// ==================== AUTH ====================
-export const login = (data) => {
-  console.log('🔐 Login attempt:', data.email);
-  if (!data.email || !data.password) {
-    return Promise.reject(new Error('Email and password are required'));
+// ============================================
+// RESPONSE INTERCEPTOR
+// ============================================
+apiClient.interceptors.response.use(
+  (response) => {
+    console.log(`✅ API Response: ${response.status}`, response.data);
+    return response;
+  },
+  (error) => {
+    // Enhanced error handling
+    const errorInfo = {
+      message: error.message,
+      code: error.code,
+      status: error.response?.status,
+      data: error.response?.data,
+    };
+
+    console.error('❌ API Error:', errorInfo);
+
+    // Categorize and enhance error messages
+    if (error.code === 'ECONNABORTED') {
+      error.message = '⏱️ Request timeout - Server took too long to respond';
+    } else if (error.code === 'ERR_NETWORK') {
+      error.message = '🔌 Network error - Cannot reach the server';
+    } else if (error.response?.status === 401) {
+      error.message = '🔐 Invalid credentials or session expired';
+      localStorage.removeItem('token');
+      localStorage.removeItem('user');
+    } else if (error.response?.status === 403) {
+      error.message = '🚫 Access denied - You do not have permission';
+    } else if (error.response?.status === 404) {
+      error.message = '❌ Endpoint not found';
+    } else if (error.response?.status === 500) {
+      error.message = '⚠️ Server error - Please try again later';
+    } else if (!error.response) {
+      error.message = '🔌 Cannot connect to server - Is the backend running?';
+    }
+
+    return Promise.reject(error);
   }
-  return API.post('/auth/login', {
-    email: data.email,
-    password: data.password,
-  });
+);
+
+// ============================================
+// AUTH ENDPOINTS
+// ============================================
+
+export const login = async (credentials) => {
+  try {
+    console.log('🔐 Logging in user:', credentials.email);
+    const response = await apiClient.post('/auth/login', credentials);
+    
+    // Save token and user info
+    if (response.data.token) {
+      localStorage.setItem('token', response.data.token);
+      localStorage.setItem('user', JSON.stringify(response.data.user));
+    }
+    
+    console.log('✅ Login successful');
+    return response;
+  } catch (error) {
+    console.error('❌ Login failed:', error.message);
+    throw error;
+  }
 };
 
-export const register = (data) => {
-  console.log('📝 Registration attempt:', data.email);
-  if (!data.name || !data.email || !data.password) {
-    return Promise.reject(new Error('Name, email, and password are required'));
+export const register = async (userData) => {
+  try {
+    console.log('📝 Registering user:', userData.email);
+    const response = await apiClient.post('/auth/register', userData);
+    
+    if (response.data.token) {
+      localStorage.setItem('token', response.data.token);
+      localStorage.setItem('user', JSON.stringify(response.data.user));
+    }
+    
+    console.log('✅ Registration successful');
+    return response;
+  } catch (error) {
+    console.error('❌ Registration failed:', error.message);
+    throw error;
   }
-  return API.post('/auth/register', {
-    name: data.name,
-    email: data.email,
-    password: data.password,
-    dob: data.dob || '',
-    phone: data.phone || '',
-  });
 };
 
 export const logout = () => {
   localStorage.removeItem('token');
   localStorage.removeItem('user');
-  return Promise.resolve();
+  console.log('✅ Logged out');
 };
 
-export const getMe = () => API.get('/auth/me');
-
-// ==================== USER ====================
-export const getProfile = () => API.get('/user/profile');
-
-export const updateProfile = (data) => {
-  if (!data || Object.keys(data).length === 0) {
-    return Promise.reject(new Error('No data to update'));
-  }
-  return API.patch('/user/profile', data);
+export const getCurrentUser = () => {
+  const user = localStorage.getItem('user');
+  return user ? JSON.parse(user) : null;
 };
 
-export const getAnalytics = () => API.get('/user/analytics');
-
-// Admin user management
-export const getAdminUsers = (q = '') => {
-  const query = q ? `?q=${encodeURIComponent(q)}` : '';
-  return API.get(`/user/admin/users${query}`);
+export const isAuthenticated = () => {
+  return !!localStorage.getItem('token');
 };
 
-export const createAdminUser = (data) => {
-  if (!data.name || !data.email || !data.password) {
-    return Promise.reject(new Error('Name, email, and password are required'));
-  }
-  return API.post('/user/admin/users', {
-    name: data.name,
-    email: data.email,
-    password: data.password,
-    role: data.role || 'user',
-    subscriptionStatus: data.subscriptionStatus || 'active',
-  });
-};
-
-export const updateAdminUser = (id, data) => {
-  if (!id) {
-    return Promise.reject(new Error('User ID is required'));
-  }
-  if (!data || Object.keys(data).length === 0) {
-    return Promise.reject(new Error('No data to update'));
-  }
-  return API.patch(`/user/admin/users/${id}`, data);
-};
-
-export const deleteAdminUser = (id) => {
-  if (!id) {
-    return Promise.reject(new Error('User ID is required'));
-  }
-  return API.delete(`/user/admin/users/${id}`);
-};
-
-// ==================== SCORES ====================
-export const getScores = () => API.get('/scores');
-
-export const addScore = (data) => {
-  if (!data.date || !data.score || !data.courseId) {
-    return Promise.reject(new Error('Date, score, and courseId are required'));
-  }
-  return API.post('/scores', {
-    date: data.date,
-    score: data.score,
-    courseId: data.courseId,
-    holeCount: data.holeCount || 18,
-  });
-};
-
-export const updateScore = (id, data) => {
-  if (!id) {
-    return Promise.reject(new Error('Score ID is required'));
-  }
-  return API.patch(`/scores/${id}`, data);
-};
-
-export const updateAdminScore = (id, data) => {
-  if (!id) {
-    return Promise.reject(new Error('Score ID is required'));
-  }
-  return API.patch(`/scores/admin/${id}`, data);
-};
-
-export const deleteScore = (id) => {
-  if (!id) {
-    return Promise.reject(new Error('Score ID is required'));
-  }
-  return API.delete(`/scores/${id}`);
-};
-
-// ==================== SUBSCRIPTIONS ====================
-export const createSubscription = (data = {}) => {
-  return API.post('/subscriptions', {
-    plan: data.plan || data.planType || 'monthly',
-    charityId: data.charityId || '',
-    contributionPercentage: data.contributionPercentage || 0,
-  });
-};
-
-export const getMySubscription = async () => {
+export const refreshToken = async () => {
   try {
-    const res = await API.get('/subscriptions/me');
-    const payload = res.data || {};
-    
-    // Handle different response formats
-    const items = Array.isArray(payload.subscriptions) ? payload.subscriptions : [];
-    const active = 
-      payload.activeSubscription || 
-      items.find((item) => item.status === 'active') || 
-      items[0] || 
-      {};
-    
-    const subscriptionData = active && Object.keys(active).length ? active : (payload.subscription || payload || {});
-    
-    return { ...res, data: subscriptionData };
-  } catch (err) {
-    console.error('Failed to fetch subscription:', err);
-    throw err;
+    const response = await apiClient.post('/auth/refresh');
+    if (response.data.token) {
+      localStorage.setItem('token', response.data.token);
+    }
+    return response;
+  } catch (error) {
+    console.error('Token refresh failed:', error);
+    logout();
+    throw error;
   }
 };
 
-export const cancelSubscription = () => API.post('/subscriptions/cancel');
+// ============================================
+// USER ENDPOINTS
+// ============================================
 
-export const renewSubscription = (data = {}) => {
-  return API.post('/subscriptions/renew', {
-    plan: data.plan || 'monthly',
-  });
-};
-
-export const getAdminSubscriptions = (status = '') => {
-  const query = status ? `?status=${encodeURIComponent(status)}` : '';
-  return API.get(`/subscriptions/admin${query}`);
-};
-
-export const simulatePayment = (data) => {
-  if (!data || Object.keys(data).length === 0) {
-    return Promise.reject(new Error('Payment data is required'));
+export const getProfile = async () => {
+  try {
+    const response = await apiClient.get('/user/profile');
+    return response;
+  } catch (error) {
+    console.error('Failed to fetch profile:', error.message);
+    throw error;
   }
-  return API.post('/subscriptions/simulate-webhook', data);
 };
 
-// ==================== CHARITIES ====================
-export const getCharities = () => API.get('/charities');
-
-export const selectCharity = (charityId, percentage = 10) => {
-  if (!charityId) {
-    return Promise.reject(new Error('Charity ID is required'));
+export const updateProfile = async (userData) => {
+  try {
+    const response = await apiClient.put('/user/profile', userData);
+    // Update stored user info
+    if (response.data.user) {
+      localStorage.setItem('user', JSON.stringify(response.data.user));
+    }
+    return response;
+  } catch (error) {
+    console.error('Failed to update profile:', error.message);
+    throw error;
   }
-  return API.post('/charities/select', {
-    charityId,
-    charityPercentage: Number(percentage),
-  });
 };
 
-export const createCharity = (data) => {
-  if (!data.name || !data.description) {
-    return Promise.reject(new Error('Name and description are required'));
+// ============================================
+// ADMIN ENDPOINTS
+// ============================================
+
+export const fetchAdminData = async (endpoint) => {
+  try {
+    const response = await apiClient.get(`/admin/${endpoint}`);
+    return response;
+  } catch (error) {
+    console.error(`Failed to fetch admin data from ${endpoint}:`, error.message);
+    throw error;
   }
-  return API.post('/charities', {
-    name: data.name,
-    description: data.description,
-    image: data.image || '',
-    events: Array.isArray(data.events) ? data.events : [],
-    isSpotlight: Boolean(data.spotlight ?? data.isSpotlight),
-  });
 };
 
-export const updateCharity = (id, data) => {
-  if (!id) {
-    return Promise.reject(new Error('Charity ID is required'));
+export const createAdminData = async (endpoint, data) => {
+  try {
+    const response = await apiClient.post(`/admin/${endpoint}`, data);
+    return response;
+  } catch (error) {
+    console.error(`Failed to create admin data in ${endpoint}:`, error.message);
+    throw error;
   }
-  return API.patch(`/charities/${id}`, {
-    name: data.name || '',
-    description: data.description || '',
-    image: data.image || '',
-    events: Array.isArray(data.events) ? data.events : [],
-    isSpotlight: Boolean(data.spotlight ?? data.isSpotlight),
-  });
 };
 
-export const deleteCharity = (id) => {
-  if (!id) {
-    return Promise.reject(new Error('Charity ID is required'));
+export const updateAdminData = async (endpoint, id, data) => {
+  try {
+    const response = await apiClient.put(`/admin/${endpoint}/${id}`, data);
+    return response;
+  } catch (error) {
+    console.error(`Failed to update admin data in ${endpoint}:`, error.message);
+    throw error;
   }
-  return API.delete(`/charities/${id}`);
 };
 
-export const donateToCharity = (id, amount) => {
-  if (!id || !amount) {
-    return Promise.reject(new Error('Charity ID and amount are required'));
+export const deleteAdminData = async (endpoint, id) => {
+  try {
+    const response = await apiClient.delete(`/admin/${endpoint}/${id}`);
+    return response;
+  } catch (error) {
+    console.error(`Failed to delete admin data from ${endpoint}:`, error.message);
+    throw error;
   }
-  return API.post(`/charities/${id}/donate`, { amount: Number(amount) });
 };
 
-// ==================== DRAW ====================
-export const getLatestDraw = () => API.get('/draw/latest');
+// ============================================
+// HEALTH CHECK
+// ============================================
 
-export const getDrawHistory = () => API.get('/draw/history');
-
-export const createDraftDraw = (data) => {
-  if (!data || Object.keys(data).length === 0) {
-    return Promise.reject(new Error('Draw data is required'));
+export const checkApiHealth = async () => {
+  try {
+    const response = await apiClient.get('/health');
+    console.log('✅ API Health Check:', response.data);
+    return response.data;
+  } catch (error) {
+    console.error('❌ API Health Check Failed:', error.message);
+    throw error;
   }
-  return API.post('/draw/draft', data);
 };
 
-export const simulateDraw = (id) => {
-  if (!id) {
-    return Promise.reject(new Error('Draw ID is required'));
+// ============================================
+// GOLF DATA ENDPOINTS (Examples)
+// ============================================
+
+export const fetchGolfScores = async (filters = {}) => {
+  try {
+    const response = await apiClient.get('/golf/scores', { params: filters });
+    return response;
+  } catch (error) {
+    console.error('Failed to fetch golf scores:', error.message);
+    throw error;
   }
-  return API.post(`/draw/${id}/simulate`);
 };
 
-export const publishDraw = (id) => {
-  if (!id) {
-    return Promise.reject(new Error('Draw ID is required'));
+export const submitGolfScore = async (scoreData) => {
+  try {
+    const response = await apiClient.post('/golf/scores', scoreData);
+    return response;
+  } catch (error) {
+    console.error('Failed to submit golf score:', error.message);
+    throw error;
   }
-  return API.post(`/draw/${id}/publish`);
 };
 
-export const runDraw = (data) => {
-  if (!data || Object.keys(data).length === 0) {
-    return Promise.reject(new Error('Draw data is required'));
-  }
-  return API.post('/draw/run', data);
-};
+// ============================================
+// EXPORT API CLIENT FOR DIRECT USE
+// ============================================
 
-// ==================== WINNERS ====================
-export const getWinners = () => API.get('/winners');
-
-export const uploadWinnerProof = (formData) => {
-  if (!(formData instanceof FormData)) {
-    return Promise.reject(new Error('FormData is required'));
-  }
-  return API.post('/winners/proof', formData, {
-    headers: { 'Content-Type': 'multipart/form-data' },
-  });
-};
-
-export const updateWinnerStatus = (id, data) => {
-  if (!id) {
-    return Promise.reject(new Error('Winner ID is required'));
-  }
-  return API.patch(`/winners/${id}/status`, data);
-};
-
-export default API;
+export default apiClient;
