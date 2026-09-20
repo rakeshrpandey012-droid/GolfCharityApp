@@ -30,7 +30,7 @@ app.use(async (req, res, next) => {
   }
 });
 
-const authRoutes = require("./routes/authRoutes");
+const authRoutes = require("./routes/auth");
 const userRoutes = require("./routes/userRoutes");
 const scoreRoutes = require("./routes/scoreRoutes");
 const drawRoutes = require('./routes/drawRoutes');

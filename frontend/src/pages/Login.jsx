@@ -1,6 +1,6 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Link, Navigate, useNavigate } from 'react-router-dom';
-import { Eye, EyeOff, Mail, Lock, ShieldCheck, Trophy, Heart, ChevronRight } from 'lucide-react';
+import { Eye, EyeOff, Mail, Lock, ShieldCheck, Trophy, Heart, ChevronRight, AlertCircle, CheckCircle, Loader } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { login } from '../api/api';
 import { useAuth } from '../context/AuthContext';
@@ -20,22 +20,79 @@ function ThemeTogglePill() {
   );
 }
 
+// ============================================
+// SERVER HEALTH CHECK FUNCTION
+// ============================================
+const checkBackendHealth = async () => {
+  try {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 5000); // 5 second timeout
+    
+    const response = await fetch('http://localhost:5000/api/health', {
+      signal: controller.signal,
+      headers: { 'Content-Type': 'application/json' }
+    });
+    
+    clearTimeout(timeoutId);
+    return response.ok;
+  } catch (err) {
+    console.error('Health check error:', err);
+    return false;
+  }
+};
+
+// ============================================
+// MAIN LOGIN COMPONENT
+// ============================================
 export default function Login() {
   const [form, setForm] = useState({ email: '', password: '' });
   const [showPass, setShowPass] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [serverStatus, setServerStatus] = useState('checking'); // 'checking', 'online', 'offline'
+  const [rememberMe, setRememberMe] = useState(false);
   const { user, loginUser } = useAuth();
   const navigate = useNavigate();
 
+  // ============================================
+  // CHECK SERVER HEALTH ON COMPONENT MOUNT
+  // ============================================
+  useEffect(() => {
+    const checkServer = async () => {
+      console.log('🔍 Checking backend server health...');
+      const isHealthy = await checkBackendHealth();
+      
+      if (isHealthy) {
+        setServerStatus('online');
+        console.log('✅ Backend server is online');
+      } else {
+        setServerStatus('offline');
+        console.error('❌ Backend server is offline or not responding');
+        setError('⚠️ Backend server is not responding. Make sure to start it with: npm run dev');
+      }
+    };
+
+    checkServer();
+
+    // Check server health every 30 seconds
+    const interval = setInterval(checkServer, 30000);
+    return () => clearInterval(interval);
+  }, []);
+
+  // ============================================
+  // REDIRECT IF ALREADY LOGGED IN
+  // ============================================
   if (user) {
     const destination = user.role === 'admin' ? '/admin' : '/dashboard';
     return <Navigate to={destination} replace />;
   }
 
+  // ============================================
+  // FORM HANDLERS
+  // ============================================
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
-    setError('');
+    setError(''); // Clear error when user starts typing
   };
 
   const useAdminDemo = () => {
@@ -43,43 +100,97 @@ export default function Login() {
     setError('');
   };
 
+  // ============================================
+  // FORM SUBMISSION
+  // ============================================
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
     setLoading(true);
 
-    if (!form.email.trim()) {
-      setError('Email is required');
-      setLoading(false);
-      return;
-    }
-    if (!form.password.trim()) {
-      setError('Password is required');
-      setLoading(false);
-      return;
-    }
-
     try {
-      const res = await login({ email: form.email, password: form.password });
-      
+      // Validate inputs
+      if (!form.email.trim()) {
+        setError('Email is required');
+        setLoading(false);
+        return;
+      }
+      if (!form.password.trim()) {
+        setError('Password is required');
+        setLoading(false);
+        return;
+      }
+
+      // Check server status before attempting login
+      if (serverStatus === 'offline') {
+        setError('🔌 Backend server is not responding. Please start it with: npm run dev in the backend folder');
+        toast.error('Server offline - cannot login');
+        setLoading(false);
+        return;
+      }
+
+      console.log('🔐 Attempting login for:', form.email);
+
+      // Call login API with timeout handling
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 30000); // 30 second timeout
+
+      const res = await login(
+        { email: form.email, password: form.password },
+        { signal: controller.signal }
+      );
+
+      clearTimeout(timeoutId);
+
       if (res.data && res.data.token && res.data.user) {
         const { token, user } = res.data;
         loginUser(token, user);
+        console.log('✅ Login successful!');
         toast.success(`Welcome back, ${user.name || 'User'}! 🏌️`);
+        
+        // Save remember me preference
+        if (rememberMe) {
+          localStorage.setItem('rememberEmail', form.email);
+        } else {
+          localStorage.removeItem('rememberEmail');
+        }
+
         navigate(user.role === 'admin' ? '/admin' : '/dashboard');
       } else {
-        throw new Error('Invalid response format');
+        throw new Error('Invalid response from server');
       }
     } catch (err) {
-      const errorMsg = err.response?.data?.message || err.message || 'Login failed. Please check your credentials.';
+      console.error('❌ Login error:', err);
+
+      let errorMsg = 'Login failed. Please try again.';
+
+      // Handle different error types
+      if (err.name === 'AbortError') {
+        errorMsg = '⏱️ Request timeout - Server is taking too long to respond. Make sure backend is running.';
+      } else if (err.code === 'ECONNREFUSED' || err.message?.includes('Failed to fetch')) {
+        errorMsg = '🔌 Cannot reach the server. Is backend running on port 5000? (npm run dev)';
+      } else if (err.response?.status === 401) {
+        errorMsg = '🔐 Invalid email or password. Please check your credentials.';
+      } else if (err.response?.status === 404) {
+        errorMsg = '❌ Server endpoint not found. Check your backend setup.';
+      } else if (err.response?.status === 500) {
+        errorMsg = '⚠️ Server error. Please try again later.';
+      } else if (err.response?.data?.message) {
+        errorMsg = err.response.data.message;
+      } else if (err.message) {
+        errorMsg = err.message;
+      }
+
       setError(errorMsg);
       toast.error(errorMsg);
-      console.error('Login error:', err);
     } finally {
       setLoading(false);
     }
   };
 
+  // ============================================
+  // RENDER
+  // ============================================
   return (
     <div className="page-bg" style={{ minHeight: '100vh', display: 'flex' }}>
 
@@ -170,6 +281,55 @@ export default function Login() {
           </div>
 
           <div className="glass-card" style={{ padding: '32px 28px' }}>
+            
+            {/* ──── SERVER STATUS INDICATOR ──── */}
+            <div style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: 8,
+              padding: '12px 14px',
+              borderRadius: '8px',
+              marginBottom: 20,
+              fontSize: '0.85rem',
+              fontWeight: 600,
+              backgroundColor: serverStatus === 'online' 
+                ? 'rgba(34, 197, 94, 0.1)' 
+                : serverStatus === 'offline'
+                ? 'rgba(239, 68, 68, 0.1)'
+                : 'rgba(59, 130, 246, 0.1)',
+              color: serverStatus === 'online'
+                ? '#22c55e'
+                : serverStatus === 'offline'
+                ? '#ef4444'
+                : '#3b82f6',
+              border: `1px solid ${
+                serverStatus === 'online'
+                  ? 'rgba(34, 197, 94, 0.3)'
+                  : serverStatus === 'offline'
+                  ? 'rgba(239, 68, 68, 0.3)'
+                  : 'rgba(59, 130, 246, 0.3)'
+              }`
+            }}>
+              {serverStatus === 'checking' && (
+                <>
+                  <Loader size={16} style={{ animation: 'spin 1s linear infinite' }} />
+                  <span>Checking server...</span>
+                </>
+              )}
+              {serverStatus === 'online' && (
+                <>
+                  <CheckCircle size={16} />
+                  <span>✅ Backend online</span>
+                </>
+              )}
+              {serverStatus === 'offline' && (
+                <>
+                  <AlertCircle size={16} />
+                  <span>❌ Backend offline</span>
+                </>
+              )}
+            </div>
+
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 12, marginBottom: 18 }}>
               <div style={{ fontSize: '0.78rem', letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--text-secondary)' }}>
                 Admin Access
@@ -185,22 +345,42 @@ export default function Login() {
             </div>
 
             <form onSubmit={handleSubmit}>
-              {/* Error Alert */}
+              
+              {/* ──── ERROR ALERT ──── */}
               {error && (
                 <div style={{
                   background: 'rgba(239, 68, 68, 0.1)',
-                  border: '1px solid var(--color-error)',
-                  color: 'var(--color-error)',
+                  border: '1px solid var(--color-error, #ef4444)',
+                  color: 'var(--color-error, #ef4444)',
                   padding: '12px 16px',
                   borderRadius: '8px',
                   marginBottom: '20px',
-                  fontSize: '14px'
+                  fontSize: '14px',
+                  lineHeight: '1.5',
+                  display: 'flex',
+                  gap: '8px',
+                  alignItems: 'flex-start'
                 }}>
-                  {error}
+                  <AlertCircle size={18} style={{ flexShrink: 0, marginTop: '2px' }} />
+                  <div>
+                    {error}
+                    {error.includes('npm run dev') && (
+                      <div style={{ marginTop: '8px', fontSize: '0.9rem', opacity: 0.9 }}>
+                        <details style={{ cursor: 'pointer' }}>
+                          <summary>💡 Need help?</summary>
+                          <ul style={{ marginTop: '8px', paddingLeft: '20px', listStyle: 'disc' }}>
+                            <li>Start backend: <code style={{ background: 'rgba(0,0,0,0.2)', padding: '2px 6px', borderRadius: '4px' }}>npm run dev</code> in backend folder</li>
+                            <li>Check MongoDB is connected</li>
+                            <li>Verify backend is on port 5000</li>
+                          </ul>
+                        </details>
+                      </div>
+                    )}
+                  </div>
                 </div>
               )}
 
-              {/* Email */}
+              {/* ──── EMAIL FIELD ──── */}
               <div className="form-group">
                 <label className="form-label">Email Address</label>
                 <div className="form-input-wrap">
@@ -218,7 +398,7 @@ export default function Login() {
                 </div>
               </div>
 
-              {/* Password */}
+              {/* ──── PASSWORD FIELD ──── */}
               <div className="form-group">
                 <label className="form-label">Password</label>
                 <div className="form-input-wrap">
@@ -245,19 +425,40 @@ export default function Login() {
 
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24, fontSize: '0.85rem' }}>
                 <label style={{ display: 'flex', gap: 8, cursor: 'pointer', color: 'var(--text-secondary)', alignItems: 'center' }}>
-                  <input type="checkbox" style={{ accentColor: 'var(--brand)' }} /> Remember me
+                  <input 
+                    type="checkbox" 
+                    checked={rememberMe}
+                    onChange={(e) => setRememberMe(e.target.checked)}
+                    disabled={loading}
+                    style={{ accentColor: 'var(--brand)' }} 
+                  /> 
+                  Remember me
                 </label>
-                <a href="#" style={{ color: 'var(--brand)', fontWeight: 600 }}>Forgot password?</a>
+                <a href="#forgot" style={{ color: 'var(--brand)', fontWeight: 600 }}>Forgot password?</a>
               </div>
 
+              {/* ──── SUBMIT BUTTON ──── */}
               <button 
                 type="submit" 
-                disabled={loading} 
+                disabled={loading || serverStatus === 'offline'} 
                 className="btn btn-primary" 
-                style={{ width: '100%', fontSize: '1rem', opacity: loading ? 0.7 : 1 }}
+                style={{ 
+                  width: '100%', 
+                  fontSize: '1rem', 
+                  opacity: (loading || serverStatus === 'offline') ? 0.6 : 1,
+                  cursor: (loading || serverStatus === 'offline') ? 'not-allowed' : 'pointer'
+                }}
               >
-                {loading ? <span className="spinner" style={{ marginRight: '8px' }} /> : null}
-                {loading ? 'Signing in...' : <>Sign In <ChevronRight size={18} style={{ marginLeft: '8px' }} /></>}
+                {loading ? (
+                  <>
+                    <Loader size={18} style={{ marginRight: '8px', animation: 'spin 1s linear infinite' }} />
+                    Signing in...
+                  </>
+                ) : (
+                  <>
+                    Sign In <ChevronRight size={18} style={{ marginLeft: '8px' }} />
+                  </>
+                )}
               </button>
             </form>
 
@@ -268,7 +469,7 @@ export default function Login() {
             </p>
           </div>
 
-          {/* Demo credentials */}
+          {/* ──── DEMO CREDENTIALS ──── */}
           <div style={{ 
             marginTop: 20, 
             background: 'linear-gradient(135deg, rgba(139, 92, 246, 0.14), rgba(6, 182, 212, 0.12))',
@@ -289,229 +490,12 @@ export default function Login() {
         @media (max-width: 860px) {
           .auth-branding-panel { display: none !important; }
         }
+
+        @keyframes spin {
+          from { transform: rotate(0deg); }
+          to { transform: rotate(360deg); }
+        }
       `}</style>
     </div>
   );
 }
-
-import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { authService, checkApiHealth } from '../services/authService';
-import './Login.css';
-
-export default function Login() {
-  const navigate = useNavigate();
-  
-  // Form state
-  const [email, setEmail] = useState('admin@golfplatform.com');
-  const [password, setPassword] = useState('');
-  
-  // UI state
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
-  const [serverStatus, setServerStatus] = useState('checking'); // 'checking', 'online', 'offline'
-  const [rememberMe, setRememberMe] = useState(false);
-
-  // ============================================
-  // CHECK SERVER HEALTH ON MOUNT
-  // ============================================
-  useEffect(() => {
-    const checkServer = async () => {
-      try {
-        await checkApiHealth();
-        setServerStatus('online');
-        console.log('✅ Server is online');
-      } catch (err) {
-        setServerStatus('offline');
-        console.error('❌ Server is offline:', err.message);
-        setError('❌ Backend server is not responding. Make sure to start it with: npm run dev');
-      }
-    };
-
-    checkServer();
-  }, []);
-
-  // ============================================
-  // HANDLE LOGIN
-  // ============================================
-  const handleLogin = async (e) => {
-    e.preventDefault();
-    setError('');
-    setLoading(true);
-
-    try {
-      // Validate inputs
-      if (!email || !password) {
-        throw new Error('Please enter email and password');
-      }
-
-      // Check server status
-      if (serverStatus === 'offline') {
-        throw new Error('🔌 Cannot connect to server. Please start your backend server.');
-      }
-
-      console.log('🔐 Logging in...');
-
-      // Call login API
-      const response = await authService.login(email, password);
-
-      // Save remember me preference
-      if (rememberMe) {
-        localStorage.setItem('rememberEmail', email);
-      } else {
-        localStorage.removeItem('rememberEmail');
-      }
-
-      // Show success and redirect
-      console.log('✅ Login successful!');
-      setError('');
-      
-      // Redirect to dashboard/admin
-      navigate('/dashboard');
-    } catch (err) {
-      console.error('❌ Login Error:', err);
-
-      // User-friendly error messages
-      let errorMessage = err.message || 'Login failed';
-
-      if (err.message?.includes('Network error')) {
-        errorMessage = '🔌 Cannot reach the server. Is it running on port 5000?';
-      } else if (err.message?.includes('timeout')) {
-        errorMessage = '⏱️ Request took too long. Server might be slow or offline.';
-      } else if (err.message?.includes('Invalid credentials')) {
-        errorMessage = '🔐 Invalid email or password';
-      } else if (err.status === 404) {
-        errorMessage = '❌ Login endpoint not found. Check your backend routes.';
-      }
-
-      setError(errorMessage);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  // ============================================
-  // RENDER
-  // ============================================
-  return (
-    <div className="login-container">
-      <div className="login-card">
-        {/* LOGO/BRANDING */}
-        <div className="login-header">
-          <h1>🏌️ GolfWin</h1>
-          <p className="tagline">Your game. Your impact. Your jackpot.</p>
-        </div>
-
-        {/* SERVER STATUS INDICATOR */}
-        <div className={`server-status ${serverStatus}`}>
-          {serverStatus === 'checking' && (
-            <>
-              <span className="status-dot pulse"></span>
-              Checking server...
-            </>
-          )}
-          {serverStatus === 'online' && (
-            <>
-              <span className="status-dot online"></span>
-              Server online
-            </>
-          )}
-          {serverStatus === 'offline' && (
-            <>
-              <span className="status-dot offline"></span>
-              Server offline - Start backend with: npm run dev
-            </>
-          )}
-        </div>
-
-        {/* ERROR MESSAGE */}
-        {error && (
-          <div className="error-alert">
-            <p>{error}</p>
-            <details className="error-help">
-              <summary>Need help?</summary>
-              <ul>
-                <li>✅ Is backend server running? Run: <code>npm run dev</code> in backend folder</li>
-                <li>✅ Is MongoDB connected? Check console for "✅ MongoDB connected"</li>
-                <li>✅ Is backend on port 5000? Check in terminal</li>
-                <li>✅ Try refreshing the page (Ctrl+R)</li>
-              </ul>
-            </details>
-          </div>
-        )}
-
-        {/* LOGIN FORM */}
-        <form onSubmit={handleLogin}>
-          {/* EMAIL INPUT */}
-          <div className="form-group">
-            <label htmlFor="email">Email Address</label>
-            <input
-              id="email"
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              placeholder="admin@golfplatform.com"
-              disabled={loading}
-              required
-            />
-          </div>
-
-          {/* PASSWORD INPUT */}
-          <div className="form-group">
-            <label htmlFor="password">Password</label>
-            <input
-              id="password"
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              placeholder="Enter your password"
-              disabled={loading}
-              required
-            />
-          </div>
-
-          {/* REMEMBER ME */}
-          <div className="form-group checkbox">
-            <input
-              id="rememberMe"
-              type="checkbox"
-              checked={rememberMe}
-              onChange={(e) => setRememberMe(e.target.checked)}
-              disabled={loading}
-            />
-            <label htmlFor="rememberMe">Remember me</label>
-          </div>
-
-          {/* SUBMIT BUTTON */}
-          <button 
-            type="submit" 
-            className="login-button"
-            disabled={loading || serverStatus === 'offline'}
-          >
-            {loading ? (
-              <>
-                <span className="spinner"></span>
-                Signing in...
-              </>
-            ) : (
-              'Sign In'
-            )}
-          </button>
-        </form>
-
-        {/* FOOTER LINKS */}
-        <div className="login-footer">
-          <a href="#forgot">Forgot password?</a>
-          <span>•</span>
-          <a href="#signup">Create account</a>
-        </div>
-
-        {/* DEBUG INFO (Remove in production) */}
-        <div className="debug-info">
-          <small>API URL: {import.meta.env.VITE_API_URL || 'http://localhost:5000/api'}</small>
-        </div>
-      </div>
-    </div>
-  );
-}
-
