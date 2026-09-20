@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { CreditCard, ShieldCheck, Lock, ChevronRight } from 'lucide-react';
 import toast from 'react-hot-toast';
@@ -16,12 +16,19 @@ export default function CheckoutSimulation() {
   const planId = searchParams.get('plan') || 'monthly';
   const plan   = PLAN_INFO[planId] || PLAN_INFO.monthly;
 
-  useAuth();
+  const { user, loading: authLoading } = useAuth();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [form, setForm]   = useState({ name: '', cardNumber: '', expiry: '', cvv: '' });
   const [promo, setPromo] = useState('');
   const [discount, setDiscount] = useState(0);
+
+  useEffect(() => {
+    if (!authLoading && !user) {
+      toast.error('Please log in to subscribe.');
+      navigate('/login');
+    }
+  }, [user, authLoading, navigate]);
 
   const handleChange = (e) => setForm(f => ({ ...f, [e.target.name]: e.target.value }));
 

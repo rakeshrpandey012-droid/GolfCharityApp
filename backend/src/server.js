@@ -1,8 +1,17 @@
-import express from 'express';
-import mongoose from 'mongoose';
-import cors from 'cors';
-import dotenv from 'dotenv';
-import authRoutes from './routes/auth.js';
+const express = require('express');
+const mongoose = require('mongoose');
+const cors = require('cors');
+const dotenv = require('dotenv');
+
+// Routes
+const authRoutes = require('./routes/auth.js');
+const scoreRoutes = require('./routes/scoreRoutes.js');
+const drawRoutes = require('./routes/drawRoutes.js');
+const charityRoutes = require('./routes/charityRoutes.js');
+const subscriptionRoutes = require('./routes/subscriptionRoutes.js');
+const userRoutes = require('./routes/userRoutes.js');
+const winnerRoutes = require('./routes/winnerRoutes.js');
+const adminDrawRoutes = require('./routes/adminDrawRoutes.js');
 
 dotenv.config();
 
@@ -12,11 +21,10 @@ const app = express();
 // 1. MIDDLEWARE SETUP
 // ============================================
 
-// CORS Configuration - CRITICAL FIX
 const allowedOrigins = [
   'http://localhost:5173',
   'http://localhost:3000',
-  'https://digital-heroes-41vy.vercel.app', // Your frontend URL
+  'https://digital-heroes-41vy.vercel.app',
   process.env.CLIENT_URL,
 ].filter(Boolean);
 
@@ -30,7 +38,7 @@ app.use(cors({
     }
   },
   credentials: true,
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
   allowedHeaders: ['Content-Type', 'Authorization'],
 }));
 
@@ -38,7 +46,7 @@ app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ limit: '10mb', extended: true }));
 
 // ============================================
-// 2. DATABASE CONNECTION - FIXED TIMEOUT
+// 2. DATABASE CONNECTION
 // ============================================
 const connectDB = async () => {
   try {
@@ -49,10 +57,9 @@ const connectDB = async () => {
     }
 
     await mongoose.connect(MONGO_URI, {
-      // CRITICAL: Timeout settings
-      connectTimeoutMS: 30000, // 30 seconds
-      serverSelectionTimeoutMS: 30000, // 30 seconds
-      socketTimeoutMS: 45000, // 45 seconds
+      connectTimeoutMS: 30000,
+      serverSelectionTimeoutMS: 30000,
+      socketTimeoutMS: 45000,
       maxPoolSize: 10,
       minPoolSize: 5,
       retryWrites: true,
@@ -63,7 +70,6 @@ const connectDB = async () => {
     return true;
   } catch (error) {
     console.error('❌ MongoDB Connection Error:', error.message);
-    // Retry connection after 5 seconds
     setTimeout(() => {
       console.log('🔄 Retrying MongoDB connection...');
       connectDB();
@@ -72,7 +78,6 @@ const connectDB = async () => {
   }
 };
 
-// Monitor MongoDB connection
 mongoose.connection.on('disconnected', () => {
   console.warn('⚠️  MongoDB disconnected');
   connectDB();
@@ -95,8 +100,17 @@ app.get('/api/health', (req, res) => {
   });
 });
 
-// Auth routes
+// Auth & Users
 app.use('/api/auth', authRoutes);
+app.use('/api/user', userRoutes);
+
+// Business Logic
+app.use('/api/scores', scoreRoutes);
+app.use('/api/subscriptions', subscriptionRoutes);
+app.use('/api/charities', charityRoutes);
+app.use('/api/draws', drawRoutes);
+app.use('/api/winners', winnerRoutes);
+app.use('/api/admin/draws', adminDrawRoutes);
 
 // 404 handler
 app.use('*', (req, res) => {
@@ -124,10 +138,7 @@ const PORT = process.env.PORT || 5000;
 
 const startServer = async () => {
   try {
-    // Connect to MongoDB first
     await connectDB();
-
-    // Start Express server
     app.listen(PORT, () => {
       console.log(`
 ╔════════════════════════════════════════╗
@@ -146,4 +157,4 @@ const startServer = async () => {
 
 startServer();
 
-export default app;
+module.exports = app;

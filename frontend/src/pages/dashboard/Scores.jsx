@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Target, Calendar, Trash2, Edit2, TrendingUp } from 'lucide-react';
 import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
 import toast from 'react-hot-toast';
@@ -7,46 +7,69 @@ import { AnimatePresence } from 'framer-motion';
 import Card from '../../components/ui/Card';
 import Input from '../../components/ui/Input';
 import Button from '../../components/ui/Button';
+import { fetchGolfScores, submitGolfScore, deleteGolfScore } from '../../api/api';
 
 export default function Scores() {
-  const [scores, setScores] = useState([
-    { id: 1, date: '2026-09-10', score: 32 },
-    { id: 2, date: '2026-09-12', score: 36 },
-    { id: 3, date: '2026-09-14', score: 28 },
-    { id: 4, date: '2026-09-16', score: 40 },
-  ]);
-
+  const [scores, setScores] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [form, setForm] = useState({ date: new Date().toISOString().split('T')[0], score: '' });
 
-  const handleAddScore = (e) => {
+  useEffect(() => {
+    loadScores();
+  }, []);
+
+  const loadScores = async () => {
+    try {
+      const data = await fetchGolfScores();
+      setScores(data.scores || []);
+    } catch (err) {
+      toast.error('Failed to load scores.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleAddScore = async (e) => {
     e.preventDefault();
     const val = parseInt(form.score, 10);
     if (isNaN(val) || val < 1 || val > 45) {
       return toast.error("Score must be between 1 and 45.");
     }
     
-    // Check if score exists for that date
-    if (scores.some(s => s.date === form.date)) {
+    // Check if score exists for that date locally to save network request
+    if (scores.some(s => s.date && s.date.startsWith(form.date))) {
       return toast.error("A score for this date already exists.");
     }
 
-    const newScore = { id: Date.now(), date: form.date, score: val };
-    
-    // Maintain only the latest 5 scores (simulate PRD logic)
-    const updated = [newScore, ...scores].sort((a, b) => new Date(b.date) - new Date(a.date)).slice(0, 5);
-    
-    setScores(updated);
-    setForm({ ...form, score: '' });
-    toast.success("Score added successfully!");
+    try {
+      await submitGolfScore({ date: form.date, score: val });
+      toast.success("Score added successfully!");
+      setForm({ ...form, score: '' });
+      await loadScores();
+    } catch (err) {
+      toast.error(err.response?.data?.message || 'Failed to submit score');
+    }
   };
 
-  const handleDelete = (id) => {
-    setScores(scores.filter(s => s.id !== id));
-    toast.success("Score deleted.");
+  const handleDelete = async (id) => {
+    try {
+      await deleteGolfScore(id);
+      toast.success("Score deleted.");
+      await loadScores();
+    } catch (err) {
+      toast.error("Failed to delete score.");
+    }
+  };
+
+  const formatDate = (dateString) => {
+    return dateString ? dateString.split('T')[0] : '';
   };
 
   // Chart data reversed for chronological left-to-right display
-  const chartData = [...scores].sort((a, b) => new Date(a.date) - new Date(b.date));
+  const chartData = [...scores].sort((a, b) => new Date(a.date) - new Date(b.date)).map(s => ({
+    date: formatDate(s.date),
+    score: s.score
+  }));
 
   return (
     <div className="page-container" style={{ padding: '24px 0' }}>
@@ -99,26 +122,27 @@ export default function Scores() {
                   </tr>
                 </thead>
                 <tbody>
-                  <AnimatePresence>
-                    {scores.map((s) => (
-                      <tr
-                        key={s.id}
-                        style={{ borderBottom: '1px solid var(--border-color)', background: 'var(--bg-primary)' }}
-                      >
-                        <td style={{ padding: '16px', color: 'var(--text-primary)' }}>{s.date}</td>
-                        <td style={{ padding: '16px', fontWeight: 600, color: 'var(--text-primary)' }}>{s.score}</td>
-                        <td style={{ padding: '16px', textAlign: 'right', display: 'flex', gap: '8px', justifyContent: 'flex-end' }}>
-                          <button style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-secondary)' }}>
-                            <Edit2 size={16} />
-                          </button>
-                          <button onClick={() => handleDelete(s.id)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--color-error)' }}>
-                            <Trash2 size={16} />
-                          </button>
-                        </td>
-                      </tr>
-                    ))}
-                  </AnimatePresence>
-                  {scores.length === 0 && (
+                  {loading ? (
+                    <tr><td colSpan="3" style={{ padding: '32px', textAlign: 'center', color: 'var(--text-tertiary)' }}>Loading...</td></tr>
+                  ) : (
+                    <AnimatePresence>
+                      {scores.map((s) => (
+                        <tr
+                          key={s._id}
+                          style={{ borderBottom: '1px solid var(--border-color)', background: 'var(--bg-primary)' }}
+                        >
+                          <td style={{ padding: '16px', color: 'var(--text-primary)' }}>{formatDate(s.date)}</td>
+                          <td style={{ padding: '16px', fontWeight: 600, color: 'var(--text-primary)' }}>{s.score}</td>
+                          <td style={{ padding: '16px', textAlign: 'right', display: 'flex', gap: '8px', justifyContent: 'flex-end' }}>
+                            <button onClick={() => handleDelete(s._id)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--color-error)' }}>
+                              <Trash2 size={16} />
+                            </button>
+                          </td>
+                        </tr>
+                      ))}
+                    </AnimatePresence>
+                  )}
+                  {!loading && scores.length === 0 && (
                     <tr>
                       <td colSpan="3" style={{ padding: '32px', textAlign: 'center', color: 'var(--text-tertiary)' }}>No scores logged yet.</td>
                     </tr>

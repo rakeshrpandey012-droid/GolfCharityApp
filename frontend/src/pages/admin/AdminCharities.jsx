@@ -17,8 +17,8 @@ export default function AdminCharities() {
 
   const fetchCharities = () =>
     getCharities()
-      .then(r => setCharities(r.data.charities || r.data || []))
-      .catch(() => {})
+      .then(r => setCharities(r.charities || r.data?.charities || r || []))
+      .catch((err) => { console.error(err); toast.error('Failed to load charities'); })
       .finally(() => setLoading(false));
 
   useEffect(() => { fetchCharities(); }, []);

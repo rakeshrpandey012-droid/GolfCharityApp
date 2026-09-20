@@ -18,8 +18,8 @@ export default function AdminWinners(){
 
   const fetchWinners = () =>
     getWinners()
-      .then(r => setWinners(r.data.winners || r.data || []))
-      .catch(() => {})
+      .then(r => setWinners(r.winners || r.data?.winners || r || []))
+      .catch((err) => { console.error('Fetch winners error:', err); })
       .finally(() => setLoading(false))
 
   useEffect(()=>{ fetchWinners() },[])

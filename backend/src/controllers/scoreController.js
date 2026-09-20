@@ -100,9 +100,35 @@ async function adminUpdateScore(req, res, next) {
   }
 }
 
+async function deleteScore(req, res, next) {
+  try {
+    const score = await Score.findOneAndDelete({ _id: req.params.id, user: req.user._id });
+    if (!score) {
+      throw new AppError("Score not found", 404);
+    }
+    res.status(200).json({ message: "Score deleted successfully" });
+  } catch (error) {
+    next(error);
+  }
+}
+
+async function adminDeleteScore(req, res, next) {
+  try {
+    const score = await Score.findByIdAndDelete(req.params.id);
+    if (!score) {
+      throw new AppError("Score not found", 404);
+    }
+    res.status(200).json({ message: "Score deleted successfully" });
+  } catch (error) {
+    next(error);
+  }
+}
+
 module.exports = {
   createScore,
   listScores,
   updateMyScore,
-  adminUpdateScore
+  adminUpdateScore,
+  deleteScore,
+  adminDeleteScore
 };
