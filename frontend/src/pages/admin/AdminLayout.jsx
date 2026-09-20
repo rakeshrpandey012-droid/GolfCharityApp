@@ -1,5 +1,6 @@
 import { Outlet, Navigate } from 'react-router-dom';
 import Sidebar from '../../components/Sidebar';
+import SubscriptionStatus from '../../components/SubscriptionStatus';
 import { useAuth } from '../../context/AuthContext';
 
 export default function AdminLayout() {

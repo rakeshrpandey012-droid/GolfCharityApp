@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { motion as Motion } from 'framer-motion';
 import { Target, Trophy, Heart, Gift, ChevronRight, TrendingUp, Clock } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
+import SubscriptionStatus from '../../components/SubscriptionStatus';
 import { getAnalytics, getLatestDraw } from '../../api/api';
 
 export default function DashboardOverview() {
@@ -55,6 +56,7 @@ export default function DashboardOverview() {
           <h2 style={{ margin: '6px 0 0', fontSize: 'clamp(1.8rem, 3vw, 2.6rem)' }}>
             Welcome back, {user?.name?.split(' ')[0] || 'Golfer'}! ⛳
           </h2>
+          <SubscriptionStatus />
           <p style={{ margin: '8px 0 0', color: 'var(--text-secondary)' }}>
             Here's your performance and impact at a glance.
           </p>

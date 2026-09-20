@@ -219,7 +219,7 @@ export default function Landing() {
               { match: '4-Number Match', share: '35%', color: '#3b82f6', label: 'Second Tier', glow: 'rgba(59,130,246,0.1)' },
               { match: '3-Number Match', share: '25%', color: '#8b5cf6', label: 'Third Tier', glow: 'rgba(139,92,246,0.1)' },
             ].map(tier => (
-              <motion.div key={tier.match} variants={fadeUp} className="bento-card bento-col-4" style={{ padding: 40, textAlign: 'center', background: `radial-gradient(circle at center 0%, ${tier.glow} 0%, transparent 60%)` }}>
+              <Motion.div key={tier.match} variants={fadeUp} className="bento-card bento-col-4" style={{ padding: 40, textAlign: 'center', background: `radial-gradient(circle at center 0%, ${tier.glow} 0%, transparent 60%)` }}>
                 <div style={{ color: tier.color, fontSize: '3rem', fontWeight: 600, fontFamily: "'Inter', sans-serif", marginBottom: 16 }}>{tier.share}</div>
                 <h3 style={{ fontSize: '1.15rem', fontWeight: 500, color: 'white', marginBottom: 8 }}>{tier.match}</h3>
                 <p style={{ color: 'var(--text-secondary)', fontSize: '0.9rem' }}>{tier.label}</p>
@@ -232,7 +232,7 @@ export default function Landing() {
       {/* ── CHARITIES ── */}
       <section id="charities" className="landing-section" style={{ padding: '120px 24px', maxWidth: 1100, margin: '0 auto', position: 'relative', zIndex: 20 }}>
         <div className="bento-grid charities-grid" style={{ alignItems: 'center' }}>
-          <motion.div
+          <Motion.div
             variants={fadeUp} initial="initial" whileInView="animate" viewport={{ once: true }}
             className="bento-col-5 charities-text"
             style={{ paddingRight: 40 }}
@@ -249,19 +249,19 @@ export default function Landing() {
             <GlowButton onClick={() => navigate('/register')} variant="ghost">Join the Mission</GlowButton>
           </motion.div>
 
-          <motion.div variants={stagger} initial="initial" whileInView="animate" viewport={{ once: true }} className="bento-col-7" style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+          <Motion.div variants={stagger} initial="initial" whileInView="animate" viewport={{ once: true }} className="bento-col-7" style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
             {[
               { name: 'Cancer Research UK', raised: '£34,200', pct: 72, color: '#3b82f6' },
               { name: 'Help for Heroes', raised: '£28,500', pct: 60, color: '#8b5cf6' },
               { name: 'Macmillan Cancer Support', raised: '£21,800', pct: 46, color: '#10b981' },
             ].map(c => (
-              <motion.div key={c.name} variants={fadeUp} className="bento-card" style={{ padding: 24 }}>
+              <Motion.div key={c.name} variants={fadeUp} className="bento-card" style={{ padding: 24 }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 16, gap: 8, flexWrap: 'wrap' }}>
                   <div style={{ fontWeight: 500, fontSize: '1rem', color: 'white' }}>{c.name}</div>
                   <div style={{ color: c.color, fontWeight: 600, fontSize: '1rem' }}>{c.raised}</div>
                 </div>
                 <div style={{ height: 8, background: 'rgba(255,255,255,0.05)', borderRadius: 4, overflow: 'hidden' }}>
-                  <motion.div
+                  <Motion.div
                     initial={{ width: 0 }}
                     whileInView={{ width: `${c.pct}%` }}
                     transition={{ duration: 1.2, ease: 'easeOut', delay: 0.2 }}
@@ -278,14 +278,14 @@ export default function Landing() {
       {/* ── PRICING ── */}
       <section id="pricing" className="landing-section" style={{ padding: '100px 24px', background: 'rgba(255,255,255,0.01)', borderTop: '1px solid rgba(255,255,255,0.05)', borderBottom: '1px solid rgba(255,255,255,0.05)', position: 'relative', zIndex: 20 }}>
         <div style={{ maxWidth: 1100, margin: '0 auto' }}>
-          <motion.div variants={fadeUp} initial="initial" whileInView="animate" viewport={{ once: true }} style={{ textAlign: 'center', marginBottom: 64 }}>
+          <Motion.div variants={fadeUp} initial="initial" whileInView="animate" viewport={{ once: true }} style={{ textAlign: 'center', marginBottom: 64 }}>
             <h2 style={{ fontFamily: "'Inter', sans-serif", fontSize: 'clamp(2rem, 4vw, 2.5rem)', fontWeight: 500, color: 'white' }}>Simple, Transparent Pricing</h2>
             <p style={{ color: 'var(--text-secondary)', marginTop: 12, maxWidth: 500, margin: '12px auto 0', lineHeight: 1.6 }}>Choose the subscription tier that best fits your game.</p>
           </motion.div>
 
-          <motion.div variants={stagger} initial="initial" whileInView="animate" viewport={{ once: true }} className="bento-grid">
+          <Motion.div variants={stagger} initial="initial" whileInView="animate" viewport={{ once: true }} className="bento-grid">
             {/* Monthly */}
-            <motion.div variants={fadeUp} className="bento-card bento-col-4" style={{ padding: 48, display: 'flex', flexDirection: 'column' }}>
+            <Motion.div variants={fadeUp} className="bento-card bento-col-4" style={{ padding: 48, display: 'flex', flexDirection: 'column' }}>
               <h3 style={{ fontSize: '1.25rem', color: 'var(--text-secondary)', fontWeight: 500, marginBottom: 16 }}>Monthly Plan</h3>
               <div style={{ fontSize: '3rem', color: 'white', fontWeight: 600, fontFamily: "'Inter', sans-serif", marginBottom: 8 }}>
                 £9.99<span style={{ fontSize: '1rem', color: 'var(--text-muted)' }}>/mo</span>
@@ -302,7 +302,7 @@ export default function Landing() {
             </motion.div>
 
             {/* Yearly (Highlighted) */}
-            <motion.div variants={fadeUp} className="bento-card bento-col-4" style={{ padding: 48, display: 'flex', flexDirection: 'column', background: 'linear-gradient(145deg, rgba(59,130,246,0.1) 0%, rgba(255,255,255,0.01) 100%)', borderColor: 'rgba(59,130,246,0.3)' }}>
+            <Motion.div variants={fadeUp} className="bento-card bento-col-4" style={{ padding: 48, display: 'flex', flexDirection: 'column', background: 'linear-gradient(145deg, rgba(59,130,246,0.1) 0%, rgba(255,255,255,0.01) 100%)', borderColor: 'rgba(59,130,246,0.3)' }}>
               <div className="pricing-popular-badge" style={{ position: 'absolute', top: 0, left: '50%', transform: 'translateX(-50%)', background: '#3b82f6', color: 'white', padding: '4px 16px', borderBottomLeftRadius: 8, borderBottomRightRadius: 8, fontSize: '0.75rem', fontWeight: 600, letterSpacing: '0.05em', textTransform: 'uppercase', whiteSpace: 'nowrap' }}>Most Popular</div>
               <h3 style={{ fontSize: '1.25rem', color: '#60a5fa', fontWeight: 500, marginBottom: 16 }}>Yearly Plan</h3>
               <div style={{ fontSize: '3rem', color: 'white', fontWeight: 600, fontFamily: "'Inter', sans-serif", marginBottom: 8 }}>
@@ -320,7 +320,7 @@ export default function Landing() {
             </motion.div>
 
             {/* Pro Plus */}
-            <motion.div variants={fadeUp} className="bento-card bento-col-4" style={{ padding: 48, display: 'flex', flexDirection: 'column' }}>
+            <Motion.div variants={fadeUp} className="bento-card bento-col-4" style={{ padding: 48, display: 'flex', flexDirection: 'column' }}>
               <h3 style={{ fontSize: '1.25rem', color: 'var(--text-secondary)', fontWeight: 500, marginBottom: 16 }}>Pro Plus</h3>
               <div style={{ fontSize: '3rem', color: 'white', fontWeight: 600, fontFamily: "'Inter', sans-serif", marginBottom: 8 }}>
                 £19.99<span style={{ fontSize: '1rem', color: 'var(--text-muted)' }}>/mo</span>
@@ -341,7 +341,7 @@ export default function Landing() {
 
       {/* ── CTA SECTION ── */}
       <section style={{ padding: '80px 16px 120px' }}>
-        <motion.div
+        <Motion.div
           initial={{ opacity: 0, y: 30 }}
           whileInView={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8 }}

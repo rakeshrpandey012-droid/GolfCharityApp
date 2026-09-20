@@ -108,9 +108,53 @@ async function adminUpdateUser(req, res, next) {
   }
 }
 
+const adminCreateUserSchema = z.object({
+  name: z.string().min(2),
+  email: z.string().email(),
+  password: z.string().min(6),
+  role: z.enum(["user", "admin"]).optional(),
+  subscriptionStatus: z.enum(["active", "inactive", "expired"]).optional(),
+  charityPercentage: z.number().min(10).max(100).optional()
+});
+
+// ---------- Create User (Admin) ----------
+async function adminCreateUser(req, res, next) {
+  try {
+    const payload = adminCreateUserSchema.parse(req.body);
+    // Check for existing email
+    const existing = await User.findOne({ email: payload.email });
+    if (existing) {
+      throw new AppError("Email already in use", 409);
+    }
+    const user = await User.create(payload);
+    // Do not return password hash
+    const userObj = user.toObject();
+    delete userObj.password;
+    res.status(201).json({ user: userObj });
+  } catch (error) {
+    next(error);
+  }
+}
+
+// ---------- Delete User (Admin) ----------
+async function adminDeleteUser(req, res, next) {
+  try {
+    const { id } = req.params;
+    const user = await User.findByIdAndDelete(id);
+    if (!user) {
+      throw new AppError("User not found", 404);
+    }
+    res.status(200).json({ message: "User deleted successfully" });
+  } catch (error) {
+    next(error);
+  }
+}
+
 module.exports = {
   getProfile,
   adminAnalytics,
   adminListUsers,
-  adminUpdateUser
+  adminUpdateUser,
+  adminCreateUser,
+  adminDeleteUser
 };

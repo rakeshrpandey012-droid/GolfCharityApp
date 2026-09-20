@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import PlanIcon from '../../components/PlanIcon';
 import { useNavigate } from 'react-router-dom';
 import { AnimatePresence } from 'framer-motion';
 import {

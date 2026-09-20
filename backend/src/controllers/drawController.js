@@ -295,7 +295,7 @@ async function latestDraw(req, res, next) {
 
 async function listDrawHistory(req, res, next) {
   try {
-    const draws = await Draw.find({ status: "published" }).sort({ month: -1, createdAt: -1 });
+    const draws = await Draw.find({}).sort({ month: -1, createdAt: -1 });
     res.status(200).json({ draws });
   } catch (error) {
     next(error);

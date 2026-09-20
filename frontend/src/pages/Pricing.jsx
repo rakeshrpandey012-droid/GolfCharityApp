@@ -1,3 +1,4 @@
+import { motion } from 'framer-motion';
 import { useNavigate, Link } from 'react-router-dom';
 import { Check, ChevronRight, ArrowLeft } from 'lucide-react';
 import { useTheme } from '../context/ThemeContext';

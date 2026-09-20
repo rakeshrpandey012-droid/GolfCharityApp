@@ -5,7 +5,8 @@ dotenv.config();
 const env = {
   port: Number(process.env.PORT || 5000),
   nodeEnv: process.env.NODE_ENV || "development",
-  mongoUri: process.env.MONGO_URI || process.env.MONGODB_URI,
+  mongoUri: process.env.MONGO_URI || "mongodb://localhost:27017/golfcharity",
+
   seedAdminName: process.env.SEED_ADMIN_NAME || "Platform Admin",
   seedAdminEmail: process.env.SEED_ADMIN_EMAIL || "admin@golfplatform.com",
   seedAdminPassword: process.env.SEED_ADMIN_PASSWORD || "Admin@123",
